@@ -124,7 +124,7 @@ class ChatClientTests(unittest.TestCase):
         self.assertEqual(sleep.call_count, 2)
 
     def test_authentication_and_other_client_errors_are_not_retried(self) -> None:
-        for status in (400, 401, 403, 404):
+        for status in (301, 302, 303, 307, 308, 400, 401, 403, 404):
             with (
                 self.subTest(status=status),
                 patch("jitmem.api.time.sleep") as sleep,
@@ -245,6 +245,23 @@ class ChatClientTests(unittest.TestCase):
                 with self.assertRaises(AuthenticationError):
                     ChatClient(self.config)
             transport.assert_not_called()
+
+    def test_invalid_header_credentials_fail_before_network_without_echo(self) -> None:
+        invalid_characters = ["\r", "\n", "\t", " ", "\x00", "\x1f", "\x7f", "\u00a0", "\u2603"]
+        for index, character in enumerate(invalid_characters):
+            credential = f"fixture-{character}-credential"
+            with (
+                self.subTest(case=index),
+                patch("jitmem.api.os.environ.get", return_value=credential),
+                patch("jitmem.api.urlopen") as transport,
+            ):
+                with self.assertRaises(AuthenticationError) as caught:
+                    ChatClient(self.config)
+                transport.assert_not_called()
+                self.assertNotIn(credential, str(caught.exception))
+                self.assertNotIn("fixture-", str(caught.exception))
+                self.assertNotIn("Authorization", str(caught.exception))
+                self.assertIn("TEST_JITMEM_KEY", str(caught.exception))
 
     def test_invalid_messages_fail_before_network(self) -> None:
         invalid = [

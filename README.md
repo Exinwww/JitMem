@@ -110,6 +110,20 @@ export OPENAI_BASE_URL="https://api.openai.com/v1"
 
 也可以复制 `.env.example` 为 `.env`，填入参数后执行 `source .env`；程序不自动读取 `.env`。该文件不会提交到 Git。
 
+## 密钥保护与扫描
+
+认证凭证只通过 API key 环境变量提供。`extra_body` 禁止嵌套凭证字段，防止其被写入实验 manifest；客户端拒绝 HTTP 重定向和含空白、控制字符或非 ASCII 字符的 key，错误信息不回显密钥。endpoint 不允许用户名、密码、查询参数或 fragment。不要把密钥放入任务描述、提示词、文档或模型参数。
+
+本机已启用 `.githooks/pre-commit`扫描暂存区、`.githooks/pre-push`扫描完整历史；GitHub 原生密钥扫描和推送保护已启用。新克隆需要安装 [Gitleaks](https://github.com/gitleaks/gitleaks)（验证版本 8.30.1），然后启用钩子：
+
+```bash
+brew install gitleaks
+git config core.hooksPath .githooks
+bash scripts/check_secrets.sh history
+```
+
+也支持将官方二进制置于被忽略的 `.tools/gitleaks`。扫描器缺失或扫描发现问题时，提交钩子会失败。当前 GitHub 登录令牌不含 `workflow` 权限，Gitleaks CI 配置保留在 `configs/secret-scan.workflow.example.yml`；授权更新 workflow 后可复制到 `.github/workflows/secret-scan.yml` 启用。唯一扫描例外是经过验证的原实验 `api.py` 固定 SHA256 值，不排除整个文件、目录或提交。检查范围与结果见 [密钥安全审计](docs/security_audit.md)。
+
 修改采样、模型特有参数或实验设置时，可复制 `configs/alfworld.example.toml` 到 `configs/alfworld.local.toml`。模型要求 `max_completion_tokens` 时修改 `token_limit_parameter`；模型不接受 temperature 时设置 `omit_temperature=true`。
 
 Qwen3 的建议参数已以注释放在样例中：executor ALFWorld thinking enabled，curator thinking disabled、temperature .6 / top-p .95 / top-k 20；GPT/Gemini curator 采用 temperature 1.0。`extra_body` 可传服务端特有参数，其支持范围需要和 API 提供方核对。curator 输出预算 8192 是工程选择，论文测试预算未披露。省略 curator 参数时会继承 executor 配置，因此使用 Qwen 时应分别显式配置 thinking。

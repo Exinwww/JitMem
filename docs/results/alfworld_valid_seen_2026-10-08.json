@@ -1087,5 +1087,6 @@
     "external_dataset_unchanged": true,
     "dataset_fingerprint_sha256": "ea156e972ba076f73968c690ae732c5dc7a3978f3c6a39270cc5aa1abadad278"
   },
-  "raw_artifacts": "Local outputs/ directory, excluded from Git. Contains full trajectories, API calls, manifests, checkpoints and detailed audits."
+  "raw_artifacts": "Local outputs/ directory, excluded from Git. Contains full trajectories, API calls, manifests, checkpoints and detailed audits.",
+  "source_commit": "3ef61bbb693d5b0c48183840008dbc399063765d"
 }

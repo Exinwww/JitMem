@@ -1,0 +1,12 @@
+title = "JITMEM secret scanning"
+
+[extend]
+useDefault = true
+
+# This exact public value is the SHA256 of src/jitmem/api.py in the original
+# benchmark commit 3ef61bb. It is a source fingerprint, not an API credential.
+# Do not exempt entire result files, test directories, commits, or key patterns.
+[[allowlists]]
+description = "Verified original api.py source SHA256 in benchmark provenance"
+targetRules = ["generic-api-key"]
+regexes = ['''^0078c3ec84b84d921c3c5e53cfc26cf93edc7a94a72f815d2aa3356a9cc22c51$''']

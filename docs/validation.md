@@ -4,6 +4,8 @@
 
 版本管理中的 [评测结果报告](results/alfworld_valid_seen_2026-10-08.md) 与 [结构化结果](results/alfworld_valid_seen_2026-10-08.json) 可在新克隆中查看。本页指向 `outputs/` 的链接对应本地生成的审计和原始记录，目录不提交到 Git。
 
+评测后进行了客户端凭证保护加固；[密钥安全审计](security_audit.md)记录检查范围与修复。下述模型结果和原实验哈希对应初始提交`3ef61bb`，安全修复后不重写这些历史记录。
+
 ## 软件正确性
 
 完整测试：`93 passed, 89 subtests passed`。Ruff 检查、21 个文件的格式检查及 Shell syntax check 均通过。

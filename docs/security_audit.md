@@ -1,0 +1,37 @@
+# 密钥安全审计
+
+审计日期：2026-10-08，Asia/Shanghai。按用户最新要求，GitHub 仓库保持公开。本次检查没有调用外部模型 API，也不在报告或扫描输出中显示密钥值。
+
+## 已发布内容与本地内容
+
+对 Git 全部提交历史及当前文件使用 Gitleaks 8.30.1 默认规则和递归解码扫描；另从 GitHub 独立下载 bare clone，检查实际已发布的分支历史。对本地原始运行记录额外扫描约107 MB内容。这些检查没有发现真实凭证。
+
+在本机读取当前模型 API 凭证和 GitHub 登录凭证，只进行内存内的逐字比对。检查 literal UTF-8、URL编码、JSON转义和base64形式；首轮覆盖964个项目/运行记录文件、35个Git blob（包含不可达对象）以及Git配置和HEAD日志，均无匹配。环境依赖、下载的Python、扫描器二进制和缓存不属于该文件扫描范围。
+
+Gitleaks 唯一类型的误报是原实验 `api.py` 的公开源码SHA256，被通用API key规则识别。该值已与初始提交中的文件内容核对；`.gitleaks.toml`只允许这一准确、固定的哈希，保留全部默认检测规则。不忽略整个文件、目录或提交，也不忽略任意看起来像哈希的字符串。测试中已有凭证字符串是显式假数据；`.env.example`中的实际key字段为空。
+
+`.env`及其变体、`.envrc`、本机配置、私钥文件、输出日志、虚拟环境和扫描器二进制均不被Git跟踪。版本管理中的评测结果不包含API endpoint、Authorization header或密钥。原实验源码哈希与结果保留，依据提交`3ef61bbb693d5b0c48183840008dbc399063765d`；安全修复后的新运行使用新源码哈希。
+
+## 发现并修复的运行时路径
+
+检查发现默认HTTP重定向可能将Authorization转发到其他origin。现在客户端拒绝所有重定向，3xx作为provider错误，不重试。测试在本机使用假key覆盖同origin和跨origin重定向，确认后续地址没有收到请求。
+
+含换行的key可能使HTTP header校验异常回显完整Authorization值，随后被CLI或error日志记录。现在构造客户端时拒绝空白、控制字符或非ASCII凭证，错误只说明环境变量要求；测试检查异常文本不包含凭证。
+
+`extra_body`原先可以嵌套`api_key`、Authorization、access-token或client-secret字段，随`asdict`进入manifest。现在配置构造阶段拒绝这些凭证字段，并测试大小写、连字符、嵌套字典和列表。认证通过环境变量，metadata只记录密钥变量名；URL中的用户名、密码、query和fragment继续被拒绝。
+
+没有证据显示上述路径已导致实际密钥外泄。本次未重跑付费模型评测，也未修改历史结果或Git历史。
+
+## 持续保护
+
+本机启用`.githooks/pre-commit`，通过Gitleaks扫描暂存区，隐藏命中的secret值。负向验证使用随机生成、未关联服务的假key：即使工作区已清除，暂存区中的key仍使hook失败；清理并重新暂存后通过。扫描器缺失时hook也失败。
+
+`.githooks/pre-push`额外扫描完整历史，防止将已经从当前文件删除、仍存在旧提交中的凭证推送到GitHub。两种hook都通过同一个固定配置的扫描入口，不输出secret值。
+
+Gitleaks CI模板位于`configs/secret-scan.workflow.example.yml`，配置push/pull_request完整历史扫描。Action使用固定提交SHA，扫描器固定版本并校验官方SHA256；权限只有`contents: read`，checkout不持久化凭证。当前登录令牌没有`workflow`权限，因此模板未部署为工作流；本次没有申请扩大令牌权限。
+
+仓库同时启用GitHub原生密钥扫描和推送保护，并核对服务端状态。其保护范围是GitHub支持的凭证类型；项目Gitleaks提供额外检测。[GitHub密钥扫描说明](https://docs.github.com/en/code-security/how-tos/secure-your-secrets/detect-secret-leaks/enable-secret-scanning)。
+
+完整本地脱敏扫描记录位于`outputs/security_audit/`，不提交。新克隆的hook启用和手动扫描方式见[README](../README.md)。审计结论对应已检查的内容和当前配置；后续提交继续经过上述扫描。
+
+修复后的完整软件验证：`105 passed, 108 subtests passed`；Ruff检查、21个文件格式检查、hook和安装脚本语法检查均通过。配置的凭证字段拒绝、非法header凭证拒绝、10种同/跨origin重定向与提交hook负向验证均使用假数据和本机环境。

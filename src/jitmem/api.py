@@ -12,9 +12,26 @@ from email.utils import parsedate_to_datetime
 from http.client import IncompleteRead
 from typing import Any
 from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from .config import ModelConfig
+
+
+class _RejectRedirects(HTTPRedirectHandler):
+    """Fail before inspecting Location or constructing a redirected request."""
+
+    def http_error_302(self, request, response, code, _message, headers):
+        raise HTTPError(request.full_url, code, "HTTP redirects are disabled", headers, response)
+
+    http_error_301 = http_error_303 = http_error_307 = http_error_308 = http_error_302
+
+
+_CHAT_OPENER = build_opener(_RejectRedirects())
+
+
+def urlopen(request: Request, timeout: float):
+    """Patchable transport entry point that never follows HTTP redirects."""
+    return _CHAT_OPENER.open(request, timeout=timeout)
 
 
 class ChatAPIError(RuntimeError):
@@ -155,6 +172,14 @@ class ChatClient:
         if config.api_key_env and not self._api_key.strip():
             raise AuthenticationError(
                 f"Set the {config.api_key_env} environment variable before making API calls"
+            )
+        if self._api_key and any(
+            ord(character) < 33 or ord(character) > 126 for character in self._api_key
+        ):
+            # http.client includes invalid header values in its exception text.
+            # Reject those credentials before any Request/header construction.
+            raise AuthenticationError(
+                f"The {config.api_key_env} environment variable must contain an ASCII API key without whitespace or control characters"
             )
         base = config.base_url.rstrip("/")
         self._url = base if base.endswith("/chat/completions") else f"{base}/chat/completions"

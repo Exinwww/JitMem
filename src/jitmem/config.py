@@ -43,6 +43,43 @@ def _nonempty_string(name: str, value: Any) -> None:
         raise ConfigError(f"{name} must be a nonempty string")
 
 
+def _reject_embedded_credentials(value: Any) -> None:
+    """Keep provider parameters safe to persist in experiment manifests."""
+    forbidden = {
+        "apikey",
+        "apisecret",
+        "authorization",
+        "accesstoken",
+        "refreshtoken",
+        "authtoken",
+        "bearertoken",
+        "clientsecret",
+        "password",
+        "privatekey",
+        "credential",
+        "credentials",
+        "secret",
+        "secretkey",
+        "accesskey",
+        "accesskeyid",
+        "secretaccesskey",
+        "sessiontoken",
+        "awsaccesskeyid",
+        "awssecretaccesskey",
+        "awssessiontoken",
+    }
+    if isinstance(value, dict):
+        for key, child in value.items():
+            if isinstance(key, str) and re.sub(r"[^a-z0-9]", "", key.lower()) in forbidden:
+                raise ConfigError(
+                    "Credentials cannot be included in extra_body; use an API key environment variable"
+                )
+            _reject_embedded_credentials(child)
+    elif isinstance(value, list):
+        for child in value:
+            _reject_embedded_credentials(child)
+
+
 @dataclass(frozen=True, slots=True)
 class ModelConfig:
     base_url: str = "https://api.openai.com/v1"
@@ -123,6 +160,7 @@ class ModelConfig:
             json.dumps(self.extra_body, allow_nan=False)
         except (TypeError, ValueError) as exc:
             raise ConfigError("extra_body must contain finite JSON-compatible values") from exc
+        _reject_embedded_credentials(self.extra_body)
         object.__setattr__(self, "extra_body", copy.deepcopy(self.extra_body))
 
 

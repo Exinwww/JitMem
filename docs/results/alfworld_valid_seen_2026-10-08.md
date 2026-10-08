@@ -2,6 +2,8 @@
 
 评测日期：2026-10-08，Asia/Shanghai。本文保存可随 Git 仓库查看的结果；详细数值、运行用量和原始实现哈希见 [结构化结果](alfworld_valid_seen_2026-10-08.json)。
 
+评测实现对应提交 `3ef61bbb693d5b0c48183840008dbc399063765d`，结构化结果保留该版本的源码哈希。评测完成后的客户端安全加固不重写历史实验或其分数；新运行会记录新版本哈希。
+
 本次使用 API 配置模型 `gpt-5.5` 作为 executor 和 curator，复现 [JITMEM](https://arxiv.org/pdf/2609.27334) 的 prompted read-time curation 流程，没有本地模型训练。模型名来自 API 配置，未独立验证服务端权重。提示词使用公开方法的语义改写，并在正式实验前补充 ALFWorld Look 的公开目标语义；与作者原模型及 RL-trained 设置不同。具体来源和工程选择见 [复现规格](../reproduction_spec.md)。
 
 两方法使用相同 executor 配置、完整 `valid_seen` 任务集和配对任务顺序。140 个唯一任务、seeds 0/1/2、batch10、workers10（spawn）、history3、最多30次决策；JITMEM description-only BM25 top3、judge gate、每轮空库、无 warm start。批内共享冻结记忆，完成整批后按预定任务顺序写入；native verifier 决定评测标签，judge 只决定记忆写入。

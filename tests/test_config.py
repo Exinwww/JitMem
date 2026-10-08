@@ -276,6 +276,29 @@ api_key_env = "TOML_CURATOR_KEY"
         self.assertEqual(second.experiment.seeds, [0, 1, 2])
         self.assertEqual(second.executor.extra_body, {})
 
+    def test_provider_parameters_cannot_persist_embedded_credentials(self) -> None:
+        fake = "not-a-real-credential"
+        cases = [
+            {"api_key": fake},
+            {"headers": {"AUTHORIZATION": fake}},
+            {"provider": [{"access-token": fake}]},
+            {"client_secret": fake},
+            {"AWS_SECRET_ACCESS_KEY": fake},
+        ]
+        for extra in cases:
+            with self.subTest(field=next(iter(extra))):
+                with self.assertRaisesRegex(ConfigError, "Credentials cannot") as caught:
+                    replace(ModelConfig(), extra_body=extra)
+                self.assertNotIn(fake, str(caught.exception))
+        with self.assertRaises(ConfigError) as caught:
+            self.load('[executor.extra_body]\napi_key="not-a-real-credential"')
+        self.assertNotIn(fake, str(caught.exception))
+        allowed = replace(
+            ModelConfig(),
+            extra_body={"top_p": 0.95, "chat_template_kwargs": {"enable_thinking": False}},
+        )
+        self.assertFalse(allowed.extra_body["chat_template_kwargs"]["enable_thinking"])
+
 
 if __name__ == "__main__":
     unittest.main()

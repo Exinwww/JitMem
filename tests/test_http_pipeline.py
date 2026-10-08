@@ -12,7 +12,7 @@ from threading import Thread
 
 import pytest
 
-from jitmem.api import ChatClient
+from jitmem.api import ChatAPIError, ChatClient
 from jitmem.config import EnvironmentConfig, ExperimentConfig, ModelConfig, RunConfig
 from jitmem.environments import FakeHouseholdEnvironment, fake_tasks
 from jitmem.memory import MemoryBank, Trajectory, Turn
@@ -71,6 +71,85 @@ def scripted_endpoint(replies):
         server.shutdown()
         server.server_close()
         thread.join(timeout=5)
+
+
+@contextmanager
+def redirect_endpoints(*, same_origin: bool, status: int):
+    """Two loopback origins record whether any redirected request reaches a sink."""
+    gateway_requests = []
+    sink_requests = []
+    sink_url = ""
+
+    class SinkHandler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            sink_requests.append({"method": self.command, "path": self.path})
+            self.send_response(200)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
+        do_POST = do_GET
+
+        def log_message(self, *_args):
+            pass
+
+    class GatewayHandler(SinkHandler):
+        def do_POST(self):
+            if self.path != "/v1/chat/completions":
+                return super().do_POST()
+            gateway_requests.append(
+                {"authorization_present": self.headers.get("Authorization") is not None}
+            )
+            self.rfile.read(int(self.headers["Content-Length"]))
+            self.send_response(status)
+            self.send_header("Location", "/sink" if same_origin else sink_url)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
+    sink = ThreadingHTTPServer(("127.0.0.1", 0), SinkHandler)
+    gateway = ThreadingHTTPServer(("127.0.0.1", 0), GatewayHandler)
+    sink_url = f"http://127.0.0.1:{sink.server_port}/sink"
+    servers = [sink, gateway]
+    threads = []
+    for server in servers:
+        server.daemon_threads = True
+        thread = Thread(target=server.serve_forever, kwargs={"poll_interval": 0.01}, daemon=True)
+        thread.start()
+        threads.append(thread)
+    try:
+        yield f"http://127.0.0.1:{gateway.server_port}/v1", gateway_requests, sink_requests
+    finally:
+        for server in servers:
+            server.shutdown()
+            server.server_close()
+        for thread in threads:
+            thread.join(timeout=5)
+
+
+@pytest.mark.parametrize("same_origin", [False, True])
+@pytest.mark.parametrize("status", [301, 302, 303, 307, 308])
+def test_http_redirects_are_rejected_without_retry_or_credential_forwarding(
+    monkeypatch, same_origin, status
+):
+    monkeypatch.setenv("JITMEM_REDIRECT_FIXTURE_KEY", "redirect-fixture-credential")
+    with redirect_endpoints(same_origin=same_origin, status=status) as (
+        url,
+        gateway_requests,
+        sink_requests,
+    ):
+        client = ChatClient(
+            ModelConfig(
+                base_url=url,
+                model="fixture-model",
+                api_key_env="JITMEM_REDIRECT_FIXTURE_KEY",
+                retries=3,
+            )
+        )
+        with pytest.raises(ChatAPIError, match=f"HTTP {status}.*1 attempt") as caught:
+            client.complete([{"role": "user", "content": "Local transport security fixture."}])
+    assert gateway_requests == [{"authorization_present": True}]
+    assert sink_requests == []
+    assert "redirect-fixture-credential" not in str(caught.value)
+    assert "Authorization" not in str(caught.value)
 
 
 def run_config(base_url, *, max_steps=30, store_policy="judge"):

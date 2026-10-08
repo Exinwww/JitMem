@@ -1,0 +1,4 @@
+#!/bin/sh
+set -eu
+PROJECT_ROOT="$(git rev-parse --show-toplevel)"
+exec bash "${PROJECT_ROOT}/scripts/check_secrets.sh" staged
