@@ -1,0 +1,1091 @@
+{
+  "schema_version": 1,
+  "kind": "versioned_alfworld_evaluation_summary",
+  "evaluation_date": "2026-10-08",
+  "timezone": "Asia/Shanghai",
+  "benchmark": true,
+  "variant": "prompted curator; semantic paraphrases; no local training",
+  "executor_model": "gpt-5.5",
+  "curator_model": "gpt-5.5",
+  "model_identity_source": "API configuration; server weights not independently verified",
+  "split": "valid_seen",
+  "unique_tasks": 140,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "total_episodes": 840,
+  "protocol": {
+    "batch_size": 10,
+    "workers": 10,
+    "max_steps": 30,
+    "history_window": 3,
+    "retrieval_k": 3,
+    "store_policy": "judge",
+    "task_adaptive": true,
+    "warm_start": null
+  },
+  "process_start_method": "spawn",
+  "success_metric": "native ALFWorld verifier",
+  "memory_commit_order": "predetermined task order after the complete batch succeeds",
+  "packages": {
+    "jitmem-reproduction": "0.1.0",
+    "alfworld": "0.4.2",
+    "textworld": "1.6.2",
+    "fast-downward-textworld": "20.6.4"
+  },
+  "source_hashes": {
+    "__init__.py": "fe687808ac0902256465e9acc98f8e4b2f7419c34d135e914656f711d1b57c6e",
+    "__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+    "api.py": "0078c3ec84b84d921c3c5e53cfc26cf93edc7a94a72f815d2aa3356a9cc22c51",
+    "cli.py": "e20fb7ddebabc1e34db91cd43bf51665fd61661c01178ed95137cfdbba53b355",
+    "config.py": "86814cb15fa94311a30a569d0948f2c06374947966ca228f1fb39a587b17345e",
+    "environments.py": "0a6c3dcde99b7a7550dbddbc4b0368b7754b1c2a3e906a2223dfb433829c8e5d",
+    "evaluation.py": "bca93178ff2338f20ac682e006e948918e14c3402a5504a71f665990ddab0887",
+    "memory.py": "e7c1b534ed8e7752d969cc3b8e9a21bfcd9e022d93bfda5d212a9e910182c317",
+    "pipeline.py": "10ca270eb32741ead9d881c76856b35f806b1d18b944e9c488bf9f49200c2726",
+    "prompts.py": "89e196b39015d33b9d6f6a5c386fe5f3abd526c9fa0c28f02c9a322674a7398b",
+    "usage.py": "f601f2e3c24ab3dea3134f7d05b48377a27b4b6bd86b1d458b626a074b0203b6"
+  },
+  "methods": {
+    "no-memory": {
+      "runs": [
+        {
+          "seed": 0,
+          "benchmark": true,
+          "tasks": 140,
+          "successes": 111,
+          "success_rate": 0.7928571428571428,
+          "mean_reward": 0.7928571428571428,
+          "mean_steps": 14.285714285714286,
+          "mean_environment_steps": 14.242857142857142,
+          "mean_latency_seconds": 46.52188411460754,
+          "invalid_actions": 6,
+          "truncated_episodes": 29,
+          "stored_episodes": 0,
+          "prompt_tokens": 938209,
+          "completion_tokens": 31400,
+          "usage_complete": true,
+          "incomplete_generations": 0,
+          "usage_by_role": {
+            "executor": {
+              "calls": 2000,
+              "prompt_tokens": 938209,
+              "completion_tokens": 31400
+            }
+          },
+          "mean_executor_prompt_tokens": 6701.492857142857,
+          "mean_executor_completion_tokens": 224.28571428571428,
+          "judge_parse_errors": 0,
+          "by_batch": {
+            "0": {
+              "tasks": 10,
+              "success_rate": 0.5,
+              "memory_size_before": 0
+            },
+            "1": {
+              "tasks": 10,
+              "success_rate": 0.8,
+              "memory_size_before": 0
+            },
+            "2": {
+              "tasks": 10,
+              "success_rate": 0.7,
+              "memory_size_before": 0
+            },
+            "3": {
+              "tasks": 10,
+              "success_rate": 0.8,
+              "memory_size_before": 0
+            },
+            "4": {
+              "tasks": 10,
+              "success_rate": 0.8,
+              "memory_size_before": 0
+            },
+            "5": {
+              "tasks": 10,
+              "success_rate": 0.7,
+              "memory_size_before": 0
+            },
+            "6": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 0
+            },
+            "7": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 0
+            },
+            "8": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 0
+            },
+            "9": {
+              "tasks": 10,
+              "success_rate": 0.8,
+              "memory_size_before": 0
+            },
+            "10": {
+              "tasks": 10,
+              "success_rate": 0.8,
+              "memory_size_before": 0
+            },
+            "11": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 0
+            },
+            "12": {
+              "tasks": 10,
+              "success_rate": 0.8,
+              "memory_size_before": 0
+            },
+            "13": {
+              "tasks": 10,
+              "success_rate": 0.8,
+              "memory_size_before": 0
+            }
+          },
+          "judge_confusion": {
+            "true_positive": 0,
+            "false_positive": 0,
+            "false_negative": 0,
+            "true_negative": 0
+          },
+          "by_task_type": {
+            "look_at_obj_in_light": {
+              "tasks": 13,
+              "success_rate": 0.7692307692307693
+            },
+            "pick_and_place_simple": {
+              "tasks": 35,
+              "success_rate": 0.8571428571428571
+            },
+            "pick_clean_then_place_in_recep": {
+              "tasks": 27,
+              "success_rate": 0.8148148148148148
+            },
+            "pick_cool_then_place_in_recep": {
+              "tasks": 25,
+              "success_rate": 0.8
+            },
+            "pick_heat_then_place_in_recep": {
+              "tasks": 16,
+              "success_rate": 0.875
+            },
+            "pick_two_obj_and_place": {
+              "tasks": 24,
+              "success_rate": 0.625
+            }
+          }
+        },
+        {
+          "seed": 1,
+          "benchmark": true,
+          "tasks": 140,
+          "successes": 107,
+          "success_rate": 0.7642857142857142,
+          "mean_reward": 0.7642857142857142,
+          "mean_steps": 15.07857142857143,
+          "mean_environment_steps": 15.014285714285714,
+          "mean_latency_seconds": 69.76392461514307,
+          "invalid_actions": 9,
+          "truncated_episodes": 33,
+          "stored_episodes": 0,
+          "prompt_tokens": 988488,
+          "completion_tokens": 33072,
+          "usage_complete": true,
+          "incomplete_generations": 0,
+          "usage_by_role": {
+            "executor": {
+              "calls": 2111,
+              "prompt_tokens": 988488,
+              "completion_tokens": 33072
+            }
+          },
+          "mean_executor_prompt_tokens": 7060.628571428571,
+          "mean_executor_completion_tokens": 236.22857142857143,
+          "judge_parse_errors": 0,
+          "by_batch": {
+            "0": {
+              "tasks": 10,
+              "success_rate": 0.6,
+              "memory_size_before": 0
+            },
+            "1": {
+              "tasks": 10,
+              "success_rate": 0.8,
+              "memory_size_before": 0
+            },
+            "2": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 0
+            },
+            "3": {
+              "tasks": 10,
+              "success_rate": 0.6,
+              "memory_size_before": 0
+            },
+            "4": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 0
+            },
+            "5": {
+              "tasks": 10,
+              "success_rate": 0.6,
+              "memory_size_before": 0
+            },
+            "6": {
+              "tasks": 10,
+              "success_rate": 0.6,
+              "memory_size_before": 0
+            },
+            "7": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 0
+            },
+            "8": {
+              "tasks": 10,
+              "success_rate": 0.7,
+              "memory_size_before": 0
+            },
+            "9": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 0
+            },
+            "10": {
+              "tasks": 10,
+              "success_rate": 0.8,
+              "memory_size_before": 0
+            },
+            "11": {
+              "tasks": 10,
+              "success_rate": 0.7,
+              "memory_size_before": 0
+            },
+            "12": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 0
+            },
+            "13": {
+              "tasks": 10,
+              "success_rate": 0.8,
+              "memory_size_before": 0
+            }
+          },
+          "judge_confusion": {
+            "true_positive": 0,
+            "false_positive": 0,
+            "false_negative": 0,
+            "true_negative": 0
+          },
+          "by_task_type": {
+            "look_at_obj_in_light": {
+              "tasks": 13,
+              "success_rate": 0.7692307692307693
+            },
+            "pick_and_place_simple": {
+              "tasks": 35,
+              "success_rate": 0.8285714285714286
+            },
+            "pick_clean_then_place_in_recep": {
+              "tasks": 27,
+              "success_rate": 0.7777777777777778
+            },
+            "pick_cool_then_place_in_recep": {
+              "tasks": 25,
+              "success_rate": 0.8
+            },
+            "pick_heat_then_place_in_recep": {
+              "tasks": 16,
+              "success_rate": 0.8125
+            },
+            "pick_two_obj_and_place": {
+              "tasks": 24,
+              "success_rate": 0.5833333333333334
+            }
+          }
+        },
+        {
+          "seed": 2,
+          "benchmark": true,
+          "tasks": 140,
+          "successes": 109,
+          "success_rate": 0.7785714285714286,
+          "mean_reward": 0.7785714285714286,
+          "mean_steps": 15.185714285714285,
+          "mean_environment_steps": 15.107142857142858,
+          "mean_latency_seconds": 55.695748215828566,
+          "invalid_actions": 11,
+          "truncated_episodes": 31,
+          "stored_episodes": 0,
+          "prompt_tokens": 997198,
+          "completion_tokens": 33275,
+          "usage_complete": true,
+          "incomplete_generations": 0,
+          "usage_by_role": {
+            "executor": {
+              "calls": 2126,
+              "prompt_tokens": 997198,
+              "completion_tokens": 33275
+            }
+          },
+          "mean_executor_prompt_tokens": 7122.842857142857,
+          "mean_executor_completion_tokens": 237.67857142857142,
+          "judge_parse_errors": 0,
+          "by_batch": {
+            "0": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 0
+            },
+            "1": {
+              "tasks": 10,
+              "success_rate": 0.8,
+              "memory_size_before": 0
+            },
+            "2": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 0
+            },
+            "3": {
+              "tasks": 10,
+              "success_rate": 0.7,
+              "memory_size_before": 0
+            },
+            "4": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 0
+            },
+            "5": {
+              "tasks": 10,
+              "success_rate": 0.6,
+              "memory_size_before": 0
+            },
+            "6": {
+              "tasks": 10,
+              "success_rate": 0.7,
+              "memory_size_before": 0
+            },
+            "7": {
+              "tasks": 10,
+              "success_rate": 1,
+              "memory_size_before": 0
+            },
+            "8": {
+              "tasks": 10,
+              "success_rate": 0.6,
+              "memory_size_before": 0
+            },
+            "9": {
+              "tasks": 10,
+              "success_rate": 0.7,
+              "memory_size_before": 0
+            },
+            "10": {
+              "tasks": 10,
+              "success_rate": 0.7,
+              "memory_size_before": 0
+            },
+            "11": {
+              "tasks": 10,
+              "success_rate": 0.8,
+              "memory_size_before": 0
+            },
+            "12": {
+              "tasks": 10,
+              "success_rate": 0.7,
+              "memory_size_before": 0
+            },
+            "13": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 0
+            }
+          },
+          "judge_confusion": {
+            "true_positive": 0,
+            "false_positive": 0,
+            "false_negative": 0,
+            "true_negative": 0
+          },
+          "by_task_type": {
+            "look_at_obj_in_light": {
+              "tasks": 13,
+              "success_rate": 0.7692307692307693
+            },
+            "pick_and_place_simple": {
+              "tasks": 35,
+              "success_rate": 0.8285714285714286
+            },
+            "pick_clean_then_place_in_recep": {
+              "tasks": 27,
+              "success_rate": 0.8888888888888888
+            },
+            "pick_cool_then_place_in_recep": {
+              "tasks": 25,
+              "success_rate": 0.72
+            },
+            "pick_heat_then_place_in_recep": {
+              "tasks": 16,
+              "success_rate": 0.8125
+            },
+            "pick_two_obj_and_place": {
+              "tasks": 24,
+              "success_rate": 0.625
+            }
+          }
+        }
+      ],
+      "success_rate_mean": 0.7785714285714286,
+      "success_rate_std": 0.01428571428571429,
+      "std_definition": "sample standard deviation (ddof=1)",
+      "episodes": 420,
+      "successes": 327,
+      "mean_decisions": 14.85,
+      "mean_environment_steps": 14.788095238095238,
+      "prompt_tokens": 2923895,
+      "completion_tokens": 97747,
+      "usage_by_role": {
+        "executor": {
+          "calls": 6237,
+          "prompt_tokens": 2923895,
+          "completion_tokens": 97747
+        }
+      }
+    },
+    "jitmem": {
+      "runs": [
+        {
+          "seed": 0,
+          "benchmark": true,
+          "tasks": 140,
+          "successes": 121,
+          "success_rate": 0.8642857142857143,
+          "mean_reward": 0.8642857142857143,
+          "mean_steps": 11.45,
+          "mean_environment_steps": 11.428571428571429,
+          "mean_latency_seconds": 48.73920702737863,
+          "invalid_actions": 3,
+          "truncated_episodes": 19,
+          "stored_episodes": 118,
+          "prompt_tokens": 1481178,
+          "completion_tokens": 64410,
+          "usage_complete": true,
+          "incomplete_generations": 0,
+          "usage_by_role": {
+            "curator": {
+              "calls": 140,
+              "prompt_tokens": 247466,
+              "completion_tokens": 31393
+            },
+            "executor": {
+              "calls": 1603,
+              "prompt_tokens": 1105156,
+              "completion_tokens": 25663
+            },
+            "judge": {
+              "calls": 140,
+              "prompt_tokens": 128556,
+              "completion_tokens": 7354
+            }
+          },
+          "mean_executor_prompt_tokens": 7893.971428571429,
+          "mean_executor_completion_tokens": 183.30714285714285,
+          "judge_parse_errors": 0,
+          "by_batch": {
+            "0": {
+              "tasks": 10,
+              "success_rate": 0.5,
+              "memory_size_before": 0
+            },
+            "1": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 5
+            },
+            "2": {
+              "tasks": 10,
+              "success_rate": 0.8,
+              "memory_size_before": 13
+            },
+            "3": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 21
+            },
+            "4": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 30
+            },
+            "5": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 38
+            },
+            "6": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 47
+            },
+            "7": {
+              "tasks": 10,
+              "success_rate": 1,
+              "memory_size_before": 57
+            },
+            "8": {
+              "tasks": 10,
+              "success_rate": 1,
+              "memory_size_before": 66
+            },
+            "9": {
+              "tasks": 10,
+              "success_rate": 0.7,
+              "memory_size_before": 76
+            },
+            "10": {
+              "tasks": 10,
+              "success_rate": 1,
+              "memory_size_before": 83
+            },
+            "11": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 93
+            },
+            "12": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 102
+            },
+            "13": {
+              "tasks": 10,
+              "success_rate": 0.8,
+              "memory_size_before": 111
+            }
+          },
+          "judge_confusion": {
+            "true_positive": 117,
+            "false_positive": 1,
+            "false_negative": 4,
+            "true_negative": 18
+          },
+          "by_task_type": {
+            "look_at_obj_in_light": {
+              "tasks": 13,
+              "success_rate": 0.7692307692307693
+            },
+            "pick_and_place_simple": {
+              "tasks": 35,
+              "success_rate": 0.9428571428571428
+            },
+            "pick_clean_then_place_in_recep": {
+              "tasks": 27,
+              "success_rate": 0.9259259259259259
+            },
+            "pick_cool_then_place_in_recep": {
+              "tasks": 25,
+              "success_rate": 0.92
+            },
+            "pick_heat_then_place_in_recep": {
+              "tasks": 16,
+              "success_rate": 0.875
+            },
+            "pick_two_obj_and_place": {
+              "tasks": 24,
+              "success_rate": 0.6666666666666666
+            }
+          }
+        },
+        {
+          "seed": 1,
+          "benchmark": true,
+          "tasks": 140,
+          "successes": 121,
+          "success_rate": 0.8642857142857143,
+          "mean_reward": 0.8642857142857143,
+          "mean_steps": 11.278571428571428,
+          "mean_environment_steps": 11.235714285714286,
+          "mean_latency_seconds": 73.64153076967848,
+          "invalid_actions": 6,
+          "truncated_episodes": 19,
+          "stored_episodes": 118,
+          "prompt_tokens": 1502281,
+          "completion_tokens": 64398,
+          "usage_complete": true,
+          "incomplete_generations": 0,
+          "usage_by_role": {
+            "curator": {
+              "calls": 140,
+              "prompt_tokens": 255977,
+              "completion_tokens": 31804
+            },
+            "executor": {
+              "calls": 1579,
+              "prompt_tokens": 1116100,
+              "completion_tokens": 25340
+            },
+            "judge": {
+              "calls": 140,
+              "prompt_tokens": 130204,
+              "completion_tokens": 7254
+            }
+          },
+          "mean_executor_prompt_tokens": 7972.142857142857,
+          "mean_executor_completion_tokens": 181.0,
+          "judge_parse_errors": 0,
+          "by_batch": {
+            "0": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 0
+            },
+            "1": {
+              "tasks": 10,
+              "success_rate": 1,
+              "memory_size_before": 9
+            },
+            "2": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 19
+            },
+            "3": {
+              "tasks": 10,
+              "success_rate": 0.8,
+              "memory_size_before": 28
+            },
+            "4": {
+              "tasks": 10,
+              "success_rate": 0.8,
+              "memory_size_before": 35
+            },
+            "5": {
+              "tasks": 10,
+              "success_rate": 0.8,
+              "memory_size_before": 42
+            },
+            "6": {
+              "tasks": 10,
+              "success_rate": 1,
+              "memory_size_before": 50
+            },
+            "7": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 60
+            },
+            "8": {
+              "tasks": 10,
+              "success_rate": 0.8,
+              "memory_size_before": 69
+            },
+            "9": {
+              "tasks": 10,
+              "success_rate": 1,
+              "memory_size_before": 77
+            },
+            "10": {
+              "tasks": 10,
+              "success_rate": 0.6,
+              "memory_size_before": 86
+            },
+            "11": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 92
+            },
+            "12": {
+              "tasks": 10,
+              "success_rate": 0.7,
+              "memory_size_before": 101
+            },
+            "13": {
+              "tasks": 10,
+              "success_rate": 1,
+              "memory_size_before": 108
+            }
+          },
+          "judge_confusion": {
+            "true_positive": 118,
+            "false_positive": 0,
+            "false_negative": 3,
+            "true_negative": 19
+          },
+          "by_task_type": {
+            "look_at_obj_in_light": {
+              "tasks": 13,
+              "success_rate": 0.7692307692307693
+            },
+            "pick_and_place_simple": {
+              "tasks": 35,
+              "success_rate": 0.9428571428571428
+            },
+            "pick_clean_then_place_in_recep": {
+              "tasks": 27,
+              "success_rate": 0.9259259259259259
+            },
+            "pick_cool_then_place_in_recep": {
+              "tasks": 25,
+              "success_rate": 0.76
+            },
+            "pick_heat_then_place_in_recep": {
+              "tasks": 16,
+              "success_rate": 0.9375
+            },
+            "pick_two_obj_and_place": {
+              "tasks": 24,
+              "success_rate": 0.7916666666666666
+            }
+          }
+        },
+        {
+          "seed": 2,
+          "benchmark": true,
+          "tasks": 140,
+          "successes": 122,
+          "success_rate": 0.8714285714285714,
+          "mean_reward": 0.8714285714285714,
+          "mean_steps": 10.971428571428572,
+          "mean_environment_steps": 10.971428571428572,
+          "mean_latency_seconds": 55.75561974968581,
+          "invalid_actions": 0,
+          "truncated_episodes": 18,
+          "stored_episodes": 118,
+          "prompt_tokens": 1448218,
+          "completion_tokens": 63376,
+          "usage_complete": true,
+          "incomplete_generations": 0,
+          "usage_by_role": {
+            "curator": {
+              "calls": 140,
+              "prompt_tokens": 243144,
+              "completion_tokens": 31292
+            },
+            "executor": {
+              "calls": 1536,
+              "prompt_tokens": 1077946,
+              "completion_tokens": 24672
+            },
+            "judge": {
+              "calls": 140,
+              "prompt_tokens": 127128,
+              "completion_tokens": 7412
+            }
+          },
+          "mean_executor_prompt_tokens": 7699.614285714286,
+          "mean_executor_completion_tokens": 176.22857142857143,
+          "judge_parse_errors": 0,
+          "by_batch": {
+            "0": {
+              "tasks": 10,
+              "success_rate": 0.8,
+              "memory_size_before": 0
+            },
+            "1": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 8
+            },
+            "2": {
+              "tasks": 10,
+              "success_rate": 1,
+              "memory_size_before": 17
+            },
+            "3": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 27
+            },
+            "4": {
+              "tasks": 10,
+              "success_rate": 0.8,
+              "memory_size_before": 35
+            },
+            "5": {
+              "tasks": 10,
+              "success_rate": 1,
+              "memory_size_before": 42
+            },
+            "6": {
+              "tasks": 10,
+              "success_rate": 0.8,
+              "memory_size_before": 52
+            },
+            "7": {
+              "tasks": 10,
+              "success_rate": 1,
+              "memory_size_before": 60
+            },
+            "8": {
+              "tasks": 10,
+              "success_rate": 0.8,
+              "memory_size_before": 69
+            },
+            "9": {
+              "tasks": 10,
+              "success_rate": 0.7,
+              "memory_size_before": 77
+            },
+            "10": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 83
+            },
+            "11": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 92
+            },
+            "12": {
+              "tasks": 10,
+              "success_rate": 0.8,
+              "memory_size_before": 101
+            },
+            "13": {
+              "tasks": 10,
+              "success_rate": 0.9,
+              "memory_size_before": 109
+            }
+          },
+          "judge_confusion": {
+            "true_positive": 118,
+            "false_positive": 0,
+            "false_negative": 4,
+            "true_negative": 18
+          },
+          "by_task_type": {
+            "look_at_obj_in_light": {
+              "tasks": 13,
+              "success_rate": 0.7692307692307693
+            },
+            "pick_and_place_simple": {
+              "tasks": 35,
+              "success_rate": 1
+            },
+            "pick_clean_then_place_in_recep": {
+              "tasks": 27,
+              "success_rate": 0.9259259259259259
+            },
+            "pick_cool_then_place_in_recep": {
+              "tasks": 25,
+              "success_rate": 0.84
+            },
+            "pick_heat_then_place_in_recep": {
+              "tasks": 16,
+              "success_rate": 0.9375
+            },
+            "pick_two_obj_and_place": {
+              "tasks": 24,
+              "success_rate": 0.6666666666666666
+            }
+          }
+        }
+      ],
+      "success_rate_mean": 0.8666666666666667,
+      "success_rate_std": 0.004123930494211598,
+      "std_definition": "sample standard deviation (ddof=1)",
+      "episodes": 420,
+      "successes": 364,
+      "mean_decisions": 11.233333333333333,
+      "mean_environment_steps": 11.211904761904762,
+      "prompt_tokens": 4431677,
+      "completion_tokens": 192184,
+      "usage_by_role": {
+        "curator": {
+          "calls": 420,
+          "prompt_tokens": 746587,
+          "completion_tokens": 94489
+        },
+        "executor": {
+          "calls": 4718,
+          "prompt_tokens": 3299202,
+          "completion_tokens": 75675
+        },
+        "judge": {
+          "calls": 420,
+          "prompt_tokens": 385888,
+          "completion_tokens": 22020
+        }
+      }
+    }
+  },
+  "across_seed": {
+    "baseline_sr_percent": {
+      "mean": 77.85714285714285,
+      "std": 1.4285714285714306
+    },
+    "jitmem_sr_percent": {
+      "mean": 86.66666666666667,
+      "std": 0.41239304942115773
+    },
+    "delta_pp": {
+      "mean": 8.809523809523816,
+      "std": 1.486904285332951
+    },
+    "mean_decision_delta": {
+      "mean": -3.616666666666667,
+      "std": 0.7073352311681493
+    },
+    "mean_environment_step_delta": {
+      "mean": -3.576190476190476,
+      "std": 0.683565581902648
+    },
+    "by_task_type": {
+      "look_at_obj_in_light": {
+        "tasks_per_seed": 13,
+        "baseline_sr_percent": {
+          "mean": 76.92307692307693,
+          "std": 0.0
+        },
+        "jitmem_sr_percent": {
+          "mean": 76.92307692307693,
+          "std": 0.0
+        },
+        "delta_pp": {
+          "mean": 0.0,
+          "std": 0.0
+        }
+      },
+      "pick_and_place_simple": {
+        "tasks_per_seed": 35,
+        "baseline_sr_percent": {
+          "mean": 83.80952380952381,
+          "std": 1.6495721976846391
+        },
+        "jitmem_sr_percent": {
+          "mean": 96.19047619047619,
+          "std": 3.2991443953692947
+        },
+        "delta_pp": {
+          "mean": 12.380952380952378,
+          "std": 4.364357804719845
+        }
+      },
+      "pick_clean_then_place_in_recep": {
+        "tasks_per_seed": 27,
+        "baseline_sr_percent": {
+          "mean": 82.71604938271605,
+          "std": 5.6575008579701676
+        },
+        "jitmem_sr_percent": {
+          "mean": 92.5925925925926,
+          "std": 0.0
+        },
+        "delta_pp": {
+          "mean": 9.876543209876546,
+          "std": 5.657500857970169
+        }
+      },
+      "pick_cool_then_place_in_recep": {
+        "tasks_per_seed": 25,
+        "baseline_sr_percent": {
+          "mean": 77.33333333333333,
+          "std": 4.618802153517006
+        },
+        "jitmem_sr_percent": {
+          "mean": 84.0,
+          "std": 8.0
+        },
+        "delta_pp": {
+          "mean": 6.666666666666665,
+          "std": 9.237604307034013
+        }
+      },
+      "pick_heat_then_place_in_recep": {
+        "tasks_per_seed": 16,
+        "baseline_sr_percent": {
+          "mean": 83.33333333333333,
+          "std": 3.608439182435161
+        },
+        "jitmem_sr_percent": {
+          "mean": 91.66666666666667,
+          "std": 3.608439182435161
+        },
+        "delta_pp": {
+          "mean": 8.333333333333334,
+          "std": 7.216878364870322
+        }
+      },
+      "pick_two_obj_and_place": {
+        "tasks_per_seed": 24,
+        "baseline_sr_percent": {
+          "mean": 61.111111111111114,
+          "std": 2.405626121623439
+        },
+        "jitmem_sr_percent": {
+          "mean": 70.83333333333333,
+          "std": 7.216878364870322
+        },
+        "delta_pp": {
+          "mean": 9.722222222222216,
+          "std": 9.62250448649376
+        }
+      }
+    }
+  },
+  "statistical_scope": {
+    "std_definition": "sample standard deviation across seeds (ddof=1)",
+    "unique_task_count": 140,
+    "repeated_episode_pairs": 420,
+    "note": "Seeds repeat the same task set and memory couples tasks within a stream. Counts and mean/std are descriptive; no independence assumption or pooled task-level significance claim is made.",
+    "pooled_significance_test": null
+  },
+  "paired_outcomes_by_seed": [
+    {
+      "seed": 0,
+      "tasks": 140,
+      "paired_counts": {
+        "both_success": 108,
+        "baseline_only": 3,
+        "jitmem_only": 13,
+        "both_failure": 16
+      },
+      "delta_pp": 7.142857142857151
+    },
+    {
+      "seed": 1,
+      "tasks": 140,
+      "paired_counts": {
+        "both_success": 99,
+        "baseline_only": 8,
+        "jitmem_only": 22,
+        "both_failure": 11
+      },
+      "delta_pp": 10.000000000000009
+    },
+    {
+      "seed": 2,
+      "tasks": 140,
+      "paired_counts": {
+        "both_success": 104,
+        "baseline_only": 5,
+        "jitmem_only": 18,
+        "both_failure": 13
+      },
+      "delta_pp": 9.285714285714286
+    }
+  ],
+  "validation": {
+    "independent_audit_passed": true,
+    "independent_audit_errors": [],
+    "software_tests_passed": 93,
+    "software_subtests_passed": 89,
+    "external_dataset_file_count": 18416,
+    "external_dataset_unchanged": true,
+    "dataset_fingerprint_sha256": "ea156e972ba076f73968c690ae732c5dc7a3978f3c6a39270cc5aa1abadad278"
+  },
+  "raw_artifacts": "Local outputs/ directory, excluded from Git. Contains full trajectories, API calls, manifests, checkpoints and detailed audits."
+}

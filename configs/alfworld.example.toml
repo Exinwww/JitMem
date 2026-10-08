@@ -1,0 +1,44 @@
+# Set OPENAI_MODEL and OPENAI_API_KEY in your shell; OPENAI_BASE_URL is optional.
+# The default URL is https://api.openai.com/v1. All endpoint/model/key values
+# can be set with environment variables; TOML controls experiment parameters.
+# Per-role JITMEM_EXECUTOR_* / JITMEM_CURATOR_* variables override shared values.
+[environment]
+backend = "alfworld"
+data_root = "/path/to/alfworld" # Set this to your existing ALFWorld data directory.
+split = "valid_seen"
+task_types = [1, 2, 3, 4, 5, 6]
+# limit = 5  # A small first API test. Remove for the full 140-task benchmark.
+
+[experiment]
+method = "jitmem"
+seeds = [0, 1, 2]  # Author seeds unspecified; these are explicit reproduction choices.
+batch_size = 10
+workers = 1 # Use --workers 10 to execute a batch in isolated processes.
+max_steps = 30
+history_window = 3
+retrieval_k = 3
+store_policy = "judge"
+task_adaptive = true
+output_dir = "outputs/alfworld_jitmem"
+
+[executor]
+temperature = 1.0
+max_tokens = 4096
+timeout_seconds = 90.0
+retries = 3
+token_limit_parameter = "max_tokens" # Some models require max_completion_tokens.
+# omit_temperature = true # For endpoints whose model rejects temperature.
+# Qwen-compatible servers may accept this; verify your endpoint's API.
+# [executor.extra_body.chat_template_kwargs]
+# enable_thinking = true
+
+[curator]
+# Default: the same endpoint, model and key as executor. Role environment variables
+# can override them without editing this file.
+temperature = 1.0 # GPT/Gemini curator; use 0.6 for Qwen3 curator.
+max_tokens = 8192 # Engineering choice: evaluation limit is not disclosed in paper.
+# [curator.extra_body]
+# top_p = 0.95
+# top_k = 20
+# [curator.extra_body.chat_template_kwargs]
+# enable_thinking = false
