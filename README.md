@@ -155,6 +155,17 @@ pilot 的 batch size 2 用于在 5 个任务内检查记忆增长，与正式 ba
 
 其他对照：`--method raw-memory` 直接注入检索轨迹；`--method write-summary` 在 write time 生成固定摘要，read time 再 curate，是简化的信息损失消融。它们不是完整 ReasoningBank、MemP 或 SkillOS 复现。配置 `[experiment] task_adaptive=false` 隐藏 curator 当前任务，`store_policy="all"` 保存所有带 judge label 的轨迹，`retrieval_k=0` 检查无检索的 curator。`--split valid_unseen` 可跑 134 个泛化任务，输出到单独目录。
 
+论文的“Quality-filtered storage outperforms label-annotated full storage”消融使用两份配对模板：[质量过滤](configs/storage_filtered.example.toml)与[全量存储附标签](configs/storage_all.example.toml)。均为 `jitmem`、140任务×3轮、空库开始，只改变存储策略与相应标签展示。配置复制为 `*.local.toml` 后设置数据路径，分别 evaluate；完整结果用以下命令审计和比较：
+
+```bash
+.venv/bin/python -m jitmem evaluate --config configs/storage_filtered.local.toml
+.venv/bin/python -m jitmem evaluate --config configs/storage_all.local.toml
+.venv/bin/python scripts/analyze_storage_ablation.py \
+  outputs/storage_filtered outputs/storage_all --output-dir outputs/storage_ablation_comparison
+```
+
+原文Table9、实验设置和解释边界见[存储消融协议](docs/storage_ablation.md)。标签来自executor judge，原生成功仅用于评分；比较差值定义为过滤减全量，结果不预设方向。
+
 默认不 warm start；可在配置设置 `warm_start` 为训练轨迹 `memory.jsonl`，校验只含 `train`、不与 evaluation task IDs 重合，默认 gate 下要求正的 executor judge 标签。若要收集 API 训练经验，可对 train split 执行 `jitmem` 或 `raw-memory`；这只是轨迹收集，不是 GRPO 或本文训练复现。
 
 ## 输出与续跑

@@ -1,0 +1,63 @@
+# 消融：质量过滤与带标签的全量存储
+
+本实验检验 [JITMEM v1](https://arxiv.org/pdf/2609.27334) 第8页 §4.2、Figure 2a 的存储消融。质量过滤组只保存 executor-as-judge 判为成功的完整轨迹；全量组保存所有完整轨迹，并在检索后将每条轨迹的自评成功/失败标签展示给 curator。标签来自模型 judge，不能替换为原生环境的真实成功标量。
+
+原论文第21页 Table 9 的 ALFWorld 结果如下；curator 均为未训练的 Qwen3-8B，三轮随机任务顺序：
+
+| Executor | 质量过滤 SR mean ± std | 全量存储附标签 SR mean ± std | 全量减过滤（百分点） |
+| --- | ---: | ---: | ---: |
+| Qwen3-8B | 60.5 ± 2.6% | 59.0 ± 2.2% | −1.5 |
+| Gemini-2.5-Pro | 80.0 ± 1.5% | 77.1 ± 3.1% | −2.9 |
+| GPT-5.4 | 79.3 ± 3.6% | 77.6 ± 1.8% | −1.7 |
+
+这是 JITMEM-base 的已报告消融。当前项目按用户要求使用模型 API、不训练 curator；本机使用环境变量配置的模型，不能将本次数字当作原论文模型或 RL-trained JITMEM 的等价复跑。
+
+## 配对协议
+
+| 项目 | 固定设置 |
+| --- | --- |
+| 环境 | ALFWorld 文本环境，`valid_seen` 全部140个任务，六类齐全，无 limit |
+| 两组方法 | `method="jitmem"`，相同 curator/executor/judge 模型与采样参数 |
+| 顺序与重复 | seeds 0、1、2；每组420次真实交互，相同 seed 的任务顺序一致 |
+| 初始记忆 | 每个 seed 独立空库，无 warm start |
+| Streaming | batch10，每批10个独立进程共享固定快照；整批完成后按预定任务顺序写入 |
+| 检索 | 描述 BM25、top3；全量组的失败轨迹也参与索引和排序 |
+| Curator | 每个任务一次，面向当前任务；完整 observation/action 轨迹输入 |
+| Executor | 相同提示模板，最近3步历史，最多30次决策 |
+| Judge | 同一 executor client，仅观察任务和完整轨迹；每条轨迹均自评 |
+| 输出预算 | executor/judge 4096、curator8192；temperature1，其他采样设置相同 |
+| 主指标 | 原生环境 SR；按三轮报告均值和样本标准差，差值为过滤减全量 |
+
+`configs/storage_filtered.example.toml` 与 `configs/storage_all.example.toml` 除 `store_policy` 和 `output_dir` 外完全相同。模型连接参数与密钥通过现有环境变量提供。两组使用相同的11个实现源码哈希、游戏哈希和 runtime；安全修复后的版本重新运行两组，不与旧版本的过滤组混合。
+
+两组使用相同的中性 curator system prompt（retrieved experience）；全量组额外展示 `Executor judge label: success/failure`。原论文没有公布这个消融专用的标签格式。executor 的输入只包含 curator 生成的 payload，judge 的输入只包含当前任务和轨迹。二者不直接接收检索轨迹标签，也不接收原生 success/reward 标量。原生状态可能通过环境自然语言 observations 推断，这是 agent 正常可见的环境反馈。
+
+存储策略改变后，两组后续生成的轨迹、BM25索引、检索结果与 bank 大小会随之分化；不强制两组使用同一批历史轨迹。该实验检验完整 streaming 存储策略，不能单独区分过滤、显式标签、索引规模与失败经验暴露的各自作用。
+
+## 运行与审计
+
+复制两份模板为对应的 `*.local.toml`，仅将 `data_root` 改为实际 ALFWorld 路径。确认两组均没有 `limit` 或 `warm_start`，连接参数沿用 `OPENAI_*` 或角色环境变量。
+
+```bash
+.venv/bin/python -m jitmem doctor --config configs/storage_filtered.local.toml
+.venv/bin/python -m jitmem evaluate --config configs/storage_filtered.local.toml
+.venv/bin/python -m jitmem evaluate --config configs/storage_all.local.toml
+.venv/bin/python scripts/analyze_storage_ablation.py \
+  outputs/storage_filtered outputs/storage_all --output-dir outputs/storage_ablation_comparison
+```
+
+模型 API 已配置时，这些 evaluate 命令会产生真实调用。可分别运行两组，或在不同终端同时运行；不要修改运行中的 `src/jitmem/` 或采样配置。出现基础设施错误后，只能在协议未变时对对应 evaluate 命令追加 `--resume`，从最后完整 batch checkpoint 继续；未提交批次会重跑并可能额外计费。已有输出目录默认拒绝覆盖。
+
+分析器要求完整配对的140任务×3轮，验证配置仅有上述差异、source/runtime/game/order一致、每批快照和有序写入、judge gate、全量组标签与实际存储轨迹相符。还核对逐任务记录、checkpoint、最终bank和模型请求，不接受未完成/故障run。
+
+除主指标外，报告各 seed/任务类SR、配对成功/失败转移、平均决策与环境步数、分角色tokens、judge/native混淆矩阵、bank增长、存储和检索中的失败比例。judge判失败和原生失败分别统计，避免把模型误判当作环境事实。API不提供usage时保留 `null`，不能宣称零成本。
+
+## 解释边界
+
+Order seed只控制任务顺序，不固定服务端token sampling。三轮共享同一组140任务，streaming经验在轮内相关；420条记录不作为420个独立任务样本做显著性检验。配对转移与每轮差值为描述性指标，三轮std也不是置信区间。
+
+judge解析失败或输出截断时，现有工程策略将其记录为拒绝（`success=false`），质量过滤组不入库，全量组保存并显示failure标签；报告单列这些异常，不能把它们解释为有效语义判断。executor截断/非法决策仍消耗预算并完整记录。API/环境故障中止该run，不作为失败任务混入SR。
+
+“过滤更好”是待检验的假设。结果必须据完整运行如实报告，即使全量组持平或更高，也不删任务、不修改judge、不重试选择有利采样。最终结果应限定为当前模型、prompt和streaming设置下的存储策略对照；仅凭失败经验暴露与SR同时变化，不能证明噪声是唯一原因。
+
+完整请求与逐任务证据保存在被Git忽略的本机 `outputs/`；公开仓库只保存去除endpoint、凭证、个人路径与原始请求的汇总报告。

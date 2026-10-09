@@ -87,3 +87,13 @@ JITMEM 三轮最终 bank 各 118 条，judge/native 的重复 episode 计数为 
 独立首批审计重放两方法 seed0 的前20个任务，共40条真实轨迹，初始与每步 observation、合法动作、native won/reward/done 和描述均与记录一致；逐调用 messages 可由公开 observation/action 与前批 raw bank 重新构建，无 expert/PDDL/native label 输入。[审计报告](../outputs/first_batch_replay_audit.json) 不调用模型 API。
 
 其中 `trial_T20190908_184242_348366`（cool mug to coffeemachine）环境在冷却后直接 won，judge 因无最后放置拒绝。审计发现原始 game 初始 PDDL 同时将该 mug 关联到 countertop 与 coffeemachine；从 countertop 拿取未删除另一个关系，使冷却动作满足原生目标。这属于继承数据/环境行为。保留 native score 和独立 judge gate，解释结果时不把所有分歧都归因于 judge 推理错误。
+
+## 存储消融验证（2026-10-09）
+
+新增质量过滤与带标签全量存储的成对配置、协议测试和完整结果分析器，见[消融协议](storage_ablation.md)。当前完整软件验证为 **150 passed、108 subtests passed**，Ruff与24个Python文件的格式检查通过；11个pipeline源文件未改变。新测试覆盖curator标签差分、executor/judge消息一致、失败及非法/截断决策的完整保存、跨批标签读取、确定性写入、配对配置、完整三轮/六类覆盖、checkpoint/bank/raw轨迹一致性、基础设施错误拒绝，以及逐调用usage与汇总一致、未知用量保留null。
+
+独立重放两组seed0前两批，共40条真实交互轨迹，全部通过：初始/每步observation、admissible actions、实际执行决策、最终native reward/won/done、BM25与三角色messages均与记录一致。全量组第二批curator实际读取13个failure-label引用，标签全部来自对应executor judge；过滤组无显式标签。审计不调用模型API、不修改数据或原始结果。逐步native标量来自重放，原始日志只有最终标量可独立比对；此审计不证明judge语义判断正确或后续批次模型能力。
+
+两组同一cool-mug数据语义例外在重放中再次出现：native成功而judge失败，过滤组不保存，全量组保留并显示failure。保持原数据与gate，不用native标签改写judge。独立报告位于本机 `outputs/storage_ablation_first_batch_audit.json`。
+
+正式评测两组均重新运行，使用安全加固后版本的相同源码哈希，140任务×seeds0/1/2，每个seed空库。一次执行中断时，两组各已完整提交40个任务；检查没有残留评测进程后，从相同配置checkpoint续跑。已提交记录不重跑、不重写，未提交请求可能产生额外调用成本，不将部分run当作完整SR。全量结果仍须通过三轮完整分析与最终独立审计后才报告。

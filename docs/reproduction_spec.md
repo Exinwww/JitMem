@@ -66,9 +66,9 @@ Appendix A 指定 vLLM 最大模型长度 40960；这是作者服务配置，不
 
 ### Curator
 
-角色是 ALFWorld household-task memory curator。输入区分 current question 与编号 retrieved memories，每条包含 past question 和完整 trajectory。要求输出一个简短可执行 briefing：指出最有用的 episodes，提炼成功的寻物方式和动作顺序，最后给当前任务的具体操作建议。原 prompt 只要求简洁，没有硬性字数限制，也没有规定必须输出 JSON 或固定三级标题。代码另外提醒验证旧 episode 的地点/object numbers，并在无经验或不相关时提供一般操作指导；这些 caution/cold-start 指令是工程补充，原文没有明确要求。`task_adaptive=false` 只隐藏 user prompt 中的 current question，保留相同 curator system 并补充当前 query 未知的说明；retriever 仍使用真实 query。
+角色是 ALFWorld household-task memory curator。输入区分 current question 与编号 retrieved memories，每条包含 past question 和完整 trajectory。要求输出一个简短可执行 briefing：指出最有用的 episodes，提炼寻物方式和动作顺序，最后给当前任务的具体操作建议。原 prompt 只要求简洁，没有硬性字数限制，也没有规定必须输出 JSON 或固定三级标题。当前代码使用中性的 retrieved experience 措辞，避免全量存储消融时把失败轨迹称为成功；两组共享相同system prompt，全量组为每条检索轨迹附上executor judge success/failure标签。代码另外提醒验证旧 episode 的地点/object numbers，并在无经验或不相关时提供一般操作指导；这些 caution/cold-start 指令是工程补充，原文没有明确要求。`task_adaptive=false` 只隐藏 user prompt 中的 current question，保留相同 curator system 并补充当前 query 未知的说明；retriever 仍使用真实 query。
 
-建议语义改写：`Prepare a compact briefing for a household agent. Review the current objective and the supplied successful episodes. Explain which episodes help, recover effective object-search and action-order patterns, and turn those patterns into concrete advice for this objective. Keep the briefing short enough for the agent to reuse during execution.`
+建议语义改写：`Prepare a compact briefing for a household agent. Review the current objective and the supplied episodes. Explain which episodes help, recover effective object-search and action-order patterns, and turn those patterns into concrete advice for this objective. Keep the briefing short enough for the agent to reuse during execution.`
 
 ### Executor
 
@@ -93,6 +93,8 @@ Appendix A 指定 vLLM 最大模型长度 40960；这是作者服务配置，不
 首轮跑相同模型与 matched task orders 的 `no-memory`、`jitmem`（prompted）以及直接注入 retrieved raw trajectories 的 `raw-memory`。后者是工程诊断对照，不是论文表格中的 named baseline。进一步跑 `jitmem` 配合 `task_adaptive=false`（curator 不见当前 query）、`jitmem` 配合 `store_policy="all"`（全部写入并展示 judge labels），以及 `write-summary`（write-time 固定摘要再 read-time curate）。`retrieval_k=0` 可以做无 retrieved context 的诊断，但不训练时不可称为论文 RL 消融的复现。
 
 CLI 的 `evaluate --method` 接受的值只有 `jitmem`、`no-memory`、`raw-memory`、`write-summary`；task adaptivity、store policy、retrieval count 在 TOML `[experiment]` 中配置。baseline 对照必须显式采用同一 split、同一 task list、同一 seeds 和 executor 参数。`compare` 命令显示已完成 summary，不能代替逐任务 paired outcomes 的统计分析。
+
+质量过滤与带标签全量存储的专用配对配置、Table9原文结果、分析入口见[存储消融协议](storage_ablation.md)。该消融固定 `method="jitmem"`、两组冷启动和完整任务集；全量组不会用原生标签修正自评误判。分析器拒绝未标注暖启动与不完整结果。本次只检验API prompted变体，不复现本地RL训练。
 
 生成预算耗尽/过滤的处理是公开工程选择：API 返回文本和 `finish_reason`，不当作 transport failure 重试。executor 不执行截断输出，消耗一次 decision budget；curator 省略截断 payload，judge 拒绝截断 verdict，distiller 不存截断 summary。任务仍参与 SR，逐调用保存 incomplete 标志。API 省略 usage 时保存未知值 `null`，受影响的 token 汇总/均值也为未知，不以零代替；其他完整提供用量的角色仍可独立统计。
 
