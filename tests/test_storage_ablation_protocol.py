@@ -24,7 +24,8 @@ def test_published_ablation_configs_keep_all_experimental_controls_matched():
         config = tomllib.loads((root / f"configs/storage_{arm}.example.toml").read_text())
         experiment = config["experiment"]
         assert experiment.pop("store_policy") == expected_policy
-        assert experiment.pop("output_dir") == f"outputs/storage_{arm}"
+        assert experiment.pop("output_dir") == f"outputs/storage_{arm}_paper_v1"
+        assert experiment["prompt_profile"] == "paper-v1"
         assert experiment.get("warm_start") is None
         assert config["environment"].get("limit") is None
         assert experiment["method"] == "jitmem" and experiment["seeds"] == [0, 1, 2]

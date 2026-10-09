@@ -2,6 +2,8 @@
 
 这个项目实现 [Just-in-Time Memory](https://arxiv.org/pdf/2609.27334) 的推理与 streaming 评估流程，使用可配置的模型 API，无本地模型训练。当前对应 prompted / untrained curator 变体；普通模型 API 的结果不能当作论文 RL-trained JITMEM 的结果。
 
+当前正式配置使用 **paper-v1原文提示词**：从固定版本论文源包提取curator/executor/distillation，judge沿用论文引用的SkillOS原模板；同时对齐可核查的history、动作解析、原生feedback和executor-only效率口径。[原文对齐说明](docs/paper_fidelity.md)列出已修正差异和作者仍未公开的细节。下列已发表数字来自旧legacy-paraphrase协议，不能当作新协议的结果。
+
 ALFWorld 文本交互环境已在项目 `.venv` 中安装并验证。数据直接读取本机配置的 `data_root`，不复制进仓库。原始数据是游戏资源，并非已完成的 LLM 轨迹；默认记忆库在每个 run 开始时为空，由模型执行任务后逐批积累。
 
 2026-10-08 已完成用户 API 的 no-memory / prompted JITMEM 成对评测：`valid_seen` 全部 140 个任务，seeds 0、1、2，每组 420 次、共 840 次真实交互。curator/executor 配置模型名均为 `gpt-5.5`；无 warm start，batch10、workers10、history3、最多30次决策。成功率由原生环境判定，均值与样本标准差按三轮计算。
@@ -39,7 +41,7 @@ ALFWorld 文本交互环境已在项目 `.venv` 中安装并验证。数据直�
 
 ```bash
 python3.11 -m venv .venv
-.venv/bin/python -m pip install -e '.[dev]'
+.venv/bin/python -m pip install -e '.[dev,paper]'
 .venv/bin/python -m pytest -q
 .venv/bin/python -m jitmem smoke
 ```
@@ -104,6 +106,14 @@ bash scripts/setup_alfworld.sh
 
 ## 接入模型 API
 
+正式运行前准备原文模板；这个命令只下载固定版本的公开论文源文件，不调用模型：
+
+```bash
+.venv/bin/python scripts/prepare_paper_prompts.py
+```
+
+本项目uv虚拟环境没有pip时，先使用 `uv pip install --python .venv/bin/python -e '.[paper]'`。模板全文保存在被忽略的 `outputs/paper_prompts/v1/`；每次运行核对源与模板哈希，缺失或篡改会提前失败，不回退改写prompt。TOML默认使用paper-v1，`legacy-paraphrase`仅供旧协议诊断和离线兼容。
+
 当前 API adapter 支持 OpenAI-compatible `POST /chat/completions`。原生 Gemini / Anthropic 等其他格式需要兼容 gateway 或新增 adapter。curator 和 executor 可以指定不同模型、endpoint 和密钥环境变量；judge 固定复用 executor client。endpoint 可以是 base URL 或完整的 `/chat/completions` URL。
 
 base URL、模型名和 key 通过环境变量指定；无需编辑配置文件中的模型值：
@@ -153,11 +163,11 @@ pilot 的 batch size 2 用于在 5 个任务内检查记忆增长，与正式 ba
 
 ```bash
 .venv/bin/python -m jitmem evaluate \
-  --method no-memory --workers 10 --output-dir outputs/alfworld_no_memory
+  --method no-memory --workers 10 --output-dir outputs/alfworld_no_memory_paper_v1
 .venv/bin/python -m jitmem evaluate \
-  --method jitmem --workers 10 --output-dir outputs/alfworld_jitmem
+  --method jitmem --workers 10 --output-dir outputs/alfworld_jitmem_paper_v1
 .venv/bin/python scripts/analyze_results.py \
-  outputs/alfworld_no_memory outputs/alfworld_jitmem --output-dir outputs/comparison
+  outputs/alfworld_no_memory_paper_v1 outputs/alfworld_jitmem_paper_v1 --output-dir outputs/comparison_paper_v1
 ```
 
 使用自定义 TOML 时给上述命令追加 `--config configs/alfworld.local.toml`，确保配置没有启用 `limit`，正式 batch size 为 10。三轮评测每个方法共 420 个 episode；模型生成仍有随机性，order seeds 只控制任务顺序，不能保证 API token sampling 可复现。最多 30 次 executor 调用 / episode，JITMEM 另有 curator 和 judge 调用，详细用量分角色记录。
@@ -170,10 +180,12 @@ pilot 的 batch size 2 用于在 5 个任务内检查记忆增长，与正式 ba
 .venv/bin/python -m jitmem evaluate --config configs/storage_filtered.local.toml
 .venv/bin/python -m jitmem evaluate --config configs/storage_all.local.toml
 .venv/bin/python scripts/analyze_storage_ablation.py \
-  outputs/storage_filtered outputs/storage_all --output-dir outputs/storage_ablation_comparison
+  outputs/storage_filtered_paper_v1 outputs/storage_all_paper_v1 --output-dir outputs/storage_ablation_comparison_paper_v1
 ```
 
 原文Table9、实验设置和解释边界见[存储消融协议](docs/storage_ablation.md)。标签来自executor judge，原生成功仅用于评分；比较差值定义为过滤减全量，结果不预设方向。
+
+paper-v1取消自行添加的Look规则、空库指导和非法决策解释；每次executor调用均提交解析动作给环境。正式主指标为native SR，效率指标为每任务executor-only input/output K及交互次数；全角色成本仅是诊断。旧输出和checkpoint保留，不在新配置中续跑或混用。
 
 默认不 warm start；可在配置设置 `warm_start` 为训练轨迹 `memory.jsonl`，校验只含 `train`、不与 evaluation task IDs 重合，默认 gate 下要求正的 executor judge 标签。若要收集 API 训练经验，可对 train split 执行 `jitmem` 或 `raw-memory`；这只是轨迹收集，不是 GRPO 或本文训练复现。
 
@@ -183,7 +195,7 @@ pilot 的 batch size 2 用于在 5 个任务内检查记忆增长，与正式 ba
 
 指标还包括分任务类/批次 SR、决策与实际环境步数、非法输出、budget truncation、memory size、judge/native confusion、judge parse errors，以及 executor、curator、judge、distiller 分角色用量。所有任务参与分母；API/环境故障显式报错并暂停本次运行，不当作任务失败混入 SR。
 
-模型生成达到 token 上限或被过滤时保留 `finish_reason` 和 `generation_failures`，继续评测：executor 不执行部分输出并消耗一次决策，curator 省略失败的 briefing，judge 拒绝该结果，distiller 不保存失败的摘要。不会通过反复续跑选择完整输出。API 不返回 usage 时，受影响的 token 总数及均值为 `null`，并标记 `usage_complete=false`，不能当作零用量或用于 token 节省比较。
+paper-v1正常消费token预算内已返回的文本，同时保留 `finish_reason` / `generation_failures` 诊断；judge只在JSON格式不合要求时拒绝。不会因达到生成上限而自行清空payload，也不会通过反复续跑选择完整输出。legacy丢弃策略仅用于旧模式。API不返回usage时，总数及均值保留null，并标记 `usage_complete=false`，不能视为零用量。
 
 checkpoint 只在完整 batch 后提交。发生故障后用相同命令追加 `--resume`，从最后提交的 batch 继续；未提交批次可能重跑并再次消耗 API 用量。配置、任务文件或实现 hash 改变时拒绝续跑，防止混合实验协议。已有输出目录默认拒绝覆盖。运行审计日志保存 payload 便于检查，持久 memory bank 不保存 payload。
 

@@ -231,6 +231,8 @@ def evaluate(config, tasks, pipeline, environment_factory, *, resume: bool = Fal
         if config.experiment.warm_start
         else None
     )
+    assets = getattr(pipeline, "assets", None)
+    prompt_assets = assets.provenance if assets is not None else None
     fingerprint = hashlib.sha256(
         json.dumps(
             {
@@ -240,6 +242,7 @@ def evaluate(config, tasks, pipeline, environment_factory, *, resume: bool = Fal
                 "packages": packages,
                 "python_version": sys.version_info[:3],
                 "warm_start_sha256": warm_start_hash,
+                "prompt_assets": prompt_assets,
             },
             sort_keys=True,
         ).encode()
@@ -264,7 +267,24 @@ def evaluate(config, tasks, pipeline, environment_factory, *, resume: bool = Fal
         "packages": packages,
         "benchmark": config.environment.backend == "alfworld",
         "variant": "prompted curator; no local training",
-        "prompt_source": "semantic paraphrases of JITMEM Appendix A and SkillOS A.4",
+        "prompt_source": (
+            "JITMEM v1 TeX listings and SkillOS v1 Figure 13; verified local assets"
+            if prompt_assets is not None
+            else "semantic paraphrases of JITMEM Appendix A and SkillOS A.4"
+        ),
+        "prompt_assets": prompt_assets,
+        "execution_protocol": (
+            "original JITMEM templates; GiGPO-derived command projection/history/action list; native feedback"
+            if prompt_assets is not None
+            else "legacy strict commands and synthetic invalid-decision feedback"
+        ),
+        "primary_metrics": {
+            "success_rate": "native verifier successes / all tasks; mean/std over task-order runs",
+            "executor_input_tokens_k": "all executor prompt tokens per task / 1000",
+            "executor_output_tokens_k": "all executor completion tokens per task / 1000",
+            "executor_steps": "executor calls per task; native interaction turns in paper-v1",
+            "other_metrics": "diagnostics; all-role usage is not paper executor-only efficiency",
+        },
         "batch_execution": (
             "spawn process parallel execution with a shared frozen bank per batch"
             if workers > 1

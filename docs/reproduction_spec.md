@@ -2,6 +2,8 @@
 
 本文是实现和评测的可核查规格。主要来源是 [JITMEM v1 PDF](https://arxiv.org/pdf/2609.27334) §3、§4、Appendix A/B；judge 和 split 补充来源是 [SkillOS v1 PDF](https://arxiv.org/pdf/2605.06614) Appendix A.4 Figure 13、Appendix C。页码均采用 PDF 印刷页码，从 1 开始。设置的证据等级分为：原文明确、继承来源、工程选择、待核实。
 
+默认TOML配置已切换到 **paper-v1原文模板**，原始资产准备、逐项协议差异与剩余未披露细节见[原文对齐说明](paper_fidelity.md)。旧语义改写只保留为 `legacy-paraphrase` 历史模式，不是当前正式配置。
+
 ## 当前复现范围
 
 按用户要求，连接参数通过环境变量指定：通用 `OPENAI_BASE_URL`、`OPENAI_MODEL`、`OPENAI_API_KEY`，默认 OpenAI-compatible `https://api.openai.com/v1/chat/completions`。可用 `JITMEM_EXECUTOR_*`、`JITMEM_CURATOR_*` 覆盖角色；环境变量优先于可选 TOML 值，未单独配置的 curator 继承 executor。运行 metadata 保存解析后的 URL/model 和密钥变量名称，不保存密钥值。
@@ -16,11 +18,11 @@
 
 1. 对 snapshot 中每条 memory 的**任务描述**建立 BM25，查询当前任务描述，取最多 3 条，按分数排序。不能把 trajectory 内容、task type、环境路径或 ground-truth label 混入检索文本。
 2. 将当前任务与检索到的完整轨迹送入 curator 一次，产生自然语言 payload。该 payload 在本 episode 全程复用，不在每个环境 step 重新生成。
-3. 每步 executor 接收任务、payload、最近 3 个 observation/action 对、当前 observation、当前 admissible actions。生成动作并严格解析一个 `<action>…</action>` 中的合法命令。当前实现最多 30 次 executor decisions；格式错误或非法动作也消耗一次 decision budget，产生显式错误反馈，但不对环境执行。分别统计 `steps`（决策数）和 `environment_steps`（实际执行命令数）。论文没有披露非法动作的解析/恢复细节，因此这一处理是工程选择。
+3. 每步executor使用原文模板，接收任务、payload、最近3个编号observation/action、当前observation和排除help的动作池。沿用固定GiGPO来源的解析/字段编码，解析命令均交环境取得原生反馈；不加入人工错误说明。最多30次交互，paper-v1的decisions与environment_steps相同。论文未公开作者parser，这一继承选择明确记录。
 4. episode 结束后，executor 模型另作一次 judge 调用，仅观察任务与完整轨迹。judge 成功则将 raw trajectory 加入 pending writes。payload 不作为持久 memory。
 5. 原生环境 verifier 的成功结果用于评测日志和指标，**不**参与默认存储 gate，也不送给 curator 或 judge。
 
-论文不说明空库时是否还调用 curator。当前 `jitmem` 和 `write-summary` 在空库时仍调用 curator，并显式提供空 retrieved context；prompt 此时允许一般操作指导。这是 cold-start 工程选择，可以产生来自模型参数知识的 hints。不能把空库任务误标为有经验支持的 memory gain。
+论文不说明空库时是否还调用curator。当前jitmem/write-summary仍调用，paper-v1仅提供原文template和空memory区，不附一般操作指导或额外占位语。模型仍可利用参数知识，空库任务不能视为使用历史经验的证据；是否调用本身仍是公开工程选择。
 
 ## Batched streaming 和评估
 
@@ -45,7 +47,7 @@
 | 评估 batch size | 10，batch 后更新 bank | Appendix A，第 18 页，原文明确 |
 | 评估重复 | 3 个随机 task-order runs | Table 1，第 6 页，原文明确 |
 | executor history | 最近 3 步 | Appendix A，第 18 页，原文明确 |
-| episode step budget | 论文 30 turns；代码 30 decisions，非法输出也消耗 | Appendix A，第 18 页 + 公开工程解释 |
+| episode step budget | 30 interaction turns，非法解析命令也提交环境；paper-v1决策与原生步数一致 | Appendix A，第18页 + GiGPO继承解析选择 |
 | executor temperature | 1.0 | Appendix A，第 18 页，原文明确 |
 | executor max output | 4096 tokens / call | Appendix A，第 18 页，原文明确 |
 | Qwen3-8B executor eval | ALFWorld thinking enabled | Appendix A，第 18 页，原文明确 |
@@ -60,9 +62,9 @@
 
 Appendix A 指定 vLLM 最大模型长度 40960；这是作者服务配置，不能简单转成任意 API 的可用上下文。API 超过上下文时应显式失败或使用已记录的限制模式，不能静默删掉 raw memory 后继续称为 faithful reproduction。
 
-## Prompt 的语义规格
+## Prompt 来源与历史语义规格
 
-实现采用语义改写并公开工程补充，**不是逐字原 prompt**。原文 curator 见 JITMEM 第 14 页，executor 见第 15 页，distillation 见第 17 页；ALFWorld judge 原文来源是 SkillOS 第 22 页。运行 fingerprint 包含源代码和 game file 内容 hash，避免 prompt 或数据变化后混用旧 checkpoint；这些改写仍会影响与论文数字的可比性。
+当前paper-v1加载原文curator/executor/distillation listings以及SkillOS原文judge图框提取资产，出处分别为JITMEM第14/15/17页、SkillOS第22页。源码、game bytes和模板指纹均进入运行fingerprint。judge图框空白与未披露字段序列化无法保证作者运行时字节一致；详见[原文对齐说明](paper_fidelity.md)。以下段落仅记录legacy改写的历史，不用于新正式实验。
 
 ### Curator
 
@@ -96,9 +98,9 @@ CLI 的 `evaluate --method` 接受的值只有 `jitmem`、`no-memory`、`raw-mem
 
 质量过滤与带标签全量存储的专用配对配置、Table9原文结果、分析入口见[存储消融协议](storage_ablation.md)。该消融固定 `method="jitmem"`、两组冷启动和完整任务集；全量组不会用原生标签修正自评误判。分析器拒绝未标注暖启动与不完整结果。本次只检验API prompted变体，不复现本地RL训练。
 
-生成预算耗尽/过滤的处理是公开工程选择：API 返回文本和 `finish_reason`，不当作 transport failure 重试。executor 不执行截断输出，消耗一次 decision budget；curator 省略截断 payload，judge 拒绝截断 verdict，distiller 不存截断 summary。任务仍参与 SR，逐调用保存 incomplete 标志。API 省略 usage 时保存未知值 `null`，受影响的 token 汇总/均值也为未知，不以零代替；其他完整提供用量的角色仍可独立统计。
+paper-v1正常消费生成预算内返回的文本，不因finish_reason=length自行丢弃内容；executor仍解析并提交环境，judge仍按JSON布尔格式解析，无法解析时保守拒绝。finish_reason/incomplete单独记录，不重试选择有利模型输出。legacy丢弃策略只对应旧记录。API省略usage时保存null，受影响汇总/均值为未知，不补零。
 
-至少输出每 run SR、每 task 类型 SR、平均 decisions/环境 steps，并将 executor、curator、judge、distiller 的 input/output tokens 分开统计，避免把论文的 executor-only token 减少解释为全系统成本减少。实际费用仍需根据用户 API 的计费规则另行计算。记录 native success 与 judge success 的 2×2 计数和 judge parse errors，检验 memory gate。episode artifacts 保留 bank size、retrieved IDs、payload 和完整 calls，可据此分析 early/late batches 的 SR 与 cold start。模型故障和环境错误会中止实验并保留 error/checkpoint，不能将部分完成 run 当作完整 benchmark，也不能从 denominator 静默删除失败任务。
+主表使用native SR三轮mean/std；效率表采用Table4的每任务executor-only input/output K与executor turns。所有角色成本、分类型结果、judge/native混淆和解析异常保留为诊断，不能替代论文口径。模型/环境故障中止并保存checkpoint，不将部分run当完整benchmark或从分母删除失败任务。完整calls、payload、检索ID与raw轨迹留在本机审计记录。
 
 配置 loader 对未指定的 curator 字段继承 executor 设置，并默认改用 8192 output tokens。Qwen3 ALFWorld 使用者必须显式为 curator 设置 non-thinking，而为 executor 设置 thinking，避免继承 `extra_body` 后两角色模式相同；`.6/.95/20` 仅适用于论文 Qwen curator，GPT/Gemini curator 应使用 temperature1。API 是否接受这些 provider-specific 参数需要 `api-check` 及 endpoint 文档确认。模型名为空时可以检查环境，不能进行实际 API evaluation。
 

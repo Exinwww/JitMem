@@ -211,6 +211,10 @@ class ExperimentConfig:
     task_adaptive: bool = True
     output_dir: str = "outputs/alfworld"
     warm_start: str | None = None
+    # Direct constructors keep historical offline fixtures stable. TOML loading
+    # and published experiment configs default to the original-paper profile.
+    prompt_profile: str = "legacy-paraphrase"
+    prompt_assets: str = "outputs/paper_prompts/v1"
 
     def __post_init__(self) -> None:
         if not isinstance(self.method, str) or self.method not in {
@@ -241,6 +245,12 @@ class ExperimentConfig:
         _nonempty_string("output_dir", self.output_dir)
         if self.warm_start is not None:
             _nonempty_string("warm_start", self.warm_start)
+        if not isinstance(self.prompt_profile, str) or self.prompt_profile not in {
+            "legacy-paraphrase",
+            "paper-v1",
+        }:
+            raise ConfigError("prompt_profile must be legacy-paraphrase or paper-v1")
+        _nonempty_string("prompt_assets", self.prompt_assets)
 
 
 @dataclass(frozen=True, slots=True)
@@ -337,7 +347,9 @@ def load_config(path: str | Path) -> RunConfig:
     curator_defaults["max_tokens"] = 8192
     return RunConfig(
         environment=_section(raw, "environment", EnvironmentConfig),
-        experiment=_section(raw, "experiment", ExperimentConfig),
+        experiment=_section(
+            raw, "experiment", ExperimentConfig, defaults={"prompt_profile": "paper-v1"}
+        ),
         executor=executor,
         curator=_section(
             raw, "curator", ModelConfig, curator_defaults, _environment_model_overrides("curator")

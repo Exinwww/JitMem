@@ -41,7 +41,9 @@ def integer(value: Any, label: str, minimum: int = 0) -> int:
     return value
 
 
-def mean_std(values: list[float]) -> dict[str, float]:
+def mean_std(values: list[float | None]) -> dict[str, float | None]:
+    if any(value is None for value in values):
+        return {"mean": None, "std": None}
     return {
         "mean": statistics.mean(values),
         "std": statistics.stdev(values) if len(values) > 1 else 0.0,
@@ -331,7 +333,14 @@ def build_comparison(
     require(
         bool(second_config.get("curator", {}).get("model")), "JITMEM curator model is undeclared"
     )
-    for field in ("batch_size", "workers", "max_steps", "history_window"):
+    for field in (
+        "batch_size",
+        "workers",
+        "max_steps",
+        "history_window",
+        "prompt_profile",
+        "prompt_assets",
+    ):
         require(
             first_config["experiment"].get(field) == second_config["experiment"].get(field),
             f"Experiment protocol mismatch: {field}",
@@ -345,6 +354,8 @@ def build_comparison(
         "source_hashes",
         "packages",
         "prompt_source",
+        "prompt_assets",
+        "execution_protocol",
         "batch_execution",
         "workers",
         "process_start_method",
@@ -400,6 +411,19 @@ def build_comparison(
                 }
             )
         metrics = {"baseline": arm_metrics(first), "jitmem": arm_metrics(second)}
+        for piece in metrics.values():
+            executor_usage = piece["usage_by_role"].get(
+                "executor", {"prompt_tokens": 0, "completion_tokens": 0}
+            )
+            piece["paper_efficiency"] = {
+                f"mean_executor_{kind}_tokens_k": (
+                    executor_usage[field] / len(first) / 1000
+                    if executor_usage[field] is not None
+                    else None
+                )
+                for kind, field in (("input", "prompt_tokens"), ("output", "completion_tokens"))
+            }
+            piece["paper_efficiency"]["mean_executor_interaction_turns"] = piece["mean_decisions"]
         by_type = {}
         for task_type in types:
             left = [row for row in first if row["task_type"] == task_type]
@@ -462,12 +486,27 @@ def build_comparison(
                 for field in ("retrieval_k", "task_adaptive", "store_policy", "warm_start")
             },
             "prompt_source": jitmem.manifest["prompt_source"],
+            "prompt_profile": second_config["experiment"].get(
+                "prompt_profile", "legacy-paraphrase"
+            ),
+            "prompt_assets": jitmem.manifest.get("prompt_assets"),
         },
         "variant": "API prompted curator; no local training; not the paper's RL-trained curator",
         "paper_executor_models": ["Qwen3-8B", "Gemini-2.5-Pro", "GPT-5.4"],
         "sources": sources,
         "per_seed": seed_reports,
         "across_seed": {
+            **{
+                f"{arm}_{field}": mean_std(
+                    [run[arm]["paper_efficiency"][field] for run in seed_reports]
+                )
+                for arm in ("baseline", "jitmem")
+                for field in (
+                    "mean_executor_input_tokens_k",
+                    "mean_executor_output_tokens_k",
+                    "mean_executor_interaction_turns",
+                )
+            },
             "baseline_sr_percent": mean_std(
                 [100 * run["baseline"]["success_rate"] for run in seed_reports]
             ),
@@ -557,6 +596,33 @@ def render_markdown(report: dict) -> str:
         "| Seed | no-memory SR | JITMEM SR | Δ pp | Both success | Baseline only | JITMEM only | Both failure |",
         "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
+    efficiency_table = [
+        "## 原论文效率口径（executor-only）",
+        "",
+        "每任务汇总executor调用的input/output tokens，K=1000；其他角色用量单列为诊断。",
+        "",
+        "| Arm | Executor input K / task | Executor output K / task | Executor calls / task |",
+        "| --- | ---: | ---: | ---: |",
+    ]
+    for arm in ("baseline", "jitmem"):
+        values = []
+        for field in (
+            "mean_executor_input_tokens_k",
+            "mean_executor_output_tokens_k",
+            "mean_executor_interaction_turns",
+        ):
+            metric = overall[f"{arm}_{field}"]
+            values.append(
+                "未知" if metric["mean"] is None else f"{metric['mean']:.3f} ± {metric['std']:.3f}"
+            )
+        efficiency_table.append(f"| {arm} | {' | '.join(values)} |")
+    efficiency_table += [
+        "",
+        "paper-v1每次executor调用都提交一个原生交互；legacy决策拒绝可能不调用环境。",
+        "",
+    ]
+    position = lines.index("## 每轮结果")
+    lines[position:position] = efficiency_table
     for run in report["per_seed"]:
         counts = run["paired_counts"]
         lines.append(
@@ -640,8 +706,8 @@ def render_markdown(report: dict) -> str:
             f"其中 {native_failed_stored_count} 条原生失败轨迹被存入记忆。"
             "这些是本次执行记录的计数，不代表独立任务样本。逐任务证据见后文。",
             "",
-            "curator 在空库时也会被调用，并允许给出一般操作指导。这是公开的实现选择，"
-            "空库 episode 的效果不能作为使用历史检索经验的证据。",
+            "curator 在空库时也会被调用；paper-v1仅使用原文模板和空检索输入，"
+            "legacy模式额外允许一般操作指导。空库episode不能作为使用历史检索经验的证据。",
             "",
             "## 按角色 token 用量",
             "",

@@ -12,7 +12,7 @@
 
 这是 JITMEM-base 的已报告消融。当前项目按用户要求使用模型 API、不训练 curator；本机使用环境变量配置的模型，不能将本次数字当作原论文模型或 RL-trained JITMEM 的等价复跑。
 
-本项目已完成140任务×3轮×2组的独立评测：过滤组 **85.71 ± 2.14%**，全量组 **88.57 ± 1.24%**，过滤减全量 **−2.86 ± 2.47 个百分点**。本次配置未复现原文方向，完整数字、模型差异与审计范围见[结果报告](results/alfworld_storage_ablation_2026-10-09.md)和[结构化结果](results/alfworld_storage_ablation_2026-10-09.json)。
+旧legacy-paraphrase协议已完成140任务×3轮×2组：过滤组 **85.71 ± 2.14%**，全量组 **88.57 ± 1.24%**，过滤减全量 **−2.86 ± 2.47 个百分点**，见[历史报告](results/alfworld_storage_ablation_2026-10-09.md)和[结构化结果](results/alfworld_storage_ablation_2026-10-09.json)。当前正式配置已切换到paper-v1原文模板与对齐的继承runtime，须重新评测；不能用上述数字代表新协议。
 
 ## 配对协议
 
@@ -25,14 +25,14 @@
 | Streaming | batch10，每批10个独立进程共享固定快照；整批完成后按预定任务顺序写入 |
 | 检索 | 描述 BM25、top3；全量组的失败轨迹也参与索引和排序 |
 | Curator | 每个任务一次，面向当前任务；完整 observation/action 轨迹输入 |
-| Executor | 相同提示模板，最近3步历史，最多30次决策 |
+| Executor | 原文相同模板，最近3步编号历史，最多30次原生交互 |
 | Judge | 同一 executor client，仅观察任务和完整轨迹；每条轨迹均自评 |
 | 输出预算 | executor/judge 4096、curator8192；temperature1，其他采样设置相同 |
 | 主指标 | 原生环境 SR；按三轮报告均值和样本标准差，差值为过滤减全量 |
 
 `configs/storage_filtered.example.toml` 与 `configs/storage_all.example.toml` 除 `store_policy` 和 `output_dir` 外完全相同。模型连接参数与密钥通过现有环境变量提供。两组使用相同的11个实现源码哈希、游戏哈希和 runtime；安全修复后的版本重新运行两组，不与旧版本的过滤组混合。
 
-两组使用相同的中性 curator system prompt（retrieved experience）；全量组额外展示 `Executor judge label: success/failure`。原论文没有公布这个消融专用的标签格式。executor 的输入只包含 curator 生成的 payload，judge 的输入只包含当前任务和轨迹。二者不直接接收检索轨迹标签，也不接收原生 success/reward 标量。原生状态可能通过环境自然语言 observations 推断，这是 agent 正常可见的环境反馈。
+两组使用同一份原文curator system模板；全量组额外展示 `Executor judge label: success/failure`。原文没有公布这个消融专用模板或标签格式，因此不自行改写system中的成功经验措辞；这一位置与格式的实现选择仍须披露。executor只接收curator payload，judge只接收当前任务与完整轨迹，二者不直接读取检索标签或native success/reward标量。[原文对齐说明](paper_fidelity.md)记录模板指纹、继承history/parser/actions格式和未公开细节。
 
 存储策略改变后，两组后续生成的轨迹、BM25索引、检索结果与 bank 大小会随之分化；不强制两组使用同一批历史轨迹。该实验检验完整 streaming 存储策略，不能单独区分过滤、显式标签、索引规模与失败经验暴露的各自作用。
 
@@ -41,11 +41,12 @@
 复制两份模板为对应的 `*.local.toml`，仅将 `data_root` 改为实际 ALFWorld 路径。确认两组均没有 `limit` 或 `warm_start`，连接参数沿用 `OPENAI_*` 或角色环境变量。
 
 ```bash
+.venv/bin/python scripts/prepare_paper_prompts.py
 .venv/bin/python -m jitmem doctor --config configs/storage_filtered.local.toml
 .venv/bin/python -m jitmem evaluate --config configs/storage_filtered.local.toml
 .venv/bin/python -m jitmem evaluate --config configs/storage_all.local.toml
 .venv/bin/python scripts/analyze_storage_ablation.py \
-  outputs/storage_filtered outputs/storage_all --output-dir outputs/storage_ablation_comparison
+  outputs/storage_filtered_paper_v1 outputs/storage_all_paper_v1 --output-dir outputs/storage_ablation_comparison_paper_v1
 ```
 
 模型 API 已配置时，这些 evaluate 命令会产生真实调用。可分别运行两组，或在不同终端同时运行；不要修改运行中的 `src/jitmem/` 或采样配置。出现基础设施错误后，只能在协议未变时对对应 evaluate 命令追加 `--resume`，从最后完整 batch checkpoint 继续；未提交批次会重跑并可能额外计费。已有输出目录默认拒绝覆盖。
@@ -58,7 +59,7 @@
 
 Order seed只控制任务顺序，不固定服务端token sampling。三轮共享同一组140任务，streaming经验在轮内相关；420条记录不作为420个独立任务样本做显著性检验。配对转移与每轮差值为描述性指标，三轮std也不是置信区间。
 
-judge解析失败或输出截断时，现有工程策略将其记录为拒绝（`success=false`），质量过滤组不入库，全量组保存并显示failure标签；报告单列这些异常，不能把它们解释为有效语义判断。executor截断/非法决策仍消耗预算并完整记录。API/环境故障中止该run，不作为失败任务混入SR。
+paper-v1正常解析judge返回文本，包括API报告length但已有完整JSON的输出；只有格式不符合布尔JSON要求时保守拒绝。生成异常单列为诊断，不能冒充有效语义判断；非法命令均交给环境并消耗交互预算。API/环境故障中止run，不作为失败任务混入SR。主SR与Table4效率口径保持一致，额外诊断不替代论文指标。
 
 “过滤更好”是待检验的假设。结果必须据完整运行如实报告，即使全量组持平或更高，也不删任务、不修改judge、不重试选择有利采样。最终结果应限定为当前模型、prompt和streaming设置下的存储策略对照；仅凭失败经验暴露与SR同时变化，不能证明噪声是唯一原因。
 

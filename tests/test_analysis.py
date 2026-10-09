@@ -186,6 +186,10 @@ def test_matched_comparison_preserves_pairs_and_unknown_usage(arms, tmp_path):
     assert report["statistical_scope"]["repeated_episode_pairs"] == 8
     assert report["statistical_scope"]["pooled_significance_test"] is None
     assert report["per_seed"][0]["jitmem"]["usage_by_role"]["executor"]["prompt_tokens"] is None
+    assert report["across_seed"]["jitmem_mean_executor_input_tokens_k"] == {
+        "mean": None,
+        "std": None,
+    }
     assert report["per_seed"][0]["jitmem"]["native_vs_judge"]["true_positive"] == 2
     source = report["per_seed"][0]["task_pairs"][2]["sources"]["baseline"]
     assert Path(source["results_jsonl"]).is_absolute() and source["line"] == 3
@@ -487,6 +491,8 @@ def test_report_preserves_all_three_paired_seeds_and_unknown_provider_usage(tmp_
         for arm in ("baseline", "jitmem"):
             assert run[arm]["prompt_tokens"] is None
             assert run[arm]["completion_tokens"] is None
+            assert run[arm]["paper_efficiency"]["mean_executor_input_tokens_k"] is None
+            assert run[arm]["paper_efficiency"]["mean_executor_output_tokens_k"] is None
             for role in run[arm]["usage_by_role"].values():
                 assert role["prompt_tokens"] is None and role["completion_tokens"] is None
     markdown = analysis.render_markdown(report)

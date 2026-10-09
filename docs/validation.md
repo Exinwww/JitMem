@@ -110,3 +110,15 @@ JITMEM 三轮最终 bank 各 118 条，judge/native 的重复 episode 计数为 
 再次只读核对外部18,416个文件，其相对路径、大小、修改时间与完整内容的fingerprint同前：`ea156e972ba076f73968c690ae732c5dc7a3978f3c6a39270cc5aa1abadad278`。没有修改数据或用原生标签替换judge。
 
 本次未复现论文“过滤更优”的方向；模型与提示词差异及统计边界见[存储消融结果](results/alfworld_storage_ablation_2026-10-09.md)。版本管理只保存经过字段白名单导出的[结构化汇总](results/alfworld_storage_ablation_2026-10-09.json)，完整比较、请求与审计保留在本机被忽略的 `outputs/`。
+
+## 原文协议切换验证（2026-10-09，paper-v1）
+
+上面的840条存储消融属于legacy-paraphrase协议。按用户要求，新正式配置使用原文资产，差异与未披露细节见[对齐说明](paper_fidelity.md)，旧结果和checkpoint保留，不混入新运行。
+
+完整软件验证为 **226 passed、108 subtests passed**；Ruff检查、29个Python文件格式检查和diff检查通过。新增测试覆盖固定源包/成员/模板的完整性链、缺失或篡改不回退、不安全解包拒绝、离线准备不触发下载、原文模板渲染、原生动作反馈、bounded输出文本消费、原文judge与native分离、模板fingerprint和成对审计的消息/输出一致性。没有模型API调用。
+
+五份原文模板已由固定版本源包成功提取并核对SHA256；模型运行只加载本地资产。judge源图框没有原始runtime字符串，换行规范化与哈希明确记录，不宣称字节完全等同作者未发布代码。
+
+真实ALFWorld脚本检查执行3次命令，包括一个非admissible命令和一个缺action标签但可解析为look的返回；均实际交给环境。决策与原生交互均为3，没有人工Invalid decision反馈，模型动作列表排除help。`outputs/paper_native_protocol_check.json`标为 `is_model_benchmark=false`、`scripted_commands=true`、`model_api_calls=0`，不是模型能力分数，也没有使用expert/walkthrough。
+
+新成对模型评测使用 `outputs/storage_filtered_paper_v1/` 与 `outputs/storage_all_paper_v1/`，只有完整三轮分析和最终审计通过后才报告成功率。

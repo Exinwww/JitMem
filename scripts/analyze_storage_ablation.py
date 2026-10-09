@@ -100,6 +100,131 @@ def memory_context(references: list[dict], memory: dict[str, dict], policy: str)
     return "\n\n".join(parts) or "No past episodes are available."
 
 
+def prompt_profile(arm) -> str:
+    profile = arm.manifest["config"]["experiment"].get("prompt_profile", "legacy-paraphrase")
+    require(
+        profile in {"legacy-paraphrase", "paper-v1"},
+        f"{arm.root}: unsupported prompt_profile",
+    )
+    return profile
+
+
+def load_paper_assets(path):
+    """Load verified local templates only when analyzing the paper profile."""
+    try:
+        from jitmem.paper_assets import load_assets
+
+        return load_assets(path)
+    except (ImportError, OSError, ValueError, TypeError) as error:
+        raise AnalysisError(
+            f"Cannot load verified paper prompt assets ({type(error).__name__})"
+        ) from error
+
+
+def validate_prompt_assets(arm):
+    if prompt_profile(arm) != "paper-v1":
+        return None
+    experiment = arm.manifest["config"]["experiment"]
+    require(
+        isinstance(experiment.get("prompt_assets"), str) and bool(experiment["prompt_assets"]),
+        f"{arm.root}: paper-v1 requires a prompt_assets directory",
+    )
+    assets = load_paper_assets(experiment["prompt_assets"])
+    require(
+        isinstance(arm.manifest.get("prompt_assets"), dict)
+        and arm.manifest["prompt_assets"] == assets.provenance,
+        f"{arm.root}: paper prompt asset provenance/hashes mismatch",
+    )
+    return assets
+
+
+def validate_paper_episode_messages(episode: dict, episode_path: Path, assets, history_window: int):
+    """Reconstruct executor/judge prompts without model or environment calls."""
+    from jitmem.memory import Trajectory, Turn
+    from jitmem.pipeline import parse_action, parse_judgment
+    from jitmem.prompts import executor_messages, judge_messages
+
+    trajectory = episode["trajectory"]
+    try:
+        turns = [Turn(**turn) for turn in trajectory["turns"]]
+    except (KeyError, TypeError) as error:
+        raise AnalysisError(f"{episode_path}: invalid paper raw turns") from error
+    require(
+        len(turns) == episode["steps"] == episode["environment_steps"]
+        and all(turn.executed is True for turn in turns),
+        f"{episode_path}: paper interaction turns must each reach the environment",
+    )
+    calls = episode["calls"]
+    require(
+        all(isinstance(call.get("response"), str) for call in calls),
+        f"{episode_path}: paper recorded responses missing",
+    )
+    require(
+        calls[0]["response"] == episode["payload"],
+        f"{episode_path}: paper curator output differs from consumed payload",
+    )
+    for index, turn in enumerate(turns):
+        require(
+            calls[index + 1]["response"] == turn.response
+            and parse_action(turn.response, turn.admissible_actions, profile="paper-v1")
+            == turn.action,
+            f"{episode_path}: paper parsed action/response differs from raw turn",
+        )
+        expected = executor_messages(
+            episode["task_description"],
+            episode["payload"],
+            turn.observation,
+            turn.admissible_actions,
+            turns[:index],
+            history_window,
+            profile="paper-v1",
+            assets=assets,
+        )
+        require(
+            calls[index + 1]["messages"] == expected,
+            f"{episode_path}: paper executor messages differ from the recorded interaction",
+        )
+    raw = Trajectory(
+        episode["task_id"],
+        episode["task_description"],
+        episode["task_type"],
+        episode["split"],
+        trajectory["initial_observation"],
+        turns,
+    )
+    require(
+        calls[-1]["messages"] == judge_messages(raw, profile="paper-v1", assets=assets),
+        f"{episode_path}: paper judge messages differ from the complete raw trajectory",
+    )
+    require(
+        parse_judgment(calls[-1]["response"]) == episode["judge"],
+        f"{episode_path}: paper recorded judge response differs from the storage verdict",
+    )
+
+
+def paper_efficiency(metrics: dict, episodes: int) -> dict:
+    executor = metrics["usage_by_role"]["executor"]
+    return {
+        "mean_executor_input_tokens_k": (
+            executor["prompt_tokens"] / episodes / 1000
+            if executor["prompt_tokens"] is not None
+            else None
+        ),
+        "mean_executor_output_tokens_k": (
+            executor["completion_tokens"] / episodes / 1000
+            if executor["completion_tokens"] is not None
+            else None
+        ),
+        "mean_executor_interaction_turns": executor["calls"] / episodes,
+    }
+
+
+def nullable_mean_std(values: list[float | None]) -> dict:
+    return (
+        {"mean": None, "std": None} if any(value is None for value in values) else mean_std(values)
+    )
+
+
 def validate_call_usage(episode: dict, episode_path: Path) -> None:
     """Require aggregate usage to equal recorded calls without inventing unknown counts."""
     calls = episode["calls"]
@@ -157,6 +282,7 @@ def validate_protocol(filtered, full, expected_seeds, expected_workers, expected
             require(bool(config.get(role, {}).get("model")), f"{arm.root}: {role} model missing")
         for field in ("source_hashes", "packages", "bm25", "python", "platform", "prompt_source"):
             require(bool(arm.manifest.get(field)), f"{arm.root}: {field} metadata missing")
+        arm.paper_assets = validate_prompt_assets(arm)
         require(
             isinstance(arm.manifest.get("fingerprint"), str) and bool(arm.manifest["fingerprint"]),
             f"{arm.root}: fingerprint missing",
@@ -168,6 +294,8 @@ def validate_protocol(filtered, full, expected_seeds, expected_workers, expected
         experiment = manifest["config"]["experiment"]
         experiment.pop("store_policy")
         experiment.pop("output_dir", None)
+        experiment.setdefault("prompt_profile", "legacy-paraphrase")
+        experiment.setdefault("prompt_assets", None)
         normalized.append(manifest)
     require(
         normalized[0] == normalized[1],
@@ -192,6 +320,7 @@ def validate_storage(arm, seed: int, policy: str) -> tuple[dict, list[dict]]:
     origin = {row["task_id"]: row for row in rows}
     episodes = []
     curator_systems = []
+    profile, assets = prompt_profile(arm), arm.paper_assets
     for index, row in enumerate(rows):
         episode_path = run_dir / "episodes" / f"{index:04d}.json"
         episode = read_json(episode_path)
@@ -234,6 +363,17 @@ def validate_storage(arm, seed: int, policy: str) -> tuple[dict, list[dict]]:
         require(
             isinstance(episode.get("trajectory"), dict), f"{episode_path}: raw trajectory missing"
         )
+        if profile == "paper-v1":
+            require(
+                curator_messages[0]["content"] == assets.curator_system,
+                f"{episode_path}: paper curator system differs from verified original assets",
+            )
+            validate_paper_episode_messages(
+                episode,
+                episode_path,
+                assets,
+                arm.manifest["config"]["experiment"]["history_window"],
+            )
         if row["stored"]:
             entry = entries[row["task_id"]]
             require(
@@ -303,10 +443,17 @@ def validate_storage(arm, seed: int, policy: str) -> tuple[dict, list[dict]]:
                     type(score) in {int, float} and math.isfinite(score) and score >= 0,
                     f"{run_dir}: invalid retrieval score",
                 )
-            expected_user = (
-                f"Question: {row['task_description']}\n\nRetrieved memories:\n"
-                + memory_context(references, entries, policy)
-            )
+            context = memory_context(references, entries, policy)
+            if profile == "paper-v1":
+                header, separator, _ = assets.curator_user.partition("Memory 1:")
+                require(bool(separator), f"{run_dir}: paper curator memory placeholder missing")
+                expected_user = header.format(query=row["task_description"]) + (
+                    context if references else ""
+                )
+            else:
+                expected_user = (
+                    f"Question: {row['task_description']}\n\nRetrieved memories:\n" + context
+                )
             require(
                 episodes[index]["calls"][0]["messages"][1].get("content") == expected_user,
                 f"{run_dir}: curator memory input/visible labels disagree with policy",
@@ -443,6 +590,8 @@ def build_comparison(
             name: {**arm_metrics(rows), "storage": storage[name]}
             for name, rows in (("filtered", first), ("full", second))
         }
+        for name in ("filtered", "full"):
+            metrics[name]["paper_efficiency"] = paper_efficiency(metrics[name], len(first))
         by_type = {}
         for task_type in types:
             left = [row for row in first if row["task_type"] == task_type]
@@ -506,6 +655,10 @@ def build_comparison(
             "all_role_input_output_tokens": nullable_total([input_tokens, output_tokens]),
             "usage_by_role": roles,
         }
+        overall[name]["paper_efficiency"] = paper_efficiency(
+            overall[name], overall[name]["episodes"]
+        )
+    profile = prompt_profile(filtered)
     return {
         "kind": "matched_native_alfworld_storage_ablation",
         "benchmark": True,
@@ -515,7 +668,12 @@ def build_comparison(
         "seeds": filtered.seeds,
         "executor_model": filtered.manifest["config"]["executor"]["model"],
         "curator_model": filtered.manifest["config"]["curator"]["model"],
-        "variant": "API prompted curator with semantic paraphrases; no local training; not author RL-trained/model-equivalent results",
+        "variant": (
+            "API prompted curator with verified original paper templates and inherited runtime choices; no local training; not author RL-trained/model-equivalent results"
+            if profile == "paper-v1"
+            else "API prompted curator with semantic paraphrases; no local training; not author RL-trained/model-equivalent results"
+        ),
+        "prompt_profile": profile,
         "difference_definition": "filtered minus label-annotated full storage",
         "protocol": {
             "workers": expected_workers,
@@ -527,6 +685,9 @@ def build_comparison(
             "cold_start": True,
             "filtered_labels_visible": False,
             "full_labels_visible": True,
+            "prompt_profile": profile,
+            "prompt_assets": filtered.manifest.get("prompt_assets"),
+            "primary_efficiency_scope": "executor-only tokens (K) and interaction turns per task; all evaluated tasks",
             "matched_config": filtered.manifest["config"],
         },
         "sources": sources,
@@ -552,6 +713,17 @@ def build_comparison(
             "mean_environment_step_delta": mean_std(
                 [run["mean_environment_step_delta"] for run in per_seed]
             ),
+            **{
+                f"{name}_{field}": nullable_mean_std(
+                    [run[name]["paper_efficiency"][field] for run in per_seed]
+                )
+                for name in ("filtered", "full")
+                for field in (
+                    "mean_executor_input_tokens_k",
+                    "mean_executor_output_tokens_k",
+                    "mean_executor_interaction_turns",
+                )
+            },
             "by_task_type": {
                 task_type: {
                     "tasks_per_seed": per_seed[0]["by_task_type"][task_type]["tasks"],
@@ -582,9 +754,20 @@ def fraction(value):
     return "—（无分母）" if value is None else f"{100 * value:.2f}%"
 
 
+def show_mean_std(value: dict, precision: int = 2) -> str:
+    if value["mean"] is None or value["std"] is None:
+        return "未知"
+    return f"{value['mean']:.{precision}f} ± {value['std']:.{precision}f}"
+
+
 def render_markdown(report: dict) -> str:
     aggregate = report["across_seed"]
     delta = aggregate["delta_pp"]
+    profile_description = (
+        "已验证的原文 prompt 模板（paper-v1）及明确披露的继承运行时选择"
+        if report["prompt_profile"] == "paper-v1"
+        else "语义改写 prompts（legacy-paraphrase）"
+    )
     lines = [
         "# ALFWorld 存储策略消融",
         "",
@@ -592,7 +775,7 @@ def render_markdown(report: dict) -> str:
         "",
         f"`valid_seen` 每轮 {report['tasks_per_seed']} 个任务，种子 {report['seeds']}；workers={report['protocol']['workers']}，batch={report['protocol']['batch_size']}，启动方式={report['protocol']['process_start_method'] or 'serial'}。两组仅改变 store_policy 和输出目录，均为 jitmem；已经核对相同配置、源代码、prompt、运行时、数据、任务顺序及整批冻结提交。",
         "",
-        f"Executor：`{report['executor_model']}`；curator：`{report['curator_model']}`（API 配置模型名）。这是使用语义改写 prompts 的 API prompted variant，没有本地训练。[原论文](https://arxiv.org/pdf/2609.27334)的这项存储消融使用未训练的 JITMEM-base；本次复现采用所声明的 API 模型与实现，既不能视为原模型下消融数值的等价复现，也不能对应 RL-trained JITMEM 的 headline 性能。",
+        f"Executor：`{report['executor_model']}`；curator：`{report['curator_model']}`（API 配置模型名）。这是使用{profile_description}的 API prompted variant，没有本地训练。[原论文](https://arxiv.org/pdf/2609.27334)的这项存储消融使用未训练的 JITMEM-base；本次复现采用所声明的 API 模型与实现，既不能视为原模型下消融数值的等价复现，也不能对应 RL-trained JITMEM 的 headline 性能。",
         "",
         "filtered 使用 executor judge gate，只保留 judge success 的原始轨迹，curator 看不到显式 outcome 标签；full 保存所有轨迹，并向 curator 显示同一 executor judge 的 success/failure 标签。标签不是原生 verifier 标签；原生 SR 独立于 judge 计算。",
         "",
@@ -600,11 +783,37 @@ def render_markdown(report: dict) -> str:
         "",
         f"Filtered 平均 SR：{aggregate['filtered_sr_percent']['mean']:.2f} ± {aggregate['filtered_sr_percent']['std']:.2f}%；full 平均 SR：{aggregate['full_sr_percent']['mean']:.2f} ± {aggregate['full_sr_percent']['std']:.2f}%。平均决策数差（filtered-minus-full）：{aggregate['mean_decision_delta']['mean']:+.2f} ± {aggregate['mean_decision_delta']['std']:.2f}；平均环境步数差：{aggregate['mean_environment_step_delta']['mean']:+.2f} ± {aggregate['mean_environment_step_delta']['std']:.2f}。",
         "",
-        "## 每轮成对结果",
+        "## 原论文口径：成功率与 executor-only 效率",
         "",
-        "| Seed | Filtered SR | Full SR | Δ pp | Both success | Filtered only | Full only | Both failure |",
-        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        "主成功指标为 native SR；Table4 效率口径为每任务 executor input/output tokens（K=1000）和 executor turns，覆盖全部任务。curator/judge 用量与其他交互统计在后面作为诊断展示。",
+        "",
+        "| Arm | Native SR mean ± std | Executor input K / task | Executor output K / task | Executor turns / task |",
+        "| --- | ---: | ---: | ---: | ---: |",
     ]
+    for name in ("filtered", "full"):
+        sr = aggregate[f"{name}_sr_percent"]
+        efficiency = [
+            aggregate[f"{name}_{field}"]
+            for field in (
+                "mean_executor_input_tokens_k",
+                "mean_executor_output_tokens_k",
+                "mean_executor_interaction_turns",
+            )
+        ]
+        lines.append(
+            f"| {name} | {show_mean_std(sr)}% | {show_mean_std(efficiency[0], 3)} | {show_mean_std(efficiency[1], 3)} | {show_mean_std(efficiency[2])} |"
+        )
+    lines.extend(
+        [
+            "",
+            "Executor turns 按 executor 调用数计；paper-v1 要求每次都执行环境交互。legacy-paraphrase 的被拒绝决策曾不进入环境，不能将旧版 decisions 与 env steps 混用。缺失任一 executor usage 时，对应 token 均值和种子间标准差均为未知。",
+            "",
+            "## 每轮成对结果",
+            "",
+            "| Seed | Filtered SR | Full SR | Δ pp | Both success | Filtered only | Full only | Both failure |",
+            "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        ]
+    )
     for run in report["per_seed"]:
         counts = run["paired_counts"]
         lines.append(
@@ -687,6 +896,8 @@ def render_markdown(report: dict) -> str:
         [
             "",
             "## 三轮汇总",
+            "",
+            "以下为全角色成本与交互诊断；不替代上面的原论文 executor-only 主效率口径。",
             "",
             "| Arm | SR mean ± std | Decisions mean ± std | Env steps mean ± std | Calls | All-role input tokens | All-role output tokens | Input + output tokens |",
             "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",

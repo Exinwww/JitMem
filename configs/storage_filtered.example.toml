@@ -9,6 +9,8 @@ task_types = [1, 2, 3, 4, 5, 6]
 
 [experiment]
 method = "jitmem"
+prompt_profile = "paper-v1"
+prompt_assets = "outputs/paper_prompts/v1"
 seeds = [0, 1, 2]
 batch_size = 10
 workers = 10
@@ -17,7 +19,7 @@ history_window = 3
 retrieval_k = 3
 store_policy = "judge"
 task_adaptive = true
-output_dir = "outputs/storage_filtered"
+output_dir = "outputs/storage_filtered_paper_v1"
 
 [executor]
 temperature = 1.0

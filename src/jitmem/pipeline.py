@@ -8,6 +8,7 @@ from typing import Any
 
 from .api import ChatResult
 from .memory import MemoryBank, Trajectory, Turn
+from .paper_assets import load_assets
 from .prompts import (
     DISTILL_SYSTEM,
     curator_messages,
@@ -30,7 +31,11 @@ class MockChatClient:
             actions = ast.literal_eval(line)
             action = next((a for a in actions if a != "look"), "look")
             text = f"<action>{action}</action>"
-        elif messages[0]["content"].startswith("Assess whether"):
+        elif match := re.search(r"admissible actions[^:]*:\s*\[([\s\S]*?)\]", content):
+            actions = re.findall(r"'([^']+)'", match.group(1))
+            action = next((a for a in actions if a != "look"), "look")
+            text = f"<action>{action}</action>"
+        elif messages[0]["content"].startswith(("Assess whether", "You are an expert judge")):
             success = "you put the mug 1 in the cabinet 1" in content.lower()
             text = json.dumps(
                 {
@@ -44,7 +49,17 @@ class MockChatClient:
         return ChatResult(text=text, prompt_tokens=0, completion_tokens=0, latency_seconds=0.0)
 
 
-def parse_action(response: str, admissible: list[str]) -> str:
+def parse_action(
+    response: str, admissible: list[str], *, profile: str = "legacy-paraphrase"
+) -> str:
+    if profile == "paper-v1":
+        # SkillOS's inherited GiGPO projection; JITMEM removed thinking-format
+        # instructions. The environment, rather than this parser, handles commands.
+        text = response.lower()
+        start, end = text.find("<action>"), text.find("</action>")
+        return text[-30:] if min(start, end) < 0 else text[start + 8 : end].strip()
+    if profile != "legacy-paraphrase":
+        raise ValueError("Unsupported prompt profile")
     matches = re.findall(r"<action>\s*(.*?)\s*</action>", response, re.DOTALL)
     if len(matches) != 1:
         raise ValueError("Expected exactly one <action>...</action> command.")
@@ -85,6 +100,11 @@ class Pipeline:
         self.config = config
         self.executor = executor
         self.curator = curator
+        self.assets = (
+            load_assets(config.experiment.prompt_assets)
+            if config.experiment.prompt_profile == "paper-v1"
+            else None
+        )
 
     def run_episode(self, task, environment, bank: MemoryBank) -> tuple[dict, Trajectory | None]:
         started = perf_counter()
@@ -92,6 +112,7 @@ class Pipeline:
         description = goal_from_observation(state.observation, task.description)
         initial_observation = state.observation
         exp = self.config.experiment
+        paper = exp.prompt_profile == "paper-v1"
         memories = bank.retrieve(description, exp.retrieval_k) if exp.method != "no-memory" else []
         calls: list[dict] = []
         generation_failures: list[dict] = []
@@ -131,11 +152,17 @@ class Pipeline:
                     task_adaptive=exp.task_adaptive,
                     raw=exp.method != "write-summary",
                     label_outcomes=exp.store_policy == "all",
+                    profile=exp.prompt_profile,
+                    assets=self.assets,
                 ),
             )
-            payload = "" if briefing.incomplete else briefing.text
+            payload = briefing.text if paper or not briefing.incomplete else ""
         elif exp.method == "raw-memory":
-            payload = memory_context(memories, label_outcomes=exp.store_policy == "all")
+            payload = memory_context(
+                memories,
+                label_outcomes=exp.store_policy == "all",
+                empty="" if paper else "No past episodes are available.",
+            )
 
         turns: list[Turn] = []
         invalid_actions = 0
@@ -146,10 +173,28 @@ class Pipeline:
                 "executor",
                 self.executor,
                 executor_messages(
-                    description, payload, observation, available, turns, exp.history_window
+                    description,
+                    payload,
+                    observation,
+                    available,
+                    turns,
+                    exp.history_window,
+                    profile=exp.prompt_profile,
+                    assets=self.assets,
                 ),
             )
             response = answer.text
+            if paper:
+                action = parse_action(response, available, profile=exp.prompt_profile)
+                # Record diagnostics without introducing additional agent feedback.
+                invalid_actions += int(
+                    action not in available
+                    or "<action>" not in response.lower()
+                    or "</action>" not in response.lower()
+                )
+                state = environment.step(action)
+                turns.append(Turn(observation, action, response, state.observation, available))
+                continue
             try:
                 if answer.incomplete:
                     raise ValueError(
@@ -174,7 +219,11 @@ class Pipeline:
         judgment = None
         stored = None
         if exp.method != "no-memory":
-            verdict = complete("judge", self.executor, judge_messages(trajectory))
+            verdict = complete(
+                "judge",
+                self.executor,
+                judge_messages(trajectory, profile=exp.prompt_profile, assets=self.assets),
+            )
             judgment = (
                 {
                     "success": False,
@@ -182,7 +231,7 @@ class Pipeline:
                     "evidence_step": -1,
                     "generation_error": True,
                 }
-                if verdict.incomplete
+                if verdict.incomplete and not paper
                 else parse_judgment(verdict.text)
             )
             trajectory.judge_success = judgment["success"]
@@ -192,14 +241,17 @@ class Pipeline:
                         "distiller",
                         self.curator,
                         [
-                            {"role": "system", "content": DISTILL_SYSTEM},
+                            {
+                                "role": "system",
+                                "content": self.assets.distillation if paper else DISTILL_SYSTEM,
+                            },
                             {
                                 "role": "user",
                                 "content": f"Task: {description}\n{trajectory.render()}",
                             },
                         ],
                     )
-                    if not distilled.incomplete:
+                    if paper or not distilled.incomplete:
                         trajectory.summary = distilled.text
                         # This ablation intentionally discards raw stored information.
                         trajectory.turns = []
