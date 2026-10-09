@@ -2,7 +2,7 @@
 
 验证日期：2026-10-08（Asia/Shanghai）。本记录区分软件正确性、真实模拟器可用性和模型能力评测。
 
-从下方早期验证到“存储消融验证（2026-10-09）”的模型协议记录均属于历史 `legacy-paraphrase`，保留原数字和实现行为。当前正式 `paper-v1` 的验证见末节“原文协议切换验证”；旧截断处理、严格动作拒绝和Look补充不适用于新协议。
+从下方早期验证到“存储消融验证（2026-10-09）”的模型协议记录均属于历史 `legacy-paraphrase`，保留原数字和实现行为。当前正式 `paper-v1` 的验证见后文“原文协议切换验证”和“仅curator模型切换验证”；旧截断处理、严格动作拒绝和Look补充不适用于新协议。
 
 版本管理中的 [评测结果报告](results/alfworld_valid_seen_2026-10-08.md) 与 [结构化结果](results/alfworld_valid_seen_2026-10-08.json) 可在新克隆中查看。本页指向 `outputs/` 的链接对应本地生成的审计和原始记录，目录不提交到 Git。
 
@@ -141,3 +141,19 @@ JITMEM 三轮最终 bank 各 118 条，judge/native 的重复 episode 计数为 
 原生环境重放范围是两组seed0前20任务，共40条。初始与每步observation、admissible actions、实际提交命令以及最终native reward/won/done均一致；证据文件绑定本次新记录的hash。该检查不调用模型，不代表全部840条均经过环境重放。
 
 最终审计再次只读核对外部全部18,416个文件的内容、大小和修改时间，fingerprint仍为`ea156e972ba076f73968c690ae732c5dc7a3978f3c6a39270cc5aa1abadad278`。没有读取expert/walkthrough来指导模型，也没有用native标签纠正judge。完整原始证据保留在本机被忽略的`outputs/`；公开[结果报告](results/alfworld_storage_ablation_paper_v1_2026-10-09.md)和[结构化汇总](results/alfworld_storage_ablation_paper_v1_2026-10-09.json)只包含白名单字段。
+
+## 仅curator模型切换验证（2026-10-09，paper-v1）
+
+质量过滤下仅将curator从`gpt-5.5`切换为`gpt-6.1-sol`；executor和judge仍为`gpt-5.5`。最终解析配置只有`curator.model`与`experiment.output_dir`不同，12个核心源码文件、5份原文模板、runtime、140个游戏、任务和每seed顺序保持相同，未训练或调用蒸馏。固定协议与命令见[模型对照协议](curator_model_comparison.md)。
+
+新评测420条真实episode，与既有质量过滤基线420条记录配对，共840条；没有重跑基线。新curator各seed成功126/125/127，基线120/125/127；native SR **90.00±0.71% vs 88.57±2.58%**，新减旧为**+1.43±2.47个百分点**。净增6次成功均在seed0，另两轮成功数相同，不宣称稳定或显著优势。
+
+新增分析器的21项测试通过，包含成对协议、完整记录、差值方向、未知usage以及输出路径保护；相关回归合计112项通过。Ruff与新增Python文件格式检查通过。此前完整226项测试属于上节的实现验证，不冒充本次全量重跑。分析器只读取记录，不调用API或环境。
+
+`outputs/curator_gpt61_final_audit.json`为`passed=true`、`errors=[]`、`comparison_validated=true`，完整新420与配对840两个覆盖标志均为true。独立重建全部消息、动作解析、BM25、judge gate、raw bank、checkpoint及汇总，独立重算各seed指标和角色usage，绑定当前分析文件hash。审计覆盖10,706次已记录模型调用，其中5,417次属于历史基线，5,289次属于本次新评测；新组executor调用/原生交互4,449次。分析和审计均0模型API调用。
+
+仅新组seed0前20条在原生环境完整重放，初始与每步observation、admissible actions、解析命令以及最终native reward/won/done均一致；证据绑定新记录hash。其余400条新记录没有完整环境重放；未将旧协议的重放证明替代本次证据。
+
+新组seed0提交10条后遭遇一次transport URLError，4次尝试后退出。确认无残留进程后以原配置和workers10续跑；最终核对中断前10条的SHA256、大小和纳秒mtime完全不变，没有重写或重跑已提交记录。用量仅含已提交episode返回的usage；另有一次非benchmark连接探针与一次只读模型目录核对，不计入评测。未提交请求和重试账单未知。目录列出`gpt-6.1-sol`仅证明ID声明，不独立验证权重。
+
+最终只读扫描确认基线全部437文件（420条episode）的内容SHA256、大小和纳秒mtime与前置快照相同；外部18,416数据文件的完整fingerprint仍为`ea156e972ba076f73968c690ae732c5dc7a3978f3c6a39270cc5aa1abadad278`。公开[结果报告](results/alfworld_curator_gpt61_paper_v1_2026-10-09.md)与[结构化汇总](results/alfworld_curator_gpt61_paper_v1_2026-10-09.json)经白名单导出，完整证据留在被忽略的`outputs/`。

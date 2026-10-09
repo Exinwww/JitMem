@@ -15,6 +15,15 @@ ALFWorld 文本交互环境已在项目 `.venv` 中安装并验证。数据直�
 
 过滤减全量为 **+0.24 ± 3.93 个百分点**，仅多1次成功，三轮差异方向有正有负，不能支持稳定的过滤优势。主SR由原生环境评分；效率按Table4只计executor，其他用量单列诊断。全部840条记录通过独立审计，另有40条原生环境重放，外部18,416个数据文件保持不变。见[原文协议结果](docs/results/alfworld_storage_ablation_paper_v1_2026-10-09.md)和[结构化汇总](docs/results/alfworld_storage_ablation_paper_v1_2026-10-09.json)。原文未公开的runtime、检索与序列化细节仍有明确实现选择，不能保证差异只来自模型。
 
+同日完成质量过滤下的curator模型对照：仅将curator切换为`gpt-6.1-sol`，executor/judge保持`gpt-5.5`，其余配置、原文模板、源码、任务和顺序相同。新运行420条episode，复用上面的420条过滤基线。
+
+| Curator | Native SR mean ± sample std | 成功 / 420 | Executor交互 / task |
+| --- | ---: | ---: | ---: |
+| gpt-5.5 | 88.57 ± 2.58% | 372 / 420 | 10.90 ± 0.70 |
+| gpt-6.1-sol | 90.00 ± 0.71% | 378 / 420 | 10.59 ± 0.17 |
+
+新curator减基线为 **+1.43 ± 2.47 个百分点**；seed0多6次成功，seed1/2成功数相同。该描述性结果不能确认与论文GPT-5.4数字的差距来自模型智力，原文curator为Qwen3-8B。见[模型对照结果](docs/results/alfworld_curator_gpt61_paper_v1_2026-10-09.md)、[结构化汇总](docs/results/alfworld_curator_gpt61_paper_v1_2026-10-09.json)及[固定协议](docs/curator_model_comparison.md)。
+
 以下两项为历史legacy-paraphrase结果，不代表当前paper-v1协议，也不用于估计原文提示词的独立因果影响。
 
 2026-10-08 已完成用户 API 的 no-memory / prompted JITMEM 成对评测：`valid_seen` 全部 140 个任务，seeds 0、1、2，每组 420 次、共 840 次真实交互。curator/executor 配置模型名均为 `gpt-5.5`；无 warm start，batch10、workers10、history3、最多30次决策。成功率由原生环境判定，均值与样本标准差按三轮计算。

@@ -53,3 +53,13 @@ Gitleaks扫描公开文档无命中；另检查两组新原始记录共约126.75
 本轮发布前的逐字凭证检查在内存中读取2个不同凭证，覆盖2,862个项目/运行记录文件、95个Git blob（包括不可达对象）、Git配置和HEAD日志；literal UTF-8、URL编码、JSON转义和base64均无匹配。该范围包括新完整评测记录和新公开报告；依赖、下载的Python、扫描器二进制和缓存仍排除。检查不显示或保存凭证，不调用模型API，脱敏记录为本机 `outputs/security_audit/paper_v1_exact_credentials.json`。
 
 Gitleaks对当前全部公开文档约230 KB的扫描通过，既有源码指纹的唯一固定例外未扩大。发布继续经过暂存区和完整历史扫描，推送后再次核对仓库public、GitHub原生secret scanning与push protection启用、开放密钥告警为0，并对包含新提交的Git对象再次做上述凭证比对。检查结论对应本次实际扫描范围，不将扫描通过解释为对未知凭证或未来提交的保证。
+
+## 仅curator模型切换发布检查（2026-10-09，paper-v1）
+
+新模型对照报告在完整新420条、配对840条与严格独立最终审计通过后才生成。公开MD/JSON采用字段白名单，逐项核对本地分析指标和审计证据，不发布endpoint、密钥/变量名、个人绝对路径、原始请求、完整prompt或逐任务配对记录。旧报告保留，所有新原始记录与本机配置仍被Git忽略。
+
+首次发布前的逐字检查在内存中读取2个不同凭证，覆盖3,332个项目/运行记录文件、106个Git blob（包括不可达对象）、Git配置及HEAD日志；literal UTF-8、URL编码、JSON转义和base64均无匹配，不显示或持久化凭证。扫描范围包含新完整420条记录和公开报告；依赖、下载的Python、扫描器二进制和缓存仍排除。脱敏证据保存在本机 `outputs/security_audit/curator_gpt61_exact_credentials.json`。
+
+Gitleaks对新增后的公开文档扫描通过。另扫描新组全部原始评测记录约66.20 MB，仅有一处manifest中的`api.py`源码SHA256命中通用API-key规则，已逐行与当前源码完整内容hash独立核对，确认是源码指纹。没有新增白名单或目录例外；公开汇总继续使用独立`file`/`sha256`字段。暂存区与全部提交历史继续由既有hook检查，推送后再比对含新提交的Git对象。
+
+本轮核对GitHub仓库仍为public，原生secret scanning与push protection均enabled，开放密钥告警数量为0。上述检查均不调用模型API，结论限于已检查的内容和当前凭证；未知凭证仍由模式扫描与GitHub保护补充检查。

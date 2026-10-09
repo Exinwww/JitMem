@@ -10,6 +10,19 @@
 
 基线为[原文协议质量过滤组](results/alfworld_storage_ablation_paper_v1_2026-10-09.md)，372/420成功，native SR **88.57 ± 2.58%**。新实验使用独立目录，每轮从空记忆库开始；不沿用基线bank或checkpoint，不重新运行或重新打分基线。
 
+## 已完成结果（2026-10-09）
+
+新curator完成140任务×seeds0/1/2，共420条真实episode；与历史基线420条逐任务配对。完整[结果报告](results/alfworld_curator_gpt61_paper_v1_2026-10-09.md)和[结构化汇总](results/alfworld_curator_gpt61_paper_v1_2026-10-09.json)单独保存，旧结果保持不变。
+
+| Seed | gpt-5.5 curator成功 / 140 | gpt-6.1-sol curator成功 / 140 | 新减旧（百分点） |
+| --- | ---: | ---: | ---: |
+| 0 | 120 | 126 | +4.29 |
+| 1 | 125 | 125 | +0.00 |
+| 2 | 127 | 127 | +0.00 |
+| Mean ± sample std | 88.57 ± 2.58% | 90.00 ± 0.71% | +1.43 ± 2.47 |
+
+新curator多6次成功，提升集中在seed0；三轮描述性结果不构成稳定提升或统计显著的证据。Table4口径executor-only input K/task为8.837±0.434与8.006±0.101，output K/task为0.772±0.052与0.766±0.004，交互/task为10.90±0.70与10.59±0.17。固定executor/judge条件下的curator替换结果，不能解释论文使用Qwen3-8B curator与GPT-5.4 executor的全部差距。
+
 ## 固定协议
 
 两组采用相同的140个`valid_seen`任务、seeds0/1/2、batch10、workers10 spawn、history3、描述BM25 top3、最多30次原生交互、`task_adaptive=true`及`store_policy="judge"`。使用相同的12个核心源码文件、5份原文模板、游戏与runtime指纹。两组均不调用distillation。
@@ -34,7 +47,7 @@ JITMEM_EXECUTOR_MODEL=gpt-5.5 JITMEM_CURATOR_MODEL=gpt-6.1-sol \
   --output-dir outputs/curator_gpt61_comparison
 ```
 
-这些命令会产生实际API调用。只有基础设施中断且协议未改变时，给evaluate追加`--resume`，从最后完整batch继续；已提交记录保留，未提交请求可能额外计费。分析与最终审计使用独立证据目录，不覆盖旧实验报告。
+api-check与evaluate会产生实际API调用。只有基础设施中断且协议未改变时，给evaluate追加`--resume`，从最后完整batch继续；已提交记录保留，未提交请求可能额外计费。分析与最终审计使用独立证据目录，不覆盖旧实验报告。
 
 分析命令仅读取本地完整记录，不调用API或环境；校验原文messages、judge gate、raw bank、checkpoint、各seed任务顺序和逐调用用量。其完整输出含本机配置与逐任务证据，只能保存在被忽略的`outputs/`，不能直接复制为公开报告。
 
