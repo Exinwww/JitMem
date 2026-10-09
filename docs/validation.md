@@ -157,3 +157,24 @@ JITMEM 三轮最终 bank 各 118 条，judge/native 的重复 episode 计数为 
 新组seed0提交10条后遭遇一次transport URLError，4次尝试后退出。确认无残留进程后以原配置和workers10续跑；最终核对中断前10条的SHA256、大小和纳秒mtime完全不变，没有重写或重跑已提交记录。用量仅含已提交episode返回的usage；另有一次非benchmark连接探针与一次只读模型目录核对，不计入评测。未提交请求和重试账单未知。目录列出`gpt-6.1-sol`仅证明ID声明，不独立验证权重。
 
 最终只读扫描确认基线全部437文件（420条episode）的内容SHA256、大小和纳秒mtime与前置快照相同；外部18,416数据文件的完整fingerprint仍为`ea156e972ba076f73968c690ae732c5dc7a3978f3c6a39270cc5aa1abadad278`。公开[结果报告](results/alfworld_curator_gpt61_paper_v1_2026-10-09.md)与[结构化汇总](results/alfworld_curator_gpt61_paper_v1_2026-10-09.json)经白名单导出，完整证据留在被忽略的`outputs/`。
+
+## gpt-6.1-sol curator的全量存储验证（2026-10-09，paper-v1）
+
+在上节质量过滤组的基础上，单独完成全量组140任务×seeds0/1/2，共420条新模型episode；curator仍为`gpt-6.1-sol`，executor/judge仍为`gpt-5.5`。配置仅改变`experiment.store_policy`与`experiment.output_dir`，12个核心源码、5份原文模板、runtime、数据和任务顺序一致；没有训练、蒸馏或warm start。旧过滤组420条直接配对，未重新运行或评分。
+
+| Seed | 过滤成功 / 140 | 全量成功 / 140 | 过滤减全量（百分点） |
+| --- | ---: | ---: | ---: |
+| 0 | 126 | 124 | +1.43 |
+| 1 | 125 | 128 | −2.14 |
+| 2 | 127 | 124 | +2.14 |
+| Mean ± sample std | 90.00 ± 0.71% | 89.52 ± 1.65% | +0.48 ± 2.30 |
+
+过滤净多2次成功，逐轮方向翻转，不宣称稳定或显著优势。沿用既有存储分析器，无需修改pipeline或统计代码；executor-only input K/task为8.006±0.101与8.068±0.187，output K/task为0.766±0.004与0.772±0.033，交互/task为10.59±0.17与10.56±0.30。
+
+严格独立审计 `outputs/storage_gpt61_final_audit.json` 为`passed=true`、`errors=[]`、`comparison_validated=true`，新full420及完整配对840覆盖标志均为true。核对6个run、84冻结batch、全部messages/动作解析/标签/BM25/gate/raw bank/结果文件/checkpoint/summary/usage，绑定完整分析SHA256并独立重算数字；共10,563次已记录模型调用，5,289次为历史过滤组，5,274次为本次新全量组（其中4,434次executor原生交互）。各seed全量bank均140；curator实际请求共216次judge-failure标签引用，标签全部来自对应judge，未用native标签纠正gate。
+
+本次新full组seed0前20条独立原生环境重放通过，逐步observation、admissible actions、实际命令和最终native won/reward/done与记录一致；证据绑定这20条新记录的hash。其余400条新full记录没有完整环境重放，未将旧filtered20或其他协议40条重放作为本次证明。
+
+本轮运行完整退出，无基础设施中断/续跑，未新增连接探针或模型目录GET；历史目录声明只作请求模型ID的证据，不验证服务端权重。用量来自已提交记录，不倒推内部重试或完整账单。数据前后完整扫描再次确认18,416文件指纹仍为`ea156e972ba076f73968c690ae732c5dc7a3978f3c6a39270cc5aa1abadad278`，过滤baseline全部437文件的SHA256、大小和纳秒mtime与新前置快照完全一致。
+
+新审计工具的11项负向守卫检查、新公开导出工具的38项局部自检及Ruff/编译检查通过；这些是本地工具验证，0模型API。此前pipeline测试记录仍见前节，本轮未改核心代码。公开[结果报告](results/alfworld_storage_ablation_curator_gpt61_paper_v1_2026-10-09.md)与[结构化汇总](results/alfworld_storage_ablation_curator_gpt61_paper_v1_2026-10-09.json)只含白名单字段，完整请求和证据继续留在被忽略的`outputs/`。

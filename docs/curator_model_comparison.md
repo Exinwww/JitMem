@@ -23,6 +23,8 @@
 
 新curator多6次成功，提升集中在seed0；三轮描述性结果不构成稳定提升或统计显著的证据。Table4口径executor-only input K/task为8.837±0.434与8.006±0.101，output K/task为0.772±0.052与0.766±0.004，交互/task为10.90±0.70与10.59±0.17。固定executor/judge条件下的curator替换结果，不能解释论文使用Qwen3-8B curator与GPT-5.4 executor的全部差距。
 
+该新curator对应的[全量存储对照](results/alfworld_storage_ablation_curator_gpt61_paper_v1_2026-10-09.md)也已完成：全量组89.52±1.65%，过滤减全量+0.48±2.30个百分点。这里比较相同curator下的存储策略，运行方法见[存储协议](storage_ablation.md#gpt-61-sol-curator-的存储对照)。
+
 ## 固定协议
 
 两组采用相同的140个`valid_seen`任务、seeds0/1/2、batch10、workers10 spawn、history3、描述BM25 top3、最多30次原生交互、`task_adaptive=true`及`store_policy="judge"`。使用相同的12个核心源码文件、5份原文模板、游戏与runtime指纹。两组均不调用distillation。

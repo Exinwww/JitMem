@@ -12,9 +12,36 @@
 
 这是 JITMEM-base 的已报告消融。当前项目按用户要求使用模型 API、不训练 curator；本机使用环境变量配置的模型，不能将本次数字当作原论文模型或 RL-trained JITMEM 的等价复跑。
 
-当前paper-v1原文模板与对齐的继承runtime已重新完成140任务×3轮×2组：过滤组 **88.57 ± 2.58%**，全量组 **88.33 ± 1.49%**，过滤减全量 **+0.24 ± 3.93 个百分点**。合计成功372与371次，差异方向随seed翻转，不能支持稳定的过滤优势；见[原文协议报告](results/alfworld_storage_ablation_paper_v1_2026-10-09.md)和[结构化结果](results/alfworld_storage_ablation_paper_v1_2026-10-09.json)。全部840条记录通过独立审计，另有40条原生环境重放。
+curator/executor均为gpt-5.5的paper-v1原文模板与对齐的继承runtime已重新完成140任务×3轮×2组：过滤组 **88.57 ± 2.58%**，全量组 **88.33 ± 1.49%**，过滤减全量 **+0.24 ± 3.93 个百分点**。合计成功372与371次，差异方向随seed翻转，不能支持稳定的过滤优势；见[原文协议报告](results/alfworld_storage_ablation_paper_v1_2026-10-09.md)和[结构化结果](results/alfworld_storage_ablation_paper_v1_2026-10-09.json)。全部840条记录通过独立审计，另有40条原生环境重放。
 
 旧legacy-paraphrase协议结果为过滤组 **85.71 ± 2.14%**、全量组 **88.57 ± 1.24%**，差值 **−2.86 ± 2.47 个百分点**，见[历史报告](results/alfworld_storage_ablation_2026-10-09.md)和[结构化结果](results/alfworld_storage_ablation_2026-10-09.json)。旧协议和checkpoint保持独立；前后还改变了交互与输出处理，不能把结果变化单独归因于prompt。
+
+## gpt-6.1-sol curator 的存储对照
+
+仅切换curator后，质量过滤组已完成140任务×seeds0/1/2：curator为`gpt-6.1-sol`，executor/judge仍为`gpt-5.5`，native SR **90.00±0.71%**、378/420成功，见[模型对照结果](results/alfworld_curator_gpt61_paper_v1_2026-10-09.md)。对应全量组采用[独立模板](../configs/storage_all_curator_gpt61.example.toml)，与该过滤组配置仅有`store_policy`和`output_dir`不同，完整评测420条；复用过滤组历史420条进行配对，不重新打分或改写基线。
+
+全量组已完成，native SR **89.52±1.65%**、376/420成功，过滤减全量为**+0.48±2.30个百分点**。三轮的方向翻转，不能支持稳定或显著的过滤优势。完整[结果报告](results/alfworld_storage_ablation_curator_gpt61_paper_v1_2026-10-09.md)与[结构化汇总](results/alfworld_storage_ablation_curator_gpt61_paper_v1_2026-10-09.json)独立保存。
+
+| Seed | 过滤成功 / 140 | 全量成功 / 140 | 过滤减全量（百分点） |
+| --- | ---: | ---: | ---: |
+| 0 | 126 | 124 | +1.43 |
+| 1 | 125 | 128 | −2.14 |
+| 2 | 127 | 124 | +2.14 |
+
+Table4口径executor-only input K/task为8.006±0.101与8.068±0.187，output K/task为0.766±0.004与0.772±0.033，交互/task为10.59±0.17与10.56±0.30。全角色API返回tokens为4,939,044与5,113,090，另作诊断，不混入executor效率列或推算账单。
+
+全量组从每seed空库开始，使用相同原文模板、源码、runtime、数据和任务顺序；保留judge判失败的轨迹并展示judge标签。模型参数与指标口径沿用下述协议。连接参数继续通过环境变量提供，运行时明确固定角色模型：
+
+```bash
+JITMEM_EXECUTOR_MODEL=gpt-5.5 JITMEM_CURATOR_MODEL=gpt-6.1-sol \
+  .venv/bin/python -m jitmem evaluate \
+  --config configs/storage_all_curator_gpt61.local.toml
+.venv/bin/python scripts/analyze_storage_ablation.py \
+  outputs/storage_filtered_curator_gpt61_paper_v1 outputs/storage_all_curator_gpt61_paper_v1 \
+  --output-dir outputs/storage_gpt61_ablation_comparison
+```
+
+evaluate会产生真实API调用；分析仅读取本地记录。只在新全量420条完整评测与独立审计通过后发布存储差值，定义仍为过滤减全量。完整分析含本机配置与逐任务证据，只保存于被忽略的`outputs/`，不直接作为公开JSON。
 
 ## 配对协议
 
@@ -22,7 +49,7 @@
 | --- | --- |
 | 环境 | ALFWorld 文本环境，`valid_seen` 全部140个任务，六类齐全，无 limit |
 | 两组方法 | `method="jitmem"`，相同 curator/executor/judge 模型与采样参数 |
-| 顺序与重复 | seeds 0、1、2；每组420次真实交互，相同 seed 的任务顺序一致 |
+| 顺序与重复 | seeds 0、1、2；每组420条episode，相同 seed 的任务顺序一致 |
 | 初始记忆 | 每个 seed 独立空库，无 warm start |
 | Streaming | batch10，每批10个独立进程共享固定快照；整批完成后按预定任务顺序写入 |
 | 检索 | 描述 BM25、top3；全量组的失败轨迹也参与索引和排序 |
@@ -32,7 +59,7 @@
 | 输出预算 | executor/judge 4096、curator8192；temperature1，其他采样设置相同 |
 | 主指标 | 原生环境 SR；按三轮报告均值和样本标准差，差值为过滤减全量 |
 
-`configs/storage_filtered.example.toml` 与 `configs/storage_all.example.toml` 除 `store_policy` 和 `output_dir` 外完全相同。模型连接参数与密钥通过现有环境变量提供。两组使用相同的12个实现源码哈希、原文资产指纹、游戏哈希和 runtime；当前paper-v1冻结实现重新运行两组，不与旧协议的过滤组混合。
+`configs/storage_filtered.example.toml` 与 `configs/storage_all.example.toml` 除 `store_policy` 和 `output_dir` 外完全相同。模型连接参数与密钥通过现有环境变量提供。两组使用相同的12个实现源码哈希、原文资产指纹、游戏哈希和runtime。gpt-5.5原文协议重评测在同一冻结实现下重新运行两组；gpt-6.1-sol curator存储对照则复用此前同协议过滤组420条，与新增全量组420条配对。两项对照都与旧legacy协议记录保持独立。
 
 两组使用同一份原文curator system模板；全量组额外展示 `Executor judge label: success/failure`。原文没有公布这个消融专用模板或标签格式，因此不自行改写system中的成功经验措辞；这一位置与格式的实现选择仍须披露。executor只接收curator payload，judge只接收当前任务与完整轨迹，二者不直接读取检索标签或native success/reward标量。[原文对齐说明](paper_fidelity.md)记录模板指纹、继承history/parser/actions格式和未公开细节。
 

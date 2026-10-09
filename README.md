@@ -24,6 +24,15 @@ ALFWorld 文本交互环境已在项目 `.venv` 中安装并验证。数据直�
 
 新curator减基线为 **+1.43 ± 2.47 个百分点**；seed0多6次成功，seed1/2成功数相同。该描述性结果不能确认与论文GPT-5.4数字的差距来自模型智力，原文curator为Qwen3-8B。见[模型对照结果](docs/results/alfworld_curator_gpt61_paper_v1_2026-10-09.md)、[结构化汇总](docs/results/alfworld_curator_gpt61_paper_v1_2026-10-09.json)及[固定协议](docs/curator_model_comparison.md)。
 
+同日完成该curator下的全量存储组420条新评测，与既有过滤组逐任务配对；两组curator均为`gpt-6.1-sol`，executor/judge均为`gpt-5.5`，原文模板与其余参数保持一致。
+
+| 存储策略 | Native SR mean ± sample std | 成功 / 420 | Executor交互 / task |
+| --- | ---: | ---: | ---: |
+| 质量过滤 | 90.00 ± 0.71% | 378 / 420 | 10.59 ± 0.17 |
+| 全量存储附judge标签 | 89.52 ± 1.65% | 376 / 420 | 10.56 ± 0.30 |
+
+过滤减全量为 **+0.48 ± 2.30 个百分点**，净多2次成功；各seed差值为+1.43、−2.14、+2.14个百分点，不能支持稳定的过滤优势。见[新存储对照结果](docs/results/alfworld_storage_ablation_curator_gpt61_paper_v1_2026-10-09.md)与[结构化汇总](docs/results/alfworld_storage_ablation_curator_gpt61_paper_v1_2026-10-09.json)。
+
 以下两项为历史legacy-paraphrase结果，不代表当前paper-v1协议，也不用于估计原文提示词的独立因果影响。
 
 2026-10-08 已完成用户 API 的 no-memory / prompted JITMEM 成对评测：`valid_seen` 全部 140 个任务，seeds 0、1、2，每组 420 次、共 840 次真实交互。curator/executor 配置模型名均为 `gpt-5.5`；无 warm start，batch10、workers10、history3、最多30次决策。成功率由原生环境判定，均值与样本标准差按三轮计算。
@@ -205,7 +214,7 @@ pilot 的 batch size 2 用于在 5 个任务内检查记忆增长，与正式 ba
 
 原文Table9、实验设置和解释边界见[存储消融协议](docs/storage_ablation.md)。标签来自executor judge，原生成功仅用于评分；比较差值定义为过滤减全量，结果不预设方向。
 
-仅替换curator的质量过滤对照使用[独立配置](configs/storage_filtered_curator_gpt61.example.toml)：curator为`gpt-6.1-sol`，executor/judge固定`gpt-5.5`，与已有paper-v1过滤组保持其余配置、源码、原文模板、任务和顺序一致。运行方法与解释范围见[模型对照协议](docs/curator_model_comparison.md)；新目录与旧bank/checkpoint独立，不将原论文模型间差距直接归因于curator。
+仅替换curator的质量过滤对照使用[独立配置](configs/storage_filtered_curator_gpt61.example.toml)：curator为`gpt-6.1-sol`，executor/judge固定`gpt-5.5`，与已有paper-v1过滤组保持其余配置、源码、原文模板、任务和顺序一致。运行方法与解释范围见[模型对照协议](docs/curator_model_comparison.md)；新目录与旧bank/checkpoint独立，不将原论文模型间差距直接归因于curator。对应的[全量存储模板](configs/storage_all_curator_gpt61.example.toml)保持同样角色模型，仅改变存储策略与输出目录；运行和逐任务配对方法见[存储对照协议](docs/storage_ablation.md#gpt-61-sol-curator-的存储对照)。
 
 paper-v1取消自行添加的Look规则、空库指导和非法决策解释；每次executor调用均提交解析动作给环境。正式主指标为native SR，效率指标为每任务executor-only input/output K及交互次数；全角色成本仅是诊断。旧输出和checkpoint保留，不在新配置中续跑或混用。
 

@@ -63,3 +63,11 @@ Gitleaks对当前全部公开文档约230 KB的扫描通过，既有源码指纹
 Gitleaks对新增后的公开文档扫描通过。另扫描新组全部原始评测记录约66.20 MB，仅有一处manifest中的`api.py`源码SHA256命中通用API-key规则，已逐行与当前源码完整内容hash独立核对，确认是源码指纹。没有新增白名单或目录例外；公开汇总继续使用独立`file`/`sha256`字段。暂存区与全部提交历史继续由既有hook检查，推送后再比对含新提交的Git对象。
 
 本轮核对GitHub仓库仍为public，原生secret scanning与push protection均enabled，开放密钥告警数量为0。上述检查均不调用模型API，结论限于已检查的内容和当前凭证；未知凭证仍由模式扫描与GitHub保护补充检查。
+
+## gpt-6.1-sol curator全量组发布检查（2026-10-09，paper-v1）
+
+新全量组420条与历史过滤420条的完整配对审计通过后，单独生成存储对照公开报告，保留此前所有结果。公开MD/JSON只含逐字段白名单汇总与指纹，不含endpoint、密钥/变量名、个人绝对路径、原始请求、完整prompt或逐任务配对内容；本机配置、全量记录和审计工具仍被Git忽略。
+
+首次发布前的内存凭证比对读取2个不同凭证，覆盖3,802个项目/运行记录文件、116个Git blob（包括不可达对象）、Git配置及HEAD日志。literal UTF-8、URL编码、JSON转义和base64均无匹配；不显示或保存凭证，不调用模型API。范围包括新完整420条全量记录和公开报告，依赖、下载的Python、扫描器二进制和缓存仍排除。前置脱敏证据单独保留为本机 `outputs/security_audit/storage_gpt61_exact_credentials_prepublication.json`，发布后再次比对新增Git对象。
+
+Gitleaks对新增后的公开文档扫描通过；另扫描新全量原始记录约71.78 MB，唯一命中为manifest中的`api.py`源码SHA256，已逐行与当前源码完整内容hash核对为指纹误报。没有扩大固定白名单、文件或目录例外。提交和推送仍经过暂存区与全部历史扫描，GitHub仓库保持public，原生secret scanning与push protection均enabled，开放密钥告警为0。检查结论限于本次已扫描内容及当前凭证，不将模式扫描解释为未知凭证的完全保证。
