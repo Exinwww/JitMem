@@ -1,0 +1,42 @@
+# Curator-only model comparison with the completed paper-v1 quality-filtered baseline.
+# Keep executor/judge gpt-5.5; replace only curator with gpt-6.1-sol.
+# Endpoint and key remain environment-configured; role model variables override TOML.
+# Copy to storage_filtered_curator_gpt61.local.toml and set data_root.
+# Pin JITMEM_EXECUTOR_MODEL=gpt-5.5 and JITMEM_CURATOR_MODEL=gpt-6.1-sol for this run.
+[environment]
+backend = "alfworld"
+data_root = "/path/to/alfworld"
+split = "valid_seen"
+task_types = [1, 2, 3, 4, 5, 6]
+
+[experiment]
+method = "jitmem"
+prompt_profile = "paper-v1"
+prompt_assets = "outputs/paper_prompts/v1"
+seeds = [0, 1, 2]
+batch_size = 10
+workers = 10
+max_steps = 30
+history_window = 3
+retrieval_k = 3
+store_policy = "judge"
+task_adaptive = true
+output_dir = "outputs/storage_filtered_curator_gpt61_paper_v1"
+
+[executor]
+model = "gpt-5.5"
+temperature = 1.0
+omit_temperature = false
+max_tokens = 4096
+timeout_seconds = 90.0
+retries = 3
+token_limit_parameter = "max_tokens"
+
+[curator]
+model = "gpt-6.1-sol"
+temperature = 1.0
+omit_temperature = false
+max_tokens = 8192
+timeout_seconds = 90.0
+retries = 3
+token_limit_parameter = "max_tokens"

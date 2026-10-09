@@ -196,6 +196,8 @@ pilot 的 batch size 2 用于在 5 个任务内检查记忆增长，与正式 ba
 
 原文Table9、实验设置和解释边界见[存储消融协议](docs/storage_ablation.md)。标签来自executor judge，原生成功仅用于评分；比较差值定义为过滤减全量，结果不预设方向。
 
+仅替换curator的质量过滤对照使用[独立配置](configs/storage_filtered_curator_gpt61.example.toml)：curator为`gpt-6.1-sol`，executor/judge固定`gpt-5.5`，与已有paper-v1过滤组保持其余配置、源码、原文模板、任务和顺序一致。运行方法与解释范围见[模型对照协议](docs/curator_model_comparison.md)；新目录与旧bank/checkpoint独立，不将原论文模型间差距直接归因于curator。
+
 paper-v1取消自行添加的Look规则、空库指导和非法决策解释；每次executor调用均提交解析动作给环境。正式主指标为native SR，效率指标为每任务executor-only input/output K及交互次数；全角色成本仅是诊断。旧输出和checkpoint保留，不在新配置中续跑或混用。
 
 默认不 warm start；可在配置设置 `warm_start` 为训练轨迹 `memory.jsonl`，校验只含 `train`、不与 evaluation task IDs 重合，默认 gate 下要求正的 executor judge 标签。若要收集 API 训练经验，可对 train split 执行 `jitmem` 或 `raw-memory`；这只是轨迹收集，不是 GRPO 或本文训练复现。
