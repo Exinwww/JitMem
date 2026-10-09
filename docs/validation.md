@@ -2,6 +2,8 @@
 
 验证日期：2026-10-08（Asia/Shanghai）。本记录区分软件正确性、真实模拟器可用性和模型能力评测。
 
+从下方早期验证到“存储消融验证（2026-10-09）”的模型协议记录均属于历史 `legacy-paraphrase`，保留原数字和实现行为。当前正式 `paper-v1` 的验证见末节“原文协议切换验证”；旧截断处理、严格动作拒绝和Look补充不适用于新协议。
+
 版本管理中的 [评测结果报告](results/alfworld_valid_seen_2026-10-08.md) 与 [结构化结果](results/alfworld_valid_seen_2026-10-08.json) 可在新克隆中查看。本页指向 `outputs/` 的链接对应本地生成的审计和原始记录，目录不提交到 Git。
 
 评测后进行了客户端凭证保护加固；[密钥安全审计](security_audit.md)记录检查范围与修复。下述模型结果和原实验哈希对应初始提交`3ef61bb`，安全修复后不重写这些历史记录。
@@ -55,7 +57,7 @@ HTTP 集成测试使用 `127.0.0.1` 的临时 scripted server，经过真实 HTT
 
 故障注入测试在第二批中模拟 API 故障，保留完整第一批 checkpoint；恢复后重跑未提交批次，不重复计入已提交任务。配置、源代码、game bytes、warm-start bank 内容或关键 runtime 版本变化会拒绝沿用旧实验。未提交批次重试可能消耗额外 API 用量，失败调用不被混入完整 benchmark 的 token 统计。
 
-模型输出达到生成 token 上限属于模型行为，不能当作网络故障中止并反复重试同一任务。现在 executor 截断输出消耗一次决策预算且不执行任何部分动作；curator 截断指导被省略，judge 截断结果被拒绝，distiller 截断摘要不入库。所有情况记录 `finish_reason` 和 `generation_failures`，任务仍计入评测。缺失 API usage 时，相应用量及受影响汇总为 `null`，`usage.complete` / summary `usage_complete` 为 false，不能据此宣称 token 减少或零成本。
+模型输出达到生成 token 上限属于模型行为，不能当作网络故障中止并反复重试同一任务。此处记录历史legacy协议：executor截断输出消耗一次决策预算且不执行任何部分动作；curator截断指导被省略，judge截断结果被拒绝，distiller截断摘要不入库。所有情况记录 `finish_reason` 和 `generation_failures`，任务仍计入评测。缺失 API usage 时，相应用量及受影响汇总为 `null`，`usage.complete` / summary `usage_complete` 为 false，不能据此宣称 token 减少或零成本。新paper-v1的返回文本消费规则见末节。
 
 ## 完整模型评测结果
 
@@ -88,7 +90,7 @@ JITMEM 三轮最终 bank 各 118 条，judge/native 的重复 episode 计数为 
 
 其中 `trial_T20190908_184242_348366`（cool mug to coffeemachine）环境在冷却后直接 won，judge 因无最后放置拒绝。审计发现原始 game 初始 PDDL 同时将该 mug 关联到 countertop 与 coffeemachine；从 countertop 拿取未删除另一个关系，使冷却动作满足原生目标。这属于继承数据/环境行为。保留 native score 和独立 judge gate，解释结果时不把所有分歧都归因于 judge 推理错误。
 
-## 存储消融验证（2026-10-09）
+## 存储消融验证（2026-10-09，legacy-paraphrase）
 
 新增质量过滤与带标签全量存储的成对配置、协议测试和完整结果分析器，见[消融协议](storage_ablation.md)。当前完整软件验证为 **150 passed、108 subtests passed**，Ruff与24个Python文件的格式检查通过；11个pipeline源文件未改变。新测试覆盖curator标签差分、executor/judge消息一致、失败及非法/截断决策的完整保存、跨批标签读取、确定性写入、配对配置、完整三轮/六类覆盖、checkpoint/bank/raw轨迹一致性、基础设施错误拒绝，以及逐调用usage与汇总一致、未知用量保留null。
 

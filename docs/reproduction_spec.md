@@ -1,6 +1,6 @@
 # JITMEM ALFWorld 复现规格
 
-本文是实现和评测的可核查规格。主要来源是 [JITMEM v1 PDF](https://arxiv.org/pdf/2609.27334) §3、§4、Appendix A/B；judge 和 split 补充来源是 [SkillOS v1 PDF](https://arxiv.org/pdf/2605.06614) Appendix A.4 Figure 13、Appendix C。页码均采用 PDF 印刷页码，从 1 开始。设置的证据等级分为：原文明确、继承来源、工程选择、待核实。
+本文是实现和评测的可核查规格。主要来源是 [JITMEM v1 PDF](https://arxiv.org/pdf/2609.27334) §3、§4、Appendix A/B；judge 和 split 补充来源是 [SkillOS v1 PDF](https://arxiv.org/pdf/2605.06614) Appendix A.4 Figure 13、B.3.1。页码均采用 PDF 印刷页码，从 1 开始。设置的证据等级分为：原文明确、继承来源、工程选择、待核实。
 
 默认TOML配置已切换到 **paper-v1原文模板**，原始资产准备、逐项协议差异与剩余未披露细节见[原文对齐说明](paper_fidelity.md)。旧语义改写只保留为 `legacy-paraphrase` 历史模式，不是当前正式配置。
 
@@ -28,7 +28,7 @@
 
 每个 run 开始时初始化独立空 memory bank，训练轨迹不带入。按指定 order seed 打乱完整任务列表；每 10 个任务组成一个 batch。batch 内全部任务使用同一个 bank snapshot，只有 batch 完成后才提交 pending successful trajectories；可以串行执行环境来减少资源消耗，仍保持相同的逻辑语义。最后不足 10 个任务的 batch 也按相同规则处理。跨 run 不共享 bank、结果和随机数状态。
 
-原文 ALFWorld 设置为 140 test tasks、3 个不同随机任务顺序 run，报告 SR 的均值及标准差。JITMEM 未披露随机种子值、完整 task manifests、环境版本和精确 split 名。SkillOS Appendix C 明确测试使用 140 `valid_seen`、训练 3553，且 JITMEM 表中的多个 baseline 数值逐项相同，因此采用 `valid_seen`/`eval_in_distribution` 是有证据的继承推断。应检查真实数据目录的 manifest；若发现 134 `valid_unseen`，它属于不同 split，不能直接与论文 140-task 数字比较。保存每个 run 的确切有序 task IDs、数据路径和数据文件 hash，以供复查。
+原文 ALFWorld 设置为 140 test tasks、3 个不同随机任务顺序 run，报告 SR 的均值及标准差。JITMEM 未披露随机种子值、完整 task manifests、环境版本和精确 split 名。SkillOS Appendix B.3.1 明确测试使用 140 `valid_seen`、训练 3553，且 JITMEM 表中的多个 baseline 数值逐项相同，因此采用 `valid_seen`/`eval_in_distribution` 是有证据的继承推断。应检查真实数据目录的 manifest；若发现 134 `valid_unseen`，它属于不同 split，不能直接与论文 140-task 数字比较。保存每个 run 的确切有序 task IDs、数据路径和数据文件 hash，以供复查。
 
 本地 task discovery 已确认：按官方 text-eligible filters，`valid_seen` 为 140（Pick35、Look13、Clean27、Heat16、Cool25、Pick2 24），六类数量逐项匹配 SkillOS 的评测表；`valid_unseen` 为 134。这里核实的是任务覆盖和 split 选择，尚不是 API agent 的评估结果。
 
@@ -43,7 +43,7 @@
 | payload | 自然语言、面向当前任务、一次 episode 一个 | §3，第 4 页，原文明确 |
 | 评估 bank | 每个 sequence/run 空库开始 | §3，第 5 页，原文明确 |
 | ALFWorld test count | 140 | §4，第 5 页，原文明确 |
-| ALFWorld test split | valid_seen / eval_in_distribution | SkillOS Appendix C，第 25 页；对 JITMEM 是继承推断 |
+| ALFWorld test split | valid_seen / eval_in_distribution | SkillOS Appendix B.3.1，第 25 页；对 JITMEM 是继承推断 |
 | 评估 batch size | 10，batch 后更新 bank | Appendix A，第 18 页，原文明确 |
 | 评估重复 | 3 个随机 task-order runs | Table 1，第 6 页，原文明确 |
 | executor history | 最近 3 步 | Appendix A，第 18 页，原文明确 |
@@ -68,7 +68,7 @@ Appendix A 指定 vLLM 最大模型长度 40960；这是作者服务配置，不
 
 ### Curator
 
-角色是 ALFWorld household-task memory curator。输入区分 current question 与编号 retrieved memories，每条包含 past question 和完整 trajectory。要求输出一个简短可执行 briefing：指出最有用的 episodes，提炼寻物方式和动作顺序，最后给当前任务的具体操作建议。原 prompt 只要求简洁，没有硬性字数限制，也没有规定必须输出 JSON 或固定三级标题。当前代码使用中性的 retrieved experience 措辞，避免全量存储消融时把失败轨迹称为成功；两组共享相同system prompt，全量组为每条检索轨迹附上executor judge success/failure标签。代码另外提醒验证旧 episode 的地点/object numbers，并在无经验或不相关时提供一般操作指导；这些 caution/cold-start 指令是工程补充，原文没有明确要求。`task_adaptive=false` 只隐藏 user prompt 中的 current question，保留相同 curator system 并补充当前 query 未知的说明；retriever 仍使用真实 query。
+角色是 ALFWorld household-task memory curator。输入区分 current question 与编号 retrieved memories，每条包含 past question 和完整 trajectory。要求输出一个简短可执行 briefing：指出最有用的 episodes，提炼寻物方式和动作顺序，最后给当前任务的具体操作建议。原 prompt 只要求简洁，没有硬性字数限制，也没有规定必须输出 JSON 或固定三级标题。legacy代码使用中性的 retrieved experience 措辞，避免全量存储消融时把失败轨迹称为成功；两组共享相同system prompt，全量组为每条检索轨迹附上executor judge success/failure标签。legacy代码另外提醒验证旧 episode 的地点/object numbers，并在无经验或不相关时提供一般操作指导；这些 caution/cold-start 指令是工程补充，原文没有明确要求。legacy的 `task_adaptive=false` 只隐藏 user prompt 中的 current question，保留相同 curator system 并补充当前 query 未知的说明；retriever 仍使用真实 query。
 
 建议语义改写：`Prepare a compact briefing for a household agent. Review the current objective and the supplied episodes. Explain which episodes help, recover effective object-search and action-order patterns, and turn those patterns into concrete advice for this objective. Keep the briefing short enough for the agent to reuse during execution.`
 
@@ -82,7 +82,7 @@ Appendix A 指定 vLLM 最大模型长度 40960；这是作者服务配置，不
 
 输入包含任务与完整交互轨迹；不包含原生 success、reward、won 标量，也不包含 curator 对完成的断言。检查最终状态所有条件，并验证先变换再放置等前置过程；只认环境 observation 证据。局部完成、歧义、耗尽预算但未完成、循环和反复非法动作判为失败。返回 `success` 布尔值、`rationale` 简短说明、`evidence_step`（失败为 -1）。解析失败应显式记录 judge error，保守不入库。
 
-真实 API pilot 暴露 Look 类的 judge 误判：3 个 native 成功都被要求额外 examine 或放置动作而拒绝。正式评测前，在 judge system prompt 补充公开的 ALFWorld Look 规则：持有目标、到达已激活目标灯的 receptacle 即满足，无须独立 examine/放置，也允许先开灯再拿物体。这是环境语义补充，不是原文 prompt；依据 [goal_library.py](https://github.com/alfworld/alfworld/blob/master/alfworld/gen/goal_library.py#L164-L191)。输入仍不包含 native success/reward 或 walkthrough。保留原 pilot 原始结果，另存诊断性重新判定，正式实验从空库重新开始。
+旧协议的真实 API pilot 暴露 Look 类的 judge 误判：3 个 native 成功都被要求额外 examine 或放置动作而拒绝。旧协议正式评测前，在 judge system prompt 补充公开的 ALFWorld Look 规则：持有目标、到达已激活目标灯的 receptacle 即满足，无须独立 examine/放置，也允许先开灯再拿物体。这是环境语义补充，不是原文 prompt；依据 [goal_library.py](https://github.com/alfworld/alfworld/blob/master/alfworld/gen/goal_library.py#L164-L191)。输入仍不包含 native success/reward 或 walkthrough。保留原 pilot 原始结果，另存诊断性重新判定，旧协议正式实验从空库重新开始。paper-v1没有这段规则补充。
 
 建议语义改写：`Evaluate whether the observed interaction accomplished every requirement of the household objective. Base the verdict on simulator observations; planned actions and agent claims are insufficient. Required transformations must appear before the final placement or interaction. Treat uncertain, partial, stuck, or budget-exhausted attempts as failures. Return JSON with success, rationale, and evidence_step; use -1 for a failure.`
 

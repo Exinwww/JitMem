@@ -30,7 +30,7 @@
 | 输出预算 | executor/judge 4096、curator8192；temperature1，其他采样设置相同 |
 | 主指标 | 原生环境 SR；按三轮报告均值和样本标准差，差值为过滤减全量 |
 
-`configs/storage_filtered.example.toml` 与 `configs/storage_all.example.toml` 除 `store_policy` 和 `output_dir` 外完全相同。模型连接参数与密钥通过现有环境变量提供。两组使用相同的11个实现源码哈希、游戏哈希和 runtime；安全修复后的版本重新运行两组，不与旧版本的过滤组混合。
+`configs/storage_filtered.example.toml` 与 `configs/storage_all.example.toml` 除 `store_policy` 和 `output_dir` 外完全相同。模型连接参数与密钥通过现有环境变量提供。两组使用相同的12个实现源码哈希、原文资产指纹、游戏哈希和 runtime；当前paper-v1冻结实现重新运行两组，不与旧协议的过滤组混合。
 
 两组使用同一份原文curator system模板；全量组额外展示 `Executor judge label: success/failure`。原文没有公布这个消融专用模板或标签格式，因此不自行改写system中的成功经验措辞；这一位置与格式的实现选择仍须披露。executor只接收curator payload，judge只接收当前任务与完整轨迹，二者不直接读取检索标签或native success/reward标量。[原文对齐说明](paper_fidelity.md)记录模板指纹、继承history/parser/actions格式和未公开细节。
 
