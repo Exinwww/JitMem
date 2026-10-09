@@ -1,0 +1,2381 @@
+{
+  "schema_version": 1,
+  "kind": "versioned_alfworld_storage_ablation_summary",
+  "evaluation_date": "2026-10-09",
+  "timezone": "Asia/Shanghai",
+  "benchmark": true,
+  "variant": "API prompted curator with semantic paraphrases; no local training; not author RL-trained/model-equivalent results",
+  "executor_model": "gpt-5.5",
+  "curator_model": "gpt-5.5",
+  "model_identity_source": "API configuration; server weights not independently verified",
+  "split": "valid_seen",
+  "unique_tasks": 140,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "total_episodes": 840,
+  "difference_definition": "filtered minus label-annotated full storage",
+  "protocol": {
+    "batch_size": 10,
+    "workers": 10,
+    "max_steps": 30,
+    "history_window": 3,
+    "retrieval_k": 3,
+    "task_adaptive": true,
+    "warm_start": null,
+    "filtered_policy": "judge",
+    "full_policy": "all",
+    "filtered_labels_visible": false,
+    "full_labels_visible": true,
+    "success_metric": "native ALFWorld verifier",
+    "process_start_method": "spawn",
+    "memory_commit_order": "predetermined task order after the complete batch succeeds"
+  },
+  "sampling": {
+    "executor": {
+      "temperature": 1.0,
+      "omit_temperature": false,
+      "max_tokens": 4096,
+      "timeout_seconds": 90.0,
+      "retries": 3,
+      "token_limit_parameter": "max_tokens"
+    },
+    "curator": {
+      "temperature": 1.0,
+      "omit_temperature": false,
+      "max_tokens": 8192,
+      "timeout_seconds": 90.0,
+      "retries": 3,
+      "token_limit_parameter": "max_tokens"
+    }
+  },
+  "packages": {
+    "jitmem-reproduction": "0.1.0",
+    "alfworld": "0.4.2",
+    "textworld": "1.6.2",
+    "fast-downward-textworld": "20.6.4"
+  },
+  "implementation_commit": "b04496576d8d0f3e144769fa7b2c47a2dfcc6b8e",
+  "experiment_protocol_commit": "be86b3f2f789e73a0b677eb4515cf053900b03c5",
+  "source_fingerprints": [
+    {
+      "file": "src/jitmem/__init__.py",
+      "sha256": "fe687808ac0902256465e9acc98f8e4b2f7419c34d135e914656f711d1b57c6e"
+    },
+    {
+      "file": "src/jitmem/__main__.py",
+      "sha256": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279"
+    },
+    {
+      "file": "src/jitmem/api.py",
+      "sha256": "89e5b9b98513dafd3cfe95384bacaff334156146b50b2775ca3d0879b4bbc2c6"
+    },
+    {
+      "file": "src/jitmem/cli.py",
+      "sha256": "e20fb7ddebabc1e34db91cd43bf51665fd61661c01178ed95137cfdbba53b355"
+    },
+    {
+      "file": "src/jitmem/config.py",
+      "sha256": "06e38fa411efd059f131502df52a1e3a1414441cf2131d58a79e2869eb292744"
+    },
+    {
+      "file": "src/jitmem/environments.py",
+      "sha256": "0a6c3dcde99b7a7550dbddbc4b0368b7754b1c2a3e906a2223dfb433829c8e5d"
+    },
+    {
+      "file": "src/jitmem/evaluation.py",
+      "sha256": "bca93178ff2338f20ac682e006e948918e14c3402a5504a71f665990ddab0887"
+    },
+    {
+      "file": "src/jitmem/memory.py",
+      "sha256": "e7c1b534ed8e7752d969cc3b8e9a21bfcd9e022d93bfda5d212a9e910182c317"
+    },
+    {
+      "file": "src/jitmem/pipeline.py",
+      "sha256": "10ca270eb32741ead9d881c76856b35f806b1d18b944e9c488bf9f49200c2726"
+    },
+    {
+      "file": "src/jitmem/prompts.py",
+      "sha256": "89e196b39015d33b9d6f6a5c386fe5f3abd526c9fa0c28f02c9a322674a7398b"
+    },
+    {
+      "file": "src/jitmem/usage.py",
+      "sha256": "f601f2e3c24ab3dea3134f7d05b48377a27b4b6bd86b1d458b626a074b0203b6"
+    }
+  ],
+  "across_seed": {
+    "filtered_sr_percent": {
+      "mean": 85.71428571428571,
+      "std": 2.142857142857146
+    },
+    "full_sr_percent": {
+      "mean": 88.57142857142857,
+      "std": 1.2371791482634897
+    },
+    "delta_pp": {
+      "mean": -2.8571428571428616,
+      "std": 2.4743582965269653
+    },
+    "filtered_mean_decisions": {
+      "mean": 11.333333333333334,
+      "std": 0.17975796274454195
+    },
+    "full_mean_decisions": {
+      "mean": 11.123809523809523,
+      "std": 0.16968357907235068
+    },
+    "filtered_mean_environment_steps": {
+      "mean": 11.311904761904762,
+      "std": 0.18271385755190145
+    },
+    "full_mean_environment_steps": {
+      "mean": 11.09047619047619,
+      "std": 0.16511179473891238
+    },
+    "mean_decision_delta": {
+      "mean": 0.20952380952380936,
+      "std": 0.057291473407218636
+    },
+    "mean_environment_step_delta": {
+      "mean": 0.22142857142857153,
+      "std": 0.07142857142857117
+    },
+    "by_task_type": {
+      "look_at_obj_in_light": {
+        "tasks_per_seed": 13,
+        "filtered_sr_percent": {
+          "mean": 69.23076923076923,
+          "std": 0.0
+        },
+        "full_sr_percent": {
+          "mean": 79.48717948717949,
+          "std": 8.882311833686552
+        },
+        "delta_pp": {
+          "mean": -10.256410256410257,
+          "std": 8.88231183368655
+        }
+      },
+      "pick_and_place_simple": {
+        "tasks_per_seed": 35,
+        "filtered_sr_percent": {
+          "mean": 95.23809523809523,
+          "std": 1.6495721976846474
+        },
+        "full_sr_percent": {
+          "mean": 95.23809523809523,
+          "std": 1.6495721976846474
+        },
+        "delta_pp": {
+          "mean": 0.0,
+          "std": 2.857142857142858
+        }
+      },
+      "pick_clean_then_place_in_recep": {
+        "tasks_per_seed": 27,
+        "filtered_sr_percent": {
+          "mean": 91.35802469135803,
+          "std": 2.1383343303319506
+        },
+        "full_sr_percent": {
+          "mean": 92.5925925925926,
+          "std": 3.7037037037037024
+        },
+        "delta_pp": {
+          "mean": -1.234567901234566,
+          "std": 2.138334330331944
+        }
+      },
+      "pick_cool_then_place_in_recep": {
+        "tasks_per_seed": 25,
+        "filtered_sr_percent": {
+          "mean": 85.33333333333333,
+          "std": 8.32666399786453
+        },
+        "full_sr_percent": {
+          "mean": 89.33333333333333,
+          "std": 4.618802153517006
+        },
+        "delta_pp": {
+          "mean": -4.0,
+          "std": 3.9999999999999982
+        }
+      },
+      "pick_heat_then_place_in_recep": {
+        "tasks_per_seed": 16,
+        "filtered_sr_percent": {
+          "mean": 91.66666666666667,
+          "std": 3.608439182435161
+        },
+        "full_sr_percent": {
+          "mean": 95.83333333333333,
+          "std": 3.608439182435161
+        },
+        "delta_pp": {
+          "mean": -4.166666666666667,
+          "std": 3.608439182435161
+        }
+      },
+      "pick_two_obj_and_place": {
+        "tasks_per_seed": 24,
+        "filtered_sr_percent": {
+          "mean": 70.83333333333334,
+          "std": 0.0
+        },
+        "full_sr_percent": {
+          "mean": 73.6111111111111,
+          "std": 6.364688465216445
+        },
+        "delta_pp": {
+          "mean": -2.777777777777771,
+          "std": 6.364688465216444
+        }
+      }
+    }
+  },
+  "overall": {
+    "filtered": {
+      "episodes": 420,
+      "calls": 5600,
+      "all_role_prompt_tokens": 4451314,
+      "all_role_completion_tokens": 194072,
+      "all_role_input_output_tokens": 4645386,
+      "usage_by_role": {
+        "curator": {
+          "calls": 420,
+          "prompt_tokens": 731258,
+          "completion_tokens": 96119
+        },
+        "executor": {
+          "calls": 4760,
+          "prompt_tokens": 3333619,
+          "completion_tokens": 76391
+        },
+        "judge": {
+          "calls": 420,
+          "prompt_tokens": 386437,
+          "completion_tokens": 21562
+        }
+      }
+    },
+    "full": {
+      "episodes": 420,
+      "calls": 5512,
+      "all_role_prompt_tokens": 4561871,
+      "all_role_completion_tokens": 196315,
+      "all_role_input_output_tokens": 4758186,
+      "usage_by_role": {
+        "curator": {
+          "calls": 420,
+          "prompt_tokens": 889279,
+          "completion_tokens": 99612
+        },
+        "executor": {
+          "calls": 4672,
+          "prompt_tokens": 3292098,
+          "completion_tokens": 75287
+        },
+        "judge": {
+          "calls": 420,
+          "prompt_tokens": 380494,
+          "completion_tokens": 21416
+        }
+      }
+    }
+  },
+  "per_seed": [
+    {
+      "seed": 0,
+      "tasks": 140,
+      "paired_counts": {
+        "both_success": 114,
+        "filtered_only": 6,
+        "full_only": 8,
+        "both_failure": 12
+      },
+      "filtered": {
+        "tasks": 140,
+        "successes": 120,
+        "success_rate": 0.8571428571428571,
+        "mean_decisions": 11.357142857142858,
+        "mean_environment_steps": 11.32857142857143,
+        "invalid_actions": 4,
+        "truncated_episodes": 20,
+        "empty_bank_episodes": 10,
+        "stored_episodes": 117,
+        "native_failed_stored_episodes": 1,
+        "generation_failures": {
+          "calls": 0,
+          "episodes": 0,
+          "by_role": {},
+          "by_finish_reason": {}
+        },
+        "native_vs_judge": {
+          "labeled_episodes": 140,
+          "true_positive": 116,
+          "false_positive": 1,
+          "false_negative": 4,
+          "true_negative": 19,
+          "parse_errors": 0,
+          "generation_errors": 0
+        },
+        "usage_by_role": {
+          "curator": {
+            "calls": 140,
+            "prompt_tokens": 245432,
+            "completion_tokens": 32436
+          },
+          "executor": {
+            "calls": 1590,
+            "prompt_tokens": 1109590,
+            "completion_tokens": 25529
+          },
+          "judge": {
+            "calls": 140,
+            "prompt_tokens": 128628,
+            "completion_tokens": 7199
+          }
+        },
+        "prompt_tokens": 1483650,
+        "completion_tokens": 65164,
+        "storage": {
+          "stored_entries": 117,
+          "final_bank_size": 117,
+          "native_failed_stored_entries": 1,
+          "judge_failed_stored_entries": 0,
+          "native_failed_stored_fraction": 0.008547008547008548,
+          "judge_failed_stored_fraction": 0.0,
+          "batch_growth": [
+            {
+              "batch_index": 0,
+              "tasks": 10,
+              "success_rate": 0.5,
+              "bank_before": 0,
+              "new_entries": 5,
+              "bank_after": 5,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 0,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 0,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 1,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 5,
+              "new_entries": 8,
+              "bank_after": 13,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 2,
+              "tasks": 10,
+              "success_rate": 0.7,
+              "bank_before": 13,
+              "new_entries": 8,
+              "bank_after": 21,
+              "native_failed_new_entries": 1,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 3,
+              "tasks": 10,
+              "success_rate": 0.8,
+              "bank_before": 21,
+              "new_entries": 8,
+              "bank_after": 29,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 1,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 1,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 4,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 29,
+              "new_entries": 8,
+              "bank_after": 37,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 5,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 37,
+              "new_entries": 9,
+              "bank_after": 46,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 1,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 1,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 6,
+              "tasks": 10,
+              "success_rate": 1,
+              "bank_before": 46,
+              "new_entries": 10,
+              "bank_after": 56,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 7,
+              "tasks": 10,
+              "success_rate": 1,
+              "bank_before": 56,
+              "new_entries": 9,
+              "bank_after": 65,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 1,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 1,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 8,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 65,
+              "new_entries": 9,
+              "bank_after": 74,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 9,
+              "tasks": 10,
+              "success_rate": 0.8,
+              "bank_before": 74,
+              "new_entries": 8,
+              "bank_after": 82,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 10,
+              "tasks": 10,
+              "success_rate": 1,
+              "bank_before": 82,
+              "new_entries": 10,
+              "bank_after": 92,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 1,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 1,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 11,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 92,
+              "new_entries": 9,
+              "bank_after": 101,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 1,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 1,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 12,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 101,
+              "new_entries": 9,
+              "bank_after": 110,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 13,
+              "tasks": 10,
+              "success_rate": 0.8,
+              "bank_before": 110,
+              "new_entries": 7,
+              "bank_after": 117,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 1,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 1,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            }
+          ],
+          "retrieval": {
+            "references": 390,
+            "native_failed_references": 6,
+            "judge_failed_references": 0,
+            "episodes_with_retrieval": 130,
+            "episodes_with_native_failed_retrieval": 6,
+            "episodes_with_judge_failed_retrieval": 0,
+            "native_failed_fraction": 0.015384615384615385,
+            "judge_failed_fraction": 0.0
+          }
+        }
+      },
+      "full": {
+        "tasks": 140,
+        "successes": 122,
+        "success_rate": 0.8714285714285714,
+        "mean_decisions": 11.207142857142857,
+        "mean_environment_steps": 11.178571428571429,
+        "invalid_actions": 4,
+        "truncated_episodes": 18,
+        "empty_bank_episodes": 10,
+        "stored_episodes": 140,
+        "native_failed_stored_episodes": 18,
+        "generation_failures": {
+          "calls": 0,
+          "episodes": 0,
+          "by_role": {},
+          "by_finish_reason": {}
+        },
+        "native_vs_judge": {
+          "labeled_episodes": 140,
+          "true_positive": 118,
+          "false_positive": 2,
+          "false_negative": 4,
+          "true_negative": 16,
+          "parse_errors": 0,
+          "generation_errors": 0
+        },
+        "usage_by_role": {
+          "curator": {
+            "calls": 140,
+            "prompt_tokens": 309077,
+            "completion_tokens": 33298
+          },
+          "executor": {
+            "calls": 1569,
+            "prompt_tokens": 1104541,
+            "completion_tokens": 25443
+          },
+          "judge": {
+            "calls": 140,
+            "prompt_tokens": 126919,
+            "completion_tokens": 7230
+          }
+        },
+        "prompt_tokens": 1540537,
+        "completion_tokens": 65971,
+        "storage": {
+          "stored_entries": 140,
+          "final_bank_size": 140,
+          "native_failed_stored_entries": 18,
+          "judge_failed_stored_entries": 20,
+          "native_failed_stored_fraction": 0.12857142857142856,
+          "judge_failed_stored_fraction": 0.14285714285714285,
+          "batch_growth": [
+            {
+              "batch_index": 0,
+              "tasks": 10,
+              "success_rate": 0.4,
+              "bank_before": 0,
+              "new_entries": 10,
+              "bank_after": 10,
+              "native_failed_new_entries": 6,
+              "judge_failed_new_entries": 6,
+              "retrieval": {
+                "references": 0,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 0,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 1,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 10,
+              "new_entries": 10,
+              "bank_after": 20,
+              "native_failed_new_entries": 1,
+              "judge_failed_new_entries": 2,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 13,
+                "judge_failed_references": 13,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 10,
+                "episodes_with_judge_failed_retrieval": 10
+              }
+            },
+            {
+              "batch_index": 2,
+              "tasks": 10,
+              "success_rate": 0.8,
+              "bank_before": 20,
+              "new_entries": 10,
+              "bank_after": 30,
+              "native_failed_new_entries": 2,
+              "judge_failed_new_entries": 1,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 8,
+                "judge_failed_references": 9,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 7,
+                "episodes_with_judge_failed_retrieval": 8
+              }
+            },
+            {
+              "batch_index": 3,
+              "tasks": 10,
+              "success_rate": 0.8,
+              "bank_before": 30,
+              "new_entries": 10,
+              "bank_after": 40,
+              "native_failed_new_entries": 2,
+              "judge_failed_new_entries": 2,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 7,
+                "judge_failed_references": 7,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 5,
+                "episodes_with_judge_failed_retrieval": 6
+              }
+            },
+            {
+              "batch_index": 4,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 40,
+              "new_entries": 10,
+              "bank_after": 50,
+              "native_failed_new_entries": 1,
+              "judge_failed_new_entries": 2,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 7,
+                "judge_failed_references": 10,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 5,
+                "episodes_with_judge_failed_retrieval": 6
+              }
+            },
+            {
+              "batch_index": 5,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 50,
+              "new_entries": 10,
+              "bank_after": 60,
+              "native_failed_new_entries": 1,
+              "judge_failed_new_entries": 1,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 7,
+                "judge_failed_references": 8,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 6,
+                "episodes_with_judge_failed_retrieval": 6
+              }
+            },
+            {
+              "batch_index": 6,
+              "tasks": 10,
+              "success_rate": 1,
+              "bank_before": 60,
+              "new_entries": 10,
+              "bank_after": 70,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 7,
+                "judge_failed_references": 7,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 6,
+                "episodes_with_judge_failed_retrieval": 6
+              }
+            },
+            {
+              "batch_index": 7,
+              "tasks": 10,
+              "success_rate": 1,
+              "bank_before": 70,
+              "new_entries": 10,
+              "bank_after": 80,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 1,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 7,
+                "judge_failed_references": 7,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 4,
+                "episodes_with_judge_failed_retrieval": 5
+              }
+            },
+            {
+              "batch_index": 8,
+              "tasks": 10,
+              "success_rate": 1,
+              "bank_before": 80,
+              "new_entries": 10,
+              "bank_after": 90,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 7,
+                "judge_failed_references": 7,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 5,
+                "episodes_with_judge_failed_retrieval": 5
+              }
+            },
+            {
+              "batch_index": 9,
+              "tasks": 10,
+              "success_rate": 0.7,
+              "bank_before": 90,
+              "new_entries": 10,
+              "bank_after": 100,
+              "native_failed_new_entries": 3,
+              "judge_failed_new_entries": 2,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 1,
+                "judge_failed_references": 1,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 1,
+                "episodes_with_judge_failed_retrieval": 1
+              }
+            },
+            {
+              "batch_index": 10,
+              "tasks": 10,
+              "success_rate": 1,
+              "bank_before": 100,
+              "new_entries": 10,
+              "bank_after": 110,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 3,
+                "judge_failed_references": 4,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 3,
+                "episodes_with_judge_failed_retrieval": 4
+              }
+            },
+            {
+              "batch_index": 11,
+              "tasks": 10,
+              "success_rate": 1,
+              "bank_before": 110,
+              "new_entries": 10,
+              "bank_after": 120,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 7,
+                "judge_failed_references": 6,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 5,
+                "episodes_with_judge_failed_retrieval": 5
+              }
+            },
+            {
+              "batch_index": 12,
+              "tasks": 10,
+              "success_rate": 0.8,
+              "bank_before": 120,
+              "new_entries": 10,
+              "bank_after": 130,
+              "native_failed_new_entries": 2,
+              "judge_failed_new_entries": 2,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 3,
+                "judge_failed_references": 3,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 2,
+                "episodes_with_judge_failed_retrieval": 2
+              }
+            },
+            {
+              "batch_index": 13,
+              "tasks": 10,
+              "success_rate": 1,
+              "bank_before": 130,
+              "new_entries": 10,
+              "bank_after": 140,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 1,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 6,
+                "judge_failed_references": 8,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 4,
+                "episodes_with_judge_failed_retrieval": 6
+              }
+            }
+          ],
+          "retrieval": {
+            "references": 390,
+            "native_failed_references": 83,
+            "judge_failed_references": 90,
+            "episodes_with_retrieval": 130,
+            "episodes_with_native_failed_retrieval": 63,
+            "episodes_with_judge_failed_retrieval": 70,
+            "native_failed_fraction": 0.2128205128205128,
+            "judge_failed_fraction": 0.23076923076923078
+          }
+        }
+      },
+      "delta_pp": -1.4285714285714346,
+      "mean_decision_delta": 0.15000000000000036,
+      "mean_environment_step_delta": 0.15000000000000036,
+      "by_task_type": {
+        "look_at_obj_in_light": {
+          "tasks": 13,
+          "filtered_sr": 0.6923076923076923,
+          "full_sr": 0.6923076923076923,
+          "delta_pp": 0.0
+        },
+        "pick_and_place_simple": {
+          "tasks": 35,
+          "filtered_sr": 0.9428571428571428,
+          "full_sr": 0.9428571428571428,
+          "delta_pp": 0.0
+        },
+        "pick_clean_then_place_in_recep": {
+          "tasks": 27,
+          "filtered_sr": 0.8888888888888888,
+          "full_sr": 0.8888888888888888,
+          "delta_pp": 0.0
+        },
+        "pick_cool_then_place_in_recep": {
+          "tasks": 25,
+          "filtered_sr": 0.88,
+          "full_sr": 0.92,
+          "delta_pp": -4.0000000000000036
+        },
+        "pick_heat_then_place_in_recep": {
+          "tasks": 16,
+          "filtered_sr": 0.9375,
+          "full_sr": 0.9375,
+          "delta_pp": 0.0
+        },
+        "pick_two_obj_and_place": {
+          "tasks": 24,
+          "filtered_sr": 0.7083333333333334,
+          "full_sr": 0.75,
+          "delta_pp": -4.1666666666666625
+        }
+      }
+    },
+    {
+      "seed": 1,
+      "tasks": 140,
+      "paired_counts": {
+        "both_success": 114,
+        "filtered_only": 3,
+        "full_only": 11,
+        "both_failure": 12
+      },
+      "filtered": {
+        "tasks": 140,
+        "successes": 117,
+        "success_rate": 0.8357142857142857,
+        "mean_decisions": 11.5,
+        "mean_environment_steps": 11.485714285714286,
+        "invalid_actions": 2,
+        "truncated_episodes": 23,
+        "empty_bank_episodes": 10,
+        "stored_episodes": 114,
+        "native_failed_stored_episodes": 0,
+        "generation_failures": {
+          "calls": 0,
+          "episodes": 0,
+          "by_role": {},
+          "by_finish_reason": {}
+        },
+        "native_vs_judge": {
+          "labeled_episodes": 140,
+          "true_positive": 114,
+          "false_positive": 0,
+          "false_negative": 3,
+          "true_negative": 23,
+          "parse_errors": 0,
+          "generation_errors": 0
+        },
+        "usage_by_role": {
+          "curator": {
+            "calls": 140,
+            "prompt_tokens": 229859,
+            "completion_tokens": 32503
+          },
+          "executor": {
+            "calls": 1610,
+            "prompt_tokens": 1139968,
+            "completion_tokens": 25879
+          },
+          "judge": {
+            "calls": 140,
+            "prompt_tokens": 130823,
+            "completion_tokens": 7204
+          }
+        },
+        "prompt_tokens": 1500650,
+        "completion_tokens": 65586,
+        "storage": {
+          "stored_entries": 114,
+          "final_bank_size": 114,
+          "native_failed_stored_entries": 0,
+          "judge_failed_stored_entries": 0,
+          "native_failed_stored_fraction": 0.0,
+          "judge_failed_stored_fraction": 0.0,
+          "batch_growth": [
+            {
+              "batch_index": 0,
+              "tasks": 10,
+              "success_rate": 0.6,
+              "bank_before": 0,
+              "new_entries": 6,
+              "bank_after": 6,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 0,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 0,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 1,
+              "tasks": 10,
+              "success_rate": 1,
+              "bank_before": 6,
+              "new_entries": 10,
+              "bank_after": 16,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 2,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 16,
+              "new_entries": 9,
+              "bank_after": 25,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 3,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 25,
+              "new_entries": 8,
+              "bank_after": 33,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 4,
+              "tasks": 10,
+              "success_rate": 0.8,
+              "bank_before": 33,
+              "new_entries": 7,
+              "bank_after": 40,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 5,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 40,
+              "new_entries": 9,
+              "bank_after": 49,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 6,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 49,
+              "new_entries": 9,
+              "bank_after": 58,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 7,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 58,
+              "new_entries": 9,
+              "bank_after": 67,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 8,
+              "tasks": 10,
+              "success_rate": 0.7,
+              "bank_before": 67,
+              "new_entries": 7,
+              "bank_after": 74,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 9,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 74,
+              "new_entries": 8,
+              "bank_after": 82,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 10,
+              "tasks": 10,
+              "success_rate": 0.7,
+              "bank_before": 82,
+              "new_entries": 7,
+              "bank_after": 89,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 11,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 89,
+              "new_entries": 9,
+              "bank_after": 98,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 12,
+              "tasks": 10,
+              "success_rate": 0.7,
+              "bank_before": 98,
+              "new_entries": 7,
+              "bank_after": 105,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 13,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 105,
+              "new_entries": 9,
+              "bank_after": 114,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            }
+          ],
+          "retrieval": {
+            "references": 390,
+            "native_failed_references": 0,
+            "judge_failed_references": 0,
+            "episodes_with_retrieval": 130,
+            "episodes_with_native_failed_retrieval": 0,
+            "episodes_with_judge_failed_retrieval": 0,
+            "native_failed_fraction": 0.0,
+            "judge_failed_fraction": 0.0
+          }
+        }
+      },
+      "full": {
+        "tasks": 140,
+        "successes": 125,
+        "success_rate": 0.8928571428571429,
+        "mean_decisions": 11.235714285714286,
+        "mean_environment_steps": 11.192857142857143,
+        "invalid_actions": 6,
+        "truncated_episodes": 15,
+        "empty_bank_episodes": 10,
+        "stored_episodes": 140,
+        "native_failed_stored_episodes": 15,
+        "generation_failures": {
+          "calls": 0,
+          "episodes": 0,
+          "by_role": {},
+          "by_finish_reason": {}
+        },
+        "native_vs_judge": {
+          "labeled_episodes": 140,
+          "true_positive": 121,
+          "false_positive": 0,
+          "false_negative": 4,
+          "true_negative": 15,
+          "parse_errors": 0,
+          "generation_errors": 0
+        },
+        "usage_by_role": {
+          "curator": {
+            "calls": 140,
+            "prompt_tokens": 301173,
+            "completion_tokens": 33271
+          },
+          "executor": {
+            "calls": 1573,
+            "prompt_tokens": 1112753,
+            "completion_tokens": 25242
+          },
+          "judge": {
+            "calls": 140,
+            "prompt_tokens": 128226,
+            "completion_tokens": 7107
+          }
+        },
+        "prompt_tokens": 1542152,
+        "completion_tokens": 65620,
+        "storage": {
+          "stored_entries": 140,
+          "final_bank_size": 140,
+          "native_failed_stored_entries": 15,
+          "judge_failed_stored_entries": 19,
+          "native_failed_stored_fraction": 0.10714285714285714,
+          "judge_failed_stored_fraction": 0.1357142857142857,
+          "batch_growth": [
+            {
+              "batch_index": 0,
+              "tasks": 10,
+              "success_rate": 0.7,
+              "bank_before": 0,
+              "new_entries": 10,
+              "bank_after": 10,
+              "native_failed_new_entries": 3,
+              "judge_failed_new_entries": 3,
+              "retrieval": {
+                "references": 0,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 0,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 1,
+              "tasks": 10,
+              "success_rate": 1,
+              "bank_before": 10,
+              "new_entries": 10,
+              "bank_after": 20,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 7,
+                "judge_failed_references": 7,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 7,
+                "episodes_with_judge_failed_retrieval": 7
+              }
+            },
+            {
+              "batch_index": 2,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 20,
+              "new_entries": 10,
+              "bank_after": 30,
+              "native_failed_new_entries": 1,
+              "judge_failed_new_entries": 1,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 5,
+                "judge_failed_references": 5,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 3,
+                "episodes_with_judge_failed_retrieval": 3
+              }
+            },
+            {
+              "batch_index": 3,
+              "tasks": 10,
+              "success_rate": 1,
+              "bank_before": 30,
+              "new_entries": 10,
+              "bank_after": 40,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 1,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 3,
+                "judge_failed_references": 3,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 3,
+                "episodes_with_judge_failed_retrieval": 3
+              }
+            },
+            {
+              "batch_index": 4,
+              "tasks": 10,
+              "success_rate": 0.8,
+              "bank_before": 40,
+              "new_entries": 10,
+              "bank_after": 50,
+              "native_failed_new_entries": 2,
+              "judge_failed_new_entries": 3,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 3,
+                "judge_failed_references": 6,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 3,
+                "episodes_with_judge_failed_retrieval": 6
+              }
+            },
+            {
+              "batch_index": 5,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 50,
+              "new_entries": 10,
+              "bank_after": 60,
+              "native_failed_new_entries": 1,
+              "judge_failed_new_entries": 1,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 1,
+                "judge_failed_references": 1,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 1,
+                "episodes_with_judge_failed_retrieval": 1
+              }
+            },
+            {
+              "batch_index": 6,
+              "tasks": 10,
+              "success_rate": 1,
+              "bank_before": 60,
+              "new_entries": 10,
+              "bank_after": 70,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 3,
+                "judge_failed_references": 3,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 3,
+                "episodes_with_judge_failed_retrieval": 3
+              }
+            },
+            {
+              "batch_index": 7,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 70,
+              "new_entries": 10,
+              "bank_after": 80,
+              "native_failed_new_entries": 1,
+              "judge_failed_new_entries": 1,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 4,
+                "judge_failed_references": 4,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 4,
+                "episodes_with_judge_failed_retrieval": 4
+              }
+            },
+            {
+              "batch_index": 8,
+              "tasks": 10,
+              "success_rate": 0.8,
+              "bank_before": 80,
+              "new_entries": 10,
+              "bank_after": 90,
+              "native_failed_new_entries": 2,
+              "judge_failed_new_entries": 2,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 1,
+                "judge_failed_references": 1,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 1,
+                "episodes_with_judge_failed_retrieval": 1
+              }
+            },
+            {
+              "batch_index": 9,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 90,
+              "new_entries": 10,
+              "bank_after": 100,
+              "native_failed_new_entries": 1,
+              "judge_failed_new_entries": 2,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 4,
+                "judge_failed_references": 6,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 4,
+                "episodes_with_judge_failed_retrieval": 5
+              }
+            },
+            {
+              "batch_index": 10,
+              "tasks": 10,
+              "success_rate": 1,
+              "bank_before": 100,
+              "new_entries": 10,
+              "bank_after": 110,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 3,
+                "judge_failed_references": 3,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 3,
+                "episodes_with_judge_failed_retrieval": 3
+              }
+            },
+            {
+              "batch_index": 11,
+              "tasks": 10,
+              "success_rate": 0.8,
+              "bank_before": 110,
+              "new_entries": 10,
+              "bank_after": 120,
+              "native_failed_new_entries": 2,
+              "judge_failed_new_entries": 2,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 1,
+                "judge_failed_references": 1,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 1,
+                "episodes_with_judge_failed_retrieval": 1
+              }
+            },
+            {
+              "batch_index": 12,
+              "tasks": 10,
+              "success_rate": 0.8,
+              "bank_before": 120,
+              "new_entries": 10,
+              "bank_after": 130,
+              "native_failed_new_entries": 2,
+              "judge_failed_new_entries": 3,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 5,
+                "judge_failed_references": 5,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 4,
+                "episodes_with_judge_failed_retrieval": 4
+              }
+            },
+            {
+              "batch_index": 13,
+              "tasks": 10,
+              "success_rate": 1,
+              "bank_before": 130,
+              "new_entries": 10,
+              "bank_after": 140,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 7,
+                "judge_failed_references": 7,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 4,
+                "episodes_with_judge_failed_retrieval": 4
+              }
+            }
+          ],
+          "retrieval": {
+            "references": 390,
+            "native_failed_references": 47,
+            "judge_failed_references": 52,
+            "episodes_with_retrieval": 130,
+            "episodes_with_native_failed_retrieval": 41,
+            "episodes_with_judge_failed_retrieval": 45,
+            "native_failed_fraction": 0.12051282051282051,
+            "judge_failed_fraction": 0.13333333333333333
+          }
+        }
+      },
+      "delta_pp": -5.714285714285716,
+      "mean_decision_delta": 0.26428571428571423,
+      "mean_environment_step_delta": 0.2928571428571427,
+      "by_task_type": {
+        "look_at_obj_in_light": {
+          "tasks": 13,
+          "filtered_sr": 0.6923076923076923,
+          "full_sr": 0.8461538461538461,
+          "delta_pp": -15.384615384615385
+        },
+        "pick_and_place_simple": {
+          "tasks": 35,
+          "filtered_sr": 0.9428571428571428,
+          "full_sr": 0.9714285714285714,
+          "delta_pp": -2.857142857142858
+        },
+        "pick_clean_then_place_in_recep": {
+          "tasks": 27,
+          "filtered_sr": 0.9259259259259259,
+          "full_sr": 0.9259259259259259,
+          "delta_pp": 0.0
+        },
+        "pick_cool_then_place_in_recep": {
+          "tasks": 25,
+          "filtered_sr": 0.76,
+          "full_sr": 0.84,
+          "delta_pp": -7.9999999999999964
+        },
+        "pick_heat_then_place_in_recep": {
+          "tasks": 16,
+          "filtered_sr": 0.875,
+          "full_sr": 0.9375,
+          "delta_pp": -6.25
+        },
+        "pick_two_obj_and_place": {
+          "tasks": 24,
+          "filtered_sr": 0.7083333333333334,
+          "full_sr": 0.7916666666666666,
+          "delta_pp": -8.333333333333325
+        }
+      }
+    },
+    {
+      "seed": 2,
+      "tasks": 140,
+      "paired_counts": {
+        "both_success": 120,
+        "filtered_only": 3,
+        "full_only": 5,
+        "both_failure": 12
+      },
+      "filtered": {
+        "tasks": 140,
+        "successes": 123,
+        "success_rate": 0.8785714285714286,
+        "mean_decisions": 11.142857142857142,
+        "mean_environment_steps": 11.121428571428572,
+        "invalid_actions": 3,
+        "truncated_episodes": 17,
+        "empty_bank_episodes": 10,
+        "stored_episodes": 119,
+        "native_failed_stored_episodes": 0,
+        "generation_failures": {
+          "calls": 0,
+          "episodes": 0,
+          "by_role": {},
+          "by_finish_reason": {}
+        },
+        "native_vs_judge": {
+          "labeled_episodes": 140,
+          "true_positive": 119,
+          "false_positive": 0,
+          "false_negative": 4,
+          "true_negative": 17,
+          "parse_errors": 0,
+          "generation_errors": 0
+        },
+        "usage_by_role": {
+          "curator": {
+            "calls": 140,
+            "prompt_tokens": 255967,
+            "completion_tokens": 31180
+          },
+          "executor": {
+            "calls": 1560,
+            "prompt_tokens": 1084061,
+            "completion_tokens": 24983
+          },
+          "judge": {
+            "calls": 140,
+            "prompt_tokens": 126986,
+            "completion_tokens": 7159
+          }
+        },
+        "prompt_tokens": 1467014,
+        "completion_tokens": 63322,
+        "storage": {
+          "stored_entries": 119,
+          "final_bank_size": 119,
+          "native_failed_stored_entries": 0,
+          "judge_failed_stored_entries": 0,
+          "native_failed_stored_fraction": 0.0,
+          "judge_failed_stored_fraction": 0.0,
+          "batch_growth": [
+            {
+              "batch_index": 0,
+              "tasks": 10,
+              "success_rate": 0.8,
+              "bank_before": 0,
+              "new_entries": 8,
+              "bank_after": 8,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 0,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 0,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 1,
+              "tasks": 10,
+              "success_rate": 0.8,
+              "bank_before": 8,
+              "new_entries": 8,
+              "bank_after": 16,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 2,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 16,
+              "new_entries": 9,
+              "bank_after": 25,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 3,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 25,
+              "new_entries": 8,
+              "bank_after": 33,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 4,
+              "tasks": 10,
+              "success_rate": 1,
+              "bank_before": 33,
+              "new_entries": 9,
+              "bank_after": 42,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 5,
+              "tasks": 10,
+              "success_rate": 1,
+              "bank_before": 42,
+              "new_entries": 10,
+              "bank_after": 52,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 6,
+              "tasks": 10,
+              "success_rate": 0.8,
+              "bank_before": 52,
+              "new_entries": 8,
+              "bank_after": 60,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 7,
+              "tasks": 10,
+              "success_rate": 1,
+              "bank_before": 60,
+              "new_entries": 9,
+              "bank_after": 69,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 8,
+              "tasks": 10,
+              "success_rate": 0.8,
+              "bank_before": 69,
+              "new_entries": 8,
+              "bank_after": 77,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 9,
+              "tasks": 10,
+              "success_rate": 0.8,
+              "bank_before": 77,
+              "new_entries": 7,
+              "bank_after": 84,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 10,
+              "tasks": 10,
+              "success_rate": 1,
+              "bank_before": 84,
+              "new_entries": 10,
+              "bank_after": 94,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 11,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 94,
+              "new_entries": 9,
+              "bank_after": 103,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 12,
+              "tasks": 10,
+              "success_rate": 0.7,
+              "bank_before": 103,
+              "new_entries": 7,
+              "bank_after": 110,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 13,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 110,
+              "new_entries": 9,
+              "bank_after": 119,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            }
+          ],
+          "retrieval": {
+            "references": 390,
+            "native_failed_references": 0,
+            "judge_failed_references": 0,
+            "episodes_with_retrieval": 130,
+            "episodes_with_native_failed_retrieval": 0,
+            "episodes_with_judge_failed_retrieval": 0,
+            "native_failed_fraction": 0.0,
+            "judge_failed_fraction": 0.0
+          }
+        }
+      },
+      "full": {
+        "tasks": 140,
+        "successes": 125,
+        "success_rate": 0.8928571428571429,
+        "mean_decisions": 10.928571428571429,
+        "mean_environment_steps": 10.9,
+        "invalid_actions": 4,
+        "truncated_episodes": 15,
+        "empty_bank_episodes": 10,
+        "stored_episodes": 140,
+        "native_failed_stored_episodes": 15,
+        "generation_failures": {
+          "calls": 0,
+          "episodes": 0,
+          "by_role": {},
+          "by_finish_reason": {}
+        },
+        "native_vs_judge": {
+          "labeled_episodes": 140,
+          "true_positive": 124,
+          "false_positive": 0,
+          "false_negative": 1,
+          "true_negative": 15,
+          "parse_errors": 0,
+          "generation_errors": 0
+        },
+        "usage_by_role": {
+          "curator": {
+            "calls": 140,
+            "prompt_tokens": 279029,
+            "completion_tokens": 33043
+          },
+          "executor": {
+            "calls": 1530,
+            "prompt_tokens": 1074804,
+            "completion_tokens": 24602
+          },
+          "judge": {
+            "calls": 140,
+            "prompt_tokens": 125349,
+            "completion_tokens": 7079
+          }
+        },
+        "prompt_tokens": 1479182,
+        "completion_tokens": 64724,
+        "storage": {
+          "stored_entries": 140,
+          "final_bank_size": 140,
+          "native_failed_stored_entries": 15,
+          "judge_failed_stored_entries": 16,
+          "native_failed_stored_fraction": 0.10714285714285714,
+          "judge_failed_stored_fraction": 0.11428571428571428,
+          "batch_growth": [
+            {
+              "batch_index": 0,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 0,
+              "new_entries": 10,
+              "bank_after": 10,
+              "native_failed_new_entries": 1,
+              "judge_failed_new_entries": 1,
+              "retrieval": {
+                "references": 0,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 0,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 1,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 10,
+              "new_entries": 10,
+              "bank_after": 20,
+              "native_failed_new_entries": 1,
+              "judge_failed_new_entries": 1,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 3,
+                "judge_failed_references": 3,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 3,
+                "episodes_with_judge_failed_retrieval": 3
+              }
+            },
+            {
+              "batch_index": 2,
+              "tasks": 10,
+              "success_rate": 1,
+              "bank_before": 20,
+              "new_entries": 10,
+              "bank_after": 30,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 1,
+                "judge_failed_references": 1,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 1,
+                "episodes_with_judge_failed_retrieval": 1
+              }
+            },
+            {
+              "batch_index": 3,
+              "tasks": 10,
+              "success_rate": 0.8,
+              "bank_before": 30,
+              "new_entries": 10,
+              "bank_after": 40,
+              "native_failed_new_entries": 2,
+              "judge_failed_new_entries": 2,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 2,
+                "judge_failed_references": 2,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 2,
+                "episodes_with_judge_failed_retrieval": 2
+              }
+            },
+            {
+              "batch_index": 4,
+              "tasks": 10,
+              "success_rate": 1,
+              "bank_before": 40,
+              "new_entries": 10,
+              "bank_after": 50,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 1,
+                "judge_failed_references": 1,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 1,
+                "episodes_with_judge_failed_retrieval": 1
+              }
+            },
+            {
+              "batch_index": 5,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 50,
+              "new_entries": 10,
+              "bank_after": 60,
+              "native_failed_new_entries": 1,
+              "judge_failed_new_entries": 1,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 2,
+                "judge_failed_references": 2,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 2,
+                "episodes_with_judge_failed_retrieval": 2
+              }
+            },
+            {
+              "batch_index": 6,
+              "tasks": 10,
+              "success_rate": 0.8,
+              "bank_before": 60,
+              "new_entries": 10,
+              "bank_after": 70,
+              "native_failed_new_entries": 2,
+              "judge_failed_new_entries": 2,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 2,
+                "judge_failed_references": 2,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 1,
+                "episodes_with_judge_failed_retrieval": 1
+              }
+            },
+            {
+              "batch_index": 7,
+              "tasks": 10,
+              "success_rate": 1,
+              "bank_before": 70,
+              "new_entries": 10,
+              "bank_after": 80,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 1,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 0,
+                "judge_failed_references": 0,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 0,
+                "episodes_with_judge_failed_retrieval": 0
+              }
+            },
+            {
+              "batch_index": 8,
+              "tasks": 10,
+              "success_rate": 0.8,
+              "bank_before": 80,
+              "new_entries": 10,
+              "bank_after": 90,
+              "native_failed_new_entries": 2,
+              "judge_failed_new_entries": 2,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 2,
+                "judge_failed_references": 2,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 2,
+                "episodes_with_judge_failed_retrieval": 2
+              }
+            },
+            {
+              "batch_index": 9,
+              "tasks": 10,
+              "success_rate": 0.8,
+              "bank_before": 90,
+              "new_entries": 10,
+              "bank_after": 100,
+              "native_failed_new_entries": 2,
+              "judge_failed_new_entries": 2,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 2,
+                "judge_failed_references": 2,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 2,
+                "episodes_with_judge_failed_retrieval": 2
+              }
+            },
+            {
+              "batch_index": 10,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 100,
+              "new_entries": 10,
+              "bank_after": 110,
+              "native_failed_new_entries": 1,
+              "judge_failed_new_entries": 1,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 5,
+                "judge_failed_references": 5,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 5,
+                "episodes_with_judge_failed_retrieval": 5
+              }
+            },
+            {
+              "batch_index": 11,
+              "tasks": 10,
+              "success_rate": 0.9,
+              "bank_before": 110,
+              "new_entries": 10,
+              "bank_after": 120,
+              "native_failed_new_entries": 1,
+              "judge_failed_new_entries": 1,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 6,
+                "judge_failed_references": 6,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 5,
+                "episodes_with_judge_failed_retrieval": 5
+              }
+            },
+            {
+              "batch_index": 12,
+              "tasks": 10,
+              "success_rate": 0.8,
+              "bank_before": 120,
+              "new_entries": 10,
+              "bank_after": 130,
+              "native_failed_new_entries": 2,
+              "judge_failed_new_entries": 2,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 5,
+                "judge_failed_references": 5,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 4,
+                "episodes_with_judge_failed_retrieval": 4
+              }
+            },
+            {
+              "batch_index": 13,
+              "tasks": 10,
+              "success_rate": 1,
+              "bank_before": 130,
+              "new_entries": 10,
+              "bank_after": 140,
+              "native_failed_new_entries": 0,
+              "judge_failed_new_entries": 0,
+              "retrieval": {
+                "references": 30,
+                "native_failed_references": 3,
+                "judge_failed_references": 3,
+                "episodes_with_retrieval": 10,
+                "episodes_with_native_failed_retrieval": 3,
+                "episodes_with_judge_failed_retrieval": 3
+              }
+            }
+          ],
+          "retrieval": {
+            "references": 390,
+            "native_failed_references": 34,
+            "judge_failed_references": 34,
+            "episodes_with_retrieval": 130,
+            "episodes_with_native_failed_retrieval": 31,
+            "episodes_with_judge_failed_retrieval": 31,
+            "native_failed_fraction": 0.08717948717948718,
+            "judge_failed_fraction": 0.08717948717948718
+          }
+        }
+      },
+      "delta_pp": -1.4285714285714346,
+      "mean_decision_delta": 0.21428571428571352,
+      "mean_environment_step_delta": 0.22142857142857153,
+      "by_task_type": {
+        "look_at_obj_in_light": {
+          "tasks": 13,
+          "filtered_sr": 0.6923076923076923,
+          "full_sr": 0.8461538461538461,
+          "delta_pp": -15.384615384615385
+        },
+        "pick_and_place_simple": {
+          "tasks": 35,
+          "filtered_sr": 0.9714285714285714,
+          "full_sr": 0.9428571428571428,
+          "delta_pp": 2.857142857142858
+        },
+        "pick_clean_then_place_in_recep": {
+          "tasks": 27,
+          "filtered_sr": 0.9259259259259259,
+          "full_sr": 0.9629629629629629,
+          "delta_pp": -3.703703703703698
+        },
+        "pick_cool_then_place_in_recep": {
+          "tasks": 25,
+          "filtered_sr": 0.92,
+          "full_sr": 0.92,
+          "delta_pp": 0.0
+        },
+        "pick_heat_then_place_in_recep": {
+          "tasks": 16,
+          "filtered_sr": 0.9375,
+          "full_sr": 1,
+          "delta_pp": -6.25
+        },
+        "pick_two_obj_and_place": {
+          "tasks": 24,
+          "filtered_sr": 0.7083333333333334,
+          "full_sr": 0.6666666666666666,
+          "delta_pp": 4.166666666666674
+        }
+      }
+    }
+  ],
+  "statistical_scope": {
+    "std_definition": "sample standard deviation across seeds, ddof=1",
+    "unique_task_count": 140,
+    "repeated_episode_pairs": 420,
+    "pooled_significance_test": null,
+    "note": "Repeated tasks and memory-coupled streams are not independent observations; counts and mean/std are descriptive."
+  },
+  "audit": {
+    "passed": true,
+    "errors": [],
+    "software_tests_passed": 150,
+    "software_subtests_passed": 108,
+    "native_replayed_episodes": 40,
+    "all_episode_structure_prompt_ranking_and_metric_checks": 840,
+    "audit_model_api_calls": 0
+  },
+  "execution_note": "An execution interruption occurred after both seed0 arms committed 40 episodes. Resumed with identical config/source hashes. Committed episodes were preserved. Usage totals cover committed calls only; uncommitted interrupted requests and transport retry overhead may have incurred additional billing.",
+  "public_summary_excludes": [
+    "API endpoints",
+    "credential values or variable names",
+    "personal absolute paths",
+    "raw model requests/responses"
+  ],
+  "dataset_integrity": {
+    "file_count": 18416,
+    "before_sha256": "ea156e972ba076f73968c690ae732c5dc7a3978f3c6a39270cc5aa1abadad278",
+    "after_sha256": "ea156e972ba076f73968c690ae732c5dc7a3978f3c6a39270cc5aa1abadad278",
+    "unchanged": true,
+    "before_reference": "Previous benchmark fingerprint, also matched at the ablation preflight"
+  }
+}

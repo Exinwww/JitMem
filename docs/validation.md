@@ -96,4 +96,17 @@ JITMEM 三轮最终 bank 各 118 条，judge/native 的重复 episode 计数为 
 
 两组同一cool-mug数据语义例外在重放中再次出现：native成功而judge失败，过滤组不保存，全量组保留并显示failure。保持原数据与gate，不用native标签改写judge。独立报告位于本机 `outputs/storage_ablation_first_batch_audit.json`。
 
-正式评测两组均重新运行，使用安全加固后版本的相同源码哈希，140任务×seeds0/1/2，每个seed空库。一次执行中断时，两组各已完整提交40个任务；检查没有残留评测进程后，从相同配置checkpoint续跑。已提交记录不重跑、不重写，未提交请求可能产生额外调用成本，不将部分run当作完整SR。全量结果仍须通过三轮完整分析与最终独立审计后才报告。
+正式评测两组均重新运行并全部完成，使用安全加固后版本的相同源码哈希，140任务×seeds0/1/2，每个seed空库。一次执行中断时，两组各已完整提交40个任务；检查没有残留评测进程后，从相同配置checkpoint续跑。已提交记录不重跑、不重写，未提交请求可能产生额外调用成本；报告用量仅覆盖已提交记录，不能倒推完整账单。
+
+| Seed | 过滤成功 / 140 | 全量成功 / 140 | 过滤减全量（百分点） |
+| --- | ---: | ---: | ---: |
+| 0 | 120 | 122 | −1.43 |
+| 1 | 117 | 125 | −5.71 |
+| 2 | 123 | 125 | −1.43 |
+| Mean ± sample std | 85.71 ± 2.14% | 88.57 ± 1.24% | −2.86 ± 2.47 |
+
+独立最终审计 `outputs/storage_ablation_final_audit.json` 为 `passed=true`、`errors=[]`、`complete_840_episode_audit=true`、`comparison_validated=true`。覆盖全部840条episode、84批、11,112次已记录模型调用，重建全部三角色messages，独立核对BM25排名、judge gate、原始轨迹、bank/checkpoint和汇总指标；11个源码文件和140个游戏hash均一致。审计不调用API；原生环境重放范围仍为前述40条。
+
+再次只读核对外部18,416个文件，其相对路径、大小、修改时间与完整内容的fingerprint同前：`ea156e972ba076f73968c690ae732c5dc7a3978f3c6a39270cc5aa1abadad278`。没有修改数据或用原生标签替换judge。
+
+本次未复现论文“过滤更优”的方向；模型与提示词差异及统计边界见[存储消融结果](results/alfworld_storage_ablation_2026-10-09.md)。版本管理只保存经过字段白名单导出的[结构化汇总](results/alfworld_storage_ablation_2026-10-09.json)，完整比较、请求与审计保留在本机被忽略的 `outputs/`。

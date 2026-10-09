@@ -2,9 +2,9 @@
 
 这个项目实现 [Just-in-Time Memory](https://arxiv.org/pdf/2609.27334) 的推理与 streaming 评估流程，使用可配置的模型 API，无本地模型训练。当前对应 prompted / untrained curator 变体；普通模型 API 的结果不能当作论文 RL-trained JITMEM 的结果。
 
-ALFWorld 文本交互环境已在项目 `.venv` 中安装并验证。数据直接读取 `/Users/linbei/workspace/experiential_memory/data/alfworld`。原始数据是游戏资源，并非已完成的 LLM 轨迹；默认记忆库在每个 run 开始时为空，由模型执行任务后逐批积累。
+ALFWorld 文本交互环境已在项目 `.venv` 中安装并验证。数据直接读取本机配置的 `data_root`，不复制进仓库。原始数据是游戏资源，并非已完成的 LLM 轨迹；默认记忆库在每个 run 开始时为空，由模型执行任务后逐批积累。
 
-已完成用户 API 的正式成对评测：`valid_seen` 全部 140 个任务，seeds 0、1、2，每组 420 次、共 840 次真实交互。curator/executor 配置模型名均为 `gpt-5.5`；无 warm start，batch10、workers10、history3、最多30次决策。成功率由原生环境判定，均值与样本标准差按三轮计算。
+2026-10-08 已完成用户 API 的 no-memory / prompted JITMEM 成对评测：`valid_seen` 全部 140 个任务，seeds 0、1、2，每组 420 次、共 840 次真实交互。curator/executor 配置模型名均为 `gpt-5.5`；无 warm start，batch10、workers10、history3、最多30次决策。成功率由原生环境判定，均值与样本标准差按三轮计算。
 
 | 方法 | 成功率 mean ± std | 平均决策次数 | 全角色 input + output tokens |
 | --- | ---: | ---: | ---: |
@@ -12,6 +12,15 @@ ALFWorld 文本交互环境已在项目 `.venv` 中安装并验证。数据直�
 | prompted JITMEM | 86.67 ± 0.41% | 11.23 | 4,623,861 |
 
 成功率提升 8.81 个百分点，决策次数减少 24.35%，总 token 用量增加 53.02%。模型名来自 API 配置，不能据此验证服务端模型权重；本次结果属于当前 prompted 实现。仓库保存 [评测结果报告](docs/results/alfworld_valid_seen_2026-10-08.md) 与 [结构化结果](docs/results/alfworld_valid_seen_2026-10-08.json)。完整逐任务证据和原始请求日志保存在本地 `outputs/`，执行分析命令可生成 `outputs/comparison/comparison.md`。外部数据 18,416 个文件的内容、大小和修改时间在评测前后均未改变。
+
+2026-10-09 已另行完成论文 Table 9 的存储消融，两组使用安全加固后相同实现，重新进行 140任务×3轮×2组，共840次真实交互：
+
+| 存储策略 | 成功率 mean ± sample std | 成功 / 420 | 平均决策次数 |
+| --- | ---: | ---: | ---: |
+| 质量过滤：仅保留 judge 成功轨迹 | 85.71 ± 2.14% | 360 / 420 | 11.33 |
+| 全量存储：向 curator 展示 judge 标签 | 88.57 ± 1.24% | 372 / 420 | 11.12 |
+
+过滤减全量为 **−2.86 ± 2.47 个百分点**，本次 API 配置未复现论文“过滤更优”的方向。论文使用未训练的 Qwen3-8B curator，本次 curator/executor 均为配置的 `gpt-5.5`，提示词也有改写；三轮差异为描述性结果，不宣称统计显著或外推到原模型。独立审计已核对全部840条记录、prompt、BM25排序与指标；另有40条原生轨迹重放。详细数字见[存储消融结果](docs/results/alfworld_storage_ablation_2026-10-09.md)与[结构化结果](docs/results/alfworld_storage_ablation_2026-10-09.json)。
 
 ## 仓库结构
 

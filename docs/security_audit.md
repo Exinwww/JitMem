@@ -35,3 +35,13 @@ Gitleaks CI模板位于`configs/secret-scan.workflow.example.yml`，配置push/p
 完整本地脱敏扫描记录位于`outputs/security_audit/`，不提交。新克隆的hook启用和手动扫描方式见[README](../README.md)。审计结论对应已检查的内容和当前配置；后续提交继续经过上述扫描。
 
 修复后的完整软件验证：`105 passed, 108 subtests passed`；Ruff检查、21个文件格式检查、hook和安装脚本语法检查均通过。配置的凭证字段拒绝、非法header凭证拒绝、10种同/跨origin重定向与提交hook负向验证均使用假数据和本机环境。
+
+## 存储消融发布检查（2026-10-09）
+
+新增报告采用字段白名单，只公开实验协议、汇总指标、版本与源码指纹，不公开endpoint、凭证值或变量名、个人绝对路径、逐任务请求与响应。原始记录、checkpoint、本机配置与审计工具继续留在被Git忽略的 `outputs/` 或 `*.local.toml`；提交前扫描暂存区，推送前扫描完整历史。
+
+本机内存中读取的2个不同凭证，经literal、URL编码、JSON转义和base64比对，覆盖1,879个项目/运行记录文件、63个Git blob（包括不可达对象）、Git配置与HEAD日志，均无匹配。检查不输出或持久化凭证值，不调用模型API。依赖、下载的Python、扫描器二进制和缓存仍不在这个文件扫描范围。
+
+Gitleaks扫描公开文档无命中；另检查两组新原始记录共约126.75 MB。每组只命中一处manifest中的新 `api.py` 源码SHA256，均已与当前公开源文件完整内容独立核对，是指纹误报。未为此增加白名单，也未扩大任何目录/文件例外；公开汇总将源码指纹写为独立的 `file` / `sha256` 字段。
+
+再次核对GitHub：仓库为public，原生secret scanning与push protection均enabled，开放密钥告警数量为0。公开汇总的独立复核、暂存区和完整历史扫描均通过；检查结论限于本次内容及上述范围。本地脱敏证据位于 `outputs/security_audit/storage_ablation_*`。
