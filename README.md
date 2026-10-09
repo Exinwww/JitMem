@@ -2,9 +2,20 @@
 
 这个项目实现 [Just-in-Time Memory](https://arxiv.org/pdf/2609.27334) 的推理与 streaming 评估流程，使用可配置的模型 API，无本地模型训练。当前对应 prompted / untrained curator 变体；普通模型 API 的结果不能当作论文 RL-trained JITMEM 的结果。
 
-当前正式配置使用 **paper-v1原文提示词**：从固定版本论文源包提取curator/executor/distillation，judge沿用论文引用的SkillOS原模板；同时对齐可核查的history、动作解析、原生feedback和executor-only效率口径。[原文对齐说明](docs/paper_fidelity.md)列出已修正差异和作者仍未公开的细节。下列已发表数字来自旧legacy-paraphrase协议，不能当作新协议的结果。
+当前正式配置使用 **paper-v1原文提示词**：从固定版本论文源包提取curator/executor/distillation，judge沿用论文引用的SkillOS原模板；同时对齐可核查的history、动作解析、原生feedback和executor-only效率口径。[原文对齐说明](docs/paper_fidelity.md)列出已修正差异和作者仍未公开的细节。distillation是可复用资产，本次任务自适应存储消融没有调用蒸馏。
 
 ALFWorld 文本交互环境已在项目 `.venv` 中安装并验证。数据直接读取本机配置的 `data_root`，不复制进仓库。原始数据是游戏资源，并非已完成的 LLM 轨迹；默认记忆库在每个 run 开始时为空，由模型执行任务后逐批积累。
+
+2026-10-09 已使用paper-v1重新完成Table9存储消融：`valid_seen`全部140任务×seeds0/1/2×2组，共840条真实episode评测、9,187次executor原生交互；curator/executor均为API配置的`gpt-5.5`，每轮空库，batch10、workers10、history3、最多30次原生交互。
+
+| 存储策略 | Native SR mean ± sample std | 成功 / 420 | Executor交互 / task |
+| --- | ---: | ---: | ---: |
+| 质量过滤：仅保留judge成功轨迹 | 88.57 ± 2.58% | 372 / 420 | 10.90 ± 0.70 |
+| 全量存储：向curator展示judge标签 | 88.33 ± 1.49% | 371 / 420 | 10.98 ± 0.30 |
+
+过滤减全量为 **+0.24 ± 3.93 个百分点**，仅多1次成功，三轮差异方向有正有负，不能支持稳定的过滤优势。主SR由原生环境评分；效率按Table4只计executor，其他用量单列诊断。全部840条记录通过独立审计，另有40条原生环境重放，外部18,416个数据文件保持不变。见[原文协议结果](docs/results/alfworld_storage_ablation_paper_v1_2026-10-09.md)和[结构化汇总](docs/results/alfworld_storage_ablation_paper_v1_2026-10-09.json)。原文未公开的runtime、检索与序列化细节仍有明确实现选择，不能保证差异只来自模型。
+
+以下两项为历史legacy-paraphrase结果，不代表当前paper-v1协议，也不用于估计原文提示词的独立因果影响。
 
 2026-10-08 已完成用户 API 的 no-memory / prompted JITMEM 成对评测：`valid_seen` 全部 140 个任务，seeds 0、1、2，每组 420 次、共 840 次真实交互。curator/executor 配置模型名均为 `gpt-5.5`；无 warm start，batch10、workers10、history3、最多30次决策。成功率由原生环境判定，均值与样本标准差按三轮计算。
 
@@ -15,7 +26,7 @@ ALFWorld 文本交互环境已在项目 `.venv` 中安装并验证。数据直�
 
 成功率提升 8.81 个百分点，决策次数减少 24.35%，总 token 用量增加 53.02%。模型名来自 API 配置，不能据此验证服务端模型权重；本次结果属于当前 prompted 实现。仓库保存 [评测结果报告](docs/results/alfworld_valid_seen_2026-10-08.md) 与 [结构化结果](docs/results/alfworld_valid_seen_2026-10-08.json)。完整逐任务证据和原始请求日志保存在本地 `outputs/`，执行分析命令可生成 `outputs/comparison/comparison.md`。外部数据 18,416 个文件的内容、大小和修改时间在评测前后均未改变。
 
-2026-10-09 已另行完成论文 Table 9 的存储消融，两组使用安全加固后相同实现，重新进行 140任务×3轮×2组，共840次真实交互：
+2026-10-09 的旧协议存储消融，两组使用安全加固后相同实现，进行 140任务×3轮×2组，共840次真实交互：
 
 | 存储策略 | 成功率 mean ± sample std | 成功 / 420 | 平均决策次数 |
 | --- | ---: | ---: | ---: |
@@ -83,7 +94,7 @@ flowchart LR
 当前已验证 Python 3.11.16、ALFWorld 0.4.2、TextWorld 1.6.2、fast-downward-textworld 20.6.4，在 macOS Apple Silicon 使用原生 wheel。只安装 text mode，不下载模型权重、THOR 视觉环境或数据。完整已验证依赖版本保存在 `requirements-lock.txt`。重新安装时执行：
 
 ```bash
-cd /Users/linbei/workspace/Reproduction/JitMem
+cd /path/to/JitMem
 bash scripts/setup_alfworld.sh
 .venv/bin/python -m jitmem doctor
 .venv/bin/python -m jitmem env-smoke

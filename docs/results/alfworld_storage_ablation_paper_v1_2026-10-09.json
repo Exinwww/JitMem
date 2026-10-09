@@ -1,0 +1,1017 @@
+{
+  "schema_version": 2,
+  "kind": "public_paper_v1_alfworld_storage_ablation_summary",
+  "evaluation_date": "2026-10-09",
+  "timezone": "Asia/Shanghai",
+  "benchmark": true,
+  "prompt_profile": "paper-v1",
+  "executor_model": "gpt-5.5",
+  "curator_model": "gpt-5.5",
+  "model_identity_source": "API configuration; server weights not independently verified",
+  "variant": "API prompted/untrained curator with original published templates; no local training",
+  "split": "valid_seen",
+  "unique_tasks": 140,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "total_episodes": 840,
+  "difference_definition": "filtered minus label-annotated full storage",
+  "protocol": {
+    "batch_size": 10,
+    "workers": 10,
+    "max_steps": 30,
+    "history_window": 3,
+    "retrieval_k": 3,
+    "task_adaptive": true,
+    "cold_start": true,
+    "warm_start": null,
+    "method": "jitmem",
+    "filtered_policy": "judge",
+    "full_policy": "all",
+    "filtered_labels_visible": false,
+    "full_labels_visible": true,
+    "process_start_method": "spawn",
+    "memory_commit_order": "scheduled task order after batch",
+    "success_metric": "native verifier binary success; all evaluated tasks retained",
+    "primary_efficiency_scope": "executor-only input/output tokens K=1000 and interaction turns per task"
+  },
+  "sampling": {
+    "executor": {
+      "temperature": 1.0,
+      "max_tokens": 4096,
+      "omit_temperature": false
+    },
+    "curator": {
+      "temperature": 1.0,
+      "max_tokens": 8192,
+      "omit_temperature": false
+    }
+  },
+  "runtime": {
+    "python_version": [
+      3,
+      11,
+      16
+    ],
+    "packages": {
+      "alfworld": "0.4.2",
+      "textworld": "1.6.2",
+      "fast-downward-textworld": "20.6.4",
+      "jitmem-reproduction": "0.1.0"
+    }
+  },
+  "implementation_commit": "cc289e285da3753ec679c9cfe3219892330f3c6f",
+  "source_fingerprints": [
+    {
+      "file": "src/jitmem/__init__.py",
+      "sha256": "fe687808ac0902256465e9acc98f8e4b2f7419c34d135e914656f711d1b57c6e"
+    },
+    {
+      "file": "src/jitmem/__main__.py",
+      "sha256": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279"
+    },
+    {
+      "file": "src/jitmem/api.py",
+      "sha256": "89e5b9b98513dafd3cfe95384bacaff334156146b50b2775ca3d0879b4bbc2c6"
+    },
+    {
+      "file": "src/jitmem/cli.py",
+      "sha256": "e20fb7ddebabc1e34db91cd43bf51665fd61661c01178ed95137cfdbba53b355"
+    },
+    {
+      "file": "src/jitmem/config.py",
+      "sha256": "26c042ba631feefea79574df214903ae0fd25b85ab3db5bf7564eb9c894cd0ba"
+    },
+    {
+      "file": "src/jitmem/environments.py",
+      "sha256": "0a6c3dcde99b7a7550dbddbc4b0368b7754b1c2a3e906a2223dfb433829c8e5d"
+    },
+    {
+      "file": "src/jitmem/evaluation.py",
+      "sha256": "ac601ceeac1b7a361dec495e9b4ab8b44a73c4a802eb34af02f2e3f347df8755"
+    },
+    {
+      "file": "src/jitmem/memory.py",
+      "sha256": "e7c1b534ed8e7752d969cc3b8e9a21bfcd9e022d93bfda5d212a9e910182c317"
+    },
+    {
+      "file": "src/jitmem/paper_assets.py",
+      "sha256": "acb96fd79683e2fd6328e6e6afb11911f4fa37256d2b65891a1bb554ad2181e7"
+    },
+    {
+      "file": "src/jitmem/pipeline.py",
+      "sha256": "6fff0c8447193638006aebd2563005901a1d3c558be7415457e761820b2841f6"
+    },
+    {
+      "file": "src/jitmem/prompts.py",
+      "sha256": "ac2ec556645d4a1a2312c4c818d22b1b1374a40dc03146d53df549cba1339e7d"
+    },
+    {
+      "file": "src/jitmem/usage.py",
+      "sha256": "f601f2e3c24ab3dea3134f7d05b48377a27b4b6bd86b1d458b626a074b0203b6"
+    }
+  ],
+  "paper_assets": {
+    "profile": "paper-v1",
+    "sources": {
+      "jitmem": {
+        "version": "2609.27334v1",
+        "url": "https://arxiv.org/src/2609.27334v1",
+        "member": "sections/appendix_prompt.tex",
+        "archive_sha256": "7fbe36724756652232976b1b3de5e93710b0a8c36392cda5329135bb5b4ed667",
+        "member_sha256": "f0822e51102dfb5fbc4c30f6bb61d11585963d0f2295f167189a53c2badc9a8b"
+      },
+      "skillos": {
+        "version": "2605.06614v1",
+        "url": "https://arxiv.org/src/2605.06614v1",
+        "member": "figures/alfworld_judge.pdf",
+        "archive_sha256": "3a3f45d849aefdf58905ecb2ee836ea0035e827ae4af740e0960ac458c80c076",
+        "member_sha256": "12109bc451eee6e163944e1ca4f6510381a38ea9b38809ab42c96a362ae370e1"
+      }
+    },
+    "templates": [
+      {
+        "file": "curator.txt",
+        "sha256": "5194cf0991f6e6a9faf80c85b9ebe8d30f7727844432776936d63f84d2b17c04"
+      },
+      {
+        "file": "distillation.txt",
+        "sha256": "778916de8c3e8244632d4ebf1cc2d0b4817f3010b01a0f4e317a392444e970b0"
+      },
+      {
+        "file": "executor.txt",
+        "sha256": "1eccc28bab43f335fdfcad9a322fc687f519fb750131ed95cddcf8d5b2642b61"
+      },
+      {
+        "file": "judge_system.txt",
+        "sha256": "02fbbbb8a63a1caf090b7e9dfa5c0994862c07851096892ae56fde3ea3388db6"
+      },
+      {
+        "file": "judge_user.txt",
+        "sha256": "fda96911b4daf6f1cc0f331043f9b68557e197fb1081161224b03ff6ca0b8ba5"
+      }
+    ],
+    "judge_extraction": "SkillOS Figure 13 PDF text; title/bullet whitespace normalized using pypdf 6.10.0. Published words are retained; original runtime whitespace is unavailable."
+  },
+  "manifest_fingerprints": {
+    "filtered": "eb5acd891f65aca5b5bb58a338b737fb8d0dd0f792903d72b27f99782179a46f",
+    "full": "8922c2e598f7be92f2de5f9e04b42e3adf0c9d773c70e57a8c7de678c351ae91"
+  },
+  "across_seed": {
+    "filtered_sr_percent": {
+      "mean": 88.57142857142857,
+      "std": 2.5753937681885657
+    },
+    "full_sr_percent": {
+      "mean": 88.33333333333333,
+      "std": 1.4869042853329528
+    },
+    "delta_pp": {
+      "mean": 0.23809523809523725,
+      "std": 3.9339789623472208
+    },
+    "filtered_mean_decisions": {
+      "mean": 10.897619047619047,
+      "std": 0.7025584924930802
+    },
+    "full_mean_decisions": {
+      "mean": 10.976190476190476,
+      "std": 0.30357843129178064
+    },
+    "filtered_mean_environment_steps": {
+      "mean": 10.897619047619047,
+      "std": 0.7025584924930802
+    },
+    "full_mean_environment_steps": {
+      "mean": 10.976190476190476,
+      "std": 0.30357843129178064
+    },
+    "mean_decision_delta": {
+      "mean": -0.07857142857142858,
+      "std": 0.43588989435406683
+    },
+    "mean_environment_step_delta": {
+      "mean": -0.07857142857142858,
+      "std": 0.43588989435406683
+    },
+    "filtered_mean_executor_input_tokens_k": {
+      "mean": 8.836583333333333,
+      "std": 0.43441244722351274
+    },
+    "filtered_mean_executor_output_tokens_k": {
+      "mean": 0.7715452380952381,
+      "std": 0.05165541258822606
+    },
+    "filtered_mean_executor_interaction_turns": {
+      "mean": 10.897619047619047,
+      "std": 0.7025584924930802
+    },
+    "full_mean_executor_input_tokens_k": {
+      "mean": 8.928657142857142,
+      "std": 0.22351755615200183
+    },
+    "full_mean_executor_output_tokens_k": {
+      "mean": 0.7810261904761905,
+      "std": 0.0074657187050084775
+    },
+    "full_mean_executor_interaction_turns": {
+      "mean": 10.976190476190476,
+      "std": 0.30357843129178064
+    },
+    "by_task_type": {
+      "look_at_obj_in_light": {
+        "tasks_per_seed": 13,
+        "filtered_sr_percent": {
+          "mean": 87.17948717948718,
+          "std": 8.882311833686543
+        },
+        "full_sr_percent": {
+          "mean": 82.05128205128204,
+          "std": 11.75019408963036
+        },
+        "delta_pp": {
+          "mean": 5.128205128205132,
+          "std": 16.012815380508716
+        }
+      },
+      "pick_and_place_simple": {
+        "tasks_per_seed": 35,
+        "filtered_sr_percent": {
+          "mean": 94.28571428571428,
+          "std": 4.948716593053934
+        },
+        "full_sr_percent": {
+          "mean": 93.33333333333333,
+          "std": 1.6495721976846391
+        },
+        "delta_pp": {
+          "mean": 0.9523809523809527,
+          "std": 3.299144395369291
+        }
+      },
+      "pick_clean_then_place_in_recep": {
+        "tasks_per_seed": 27,
+        "filtered_sr_percent": {
+          "mean": 93.82716049382717,
+          "std": 2.138334330331942
+        },
+        "full_sr_percent": {
+          "mean": 92.5925925925926,
+          "std": 0.0
+        },
+        "delta_pp": {
+          "mean": 1.234567901234566,
+          "std": 2.138334330331944
+        }
+      },
+      "pick_cool_then_place_in_recep": {
+        "tasks_per_seed": 25,
+        "filtered_sr_percent": {
+          "mean": 86.66666666666667,
+          "std": 2.309401076758503
+        },
+        "full_sr_percent": {
+          "mean": 90.66666666666667,
+          "std": 2.309401076758503
+        },
+        "delta_pp": {
+          "mean": -4.0000000000000036,
+          "std": 0.0
+        }
+      },
+      "pick_heat_then_place_in_recep": {
+        "tasks_per_seed": 16,
+        "filtered_sr_percent": {
+          "mean": 89.58333333333333,
+          "std": 3.608439182435161
+        },
+        "full_sr_percent": {
+          "mean": 93.75,
+          "std": 6.25
+        },
+        "delta_pp": {
+          "mean": -4.166666666666667,
+          "std": 3.608439182435161
+        }
+      },
+      "pick_two_obj_and_place": {
+        "tasks_per_seed": 24,
+        "filtered_sr_percent": {
+          "mean": 76.38888888888889,
+          "std": 4.81125224324687
+        },
+        "full_sr_percent": {
+          "mean": 73.6111111111111,
+          "std": 6.364688465216445
+        },
+        "delta_pp": {
+          "mean": 2.777777777777779,
+          "std": 10.485881160098259
+        }
+      }
+    }
+  },
+  "overall": {
+    "filtered": {
+      "episodes": 420,
+      "calls": 5417,
+      "all_role_prompt_tokens": 4862539,
+      "all_role_completion_tokens": 455159,
+      "all_role_input_output_tokens": 5317698,
+      "usage_by_role": {
+        "curator": {
+          "calls": 420,
+          "prompt_tokens": 718957,
+          "completion_tokens": 102546
+        },
+        "executor": {
+          "calls": 4577,
+          "prompt_tokens": 3711365,
+          "completion_tokens": 324049
+        },
+        "judge": {
+          "calls": 420,
+          "prompt_tokens": 432217,
+          "completion_tokens": 28564
+        }
+      },
+      "paper_efficiency": {
+        "mean_executor_input_tokens_k": 8.836583333333333,
+        "mean_executor_output_tokens_k": 0.7715452380952381,
+        "mean_executor_interaction_turns": 10.897619047619047
+      }
+    },
+    "full": {
+      "episodes": 420,
+      "calls": 5450,
+      "all_role_prompt_tokens": 5069089,
+      "all_role_completion_tokens": 462206,
+      "all_role_input_output_tokens": 5531295,
+      "usage_by_role": {
+        "curator": {
+          "calls": 420,
+          "prompt_tokens": 887401,
+          "completion_tokens": 105705
+        },
+        "executor": {
+          "calls": 4610,
+          "prompt_tokens": 3750036,
+          "completion_tokens": 328031
+        },
+        "judge": {
+          "calls": 420,
+          "prompt_tokens": 431652,
+          "completion_tokens": 28470
+        }
+      },
+      "paper_efficiency": {
+        "mean_executor_input_tokens_k": 8.928657142857142,
+        "mean_executor_output_tokens_k": 0.7810261904761905,
+        "mean_executor_interaction_turns": 10.976190476190476
+      }
+    }
+  },
+  "per_seed": [
+    {
+      "seed": 0,
+      "tasks": 140,
+      "delta_pp": -4.285714285714293,
+      "mean_decision_delta": 0.4214285714285708,
+      "mean_environment_step_delta": 0.4214285714285708,
+      "filtered": {
+        "tasks": 140,
+        "successes": 120,
+        "success_rate": 0.8571428571428571,
+        "mean_decisions": 11.7,
+        "mean_environment_steps": 11.7,
+        "invalid_actions": 2,
+        "truncated_episodes": 20,
+        "stored_episodes": 111,
+        "native_failed_stored_episodes": 1,
+        "empty_bank_episodes": 10,
+        "prompt_tokens": 1685963,
+        "completion_tokens": 160060,
+        "paper_efficiency": {
+          "mean_executor_input_tokens_k": 9.334614285714286,
+          "mean_executor_output_tokens_k": 0.8308,
+          "mean_executor_interaction_turns": 11.7
+        },
+        "usage_by_role": {
+          "curator": {
+            "calls": 140,
+            "prompt_tokens": 231321,
+            "completion_tokens": 34208
+          },
+          "executor": {
+            "calls": 1638,
+            "prompt_tokens": 1306846,
+            "completion_tokens": 116312
+          },
+          "judge": {
+            "calls": 140,
+            "prompt_tokens": 147796,
+            "completion_tokens": 9540
+          }
+        },
+        "native_vs_judge": {
+          "labeled_episodes": 140,
+          "true_positive": 110,
+          "false_positive": 1,
+          "false_negative": 10,
+          "true_negative": 19,
+          "parse_errors": 0,
+          "generation_errors": 0
+        },
+        "storage": {
+          "stored_entries": 111,
+          "final_bank_size": 111,
+          "native_failed_stored_entries": 1,
+          "judge_failed_stored_entries": 0,
+          "native_failed_stored_fraction": 0.009009009009009009,
+          "judge_failed_stored_fraction": 0.0,
+          "retrieval": {
+            "references": 390,
+            "native_failed_references": 3,
+            "judge_failed_references": 0,
+            "episodes_with_retrieval": 130,
+            "episodes_with_native_failed_retrieval": 3,
+            "episodes_with_judge_failed_retrieval": 0,
+            "native_failed_fraction": 0.007692307692307693,
+            "judge_failed_fraction": 0.0
+          }
+        },
+        "generation_failures": {
+          "calls": 0,
+          "episodes": 0,
+          "by_role": {},
+          "by_finish_reason": {}
+        }
+      },
+      "full": {
+        "tasks": 140,
+        "successes": 126,
+        "success_rate": 0.9,
+        "mean_decisions": 11.278571428571428,
+        "mean_environment_steps": 11.278571428571428,
+        "invalid_actions": 5,
+        "truncated_episodes": 14,
+        "stored_episodes": 140,
+        "native_failed_stored_episodes": 14,
+        "empty_bank_episodes": 10,
+        "prompt_tokens": 1737994,
+        "completion_tokens": 155891,
+        "paper_efficiency": {
+          "mean_executor_input_tokens_k": 9.162764285714285,
+          "mean_executor_output_tokens_k": 0.7893,
+          "mean_executor_interaction_turns": 11.278571428571428
+        },
+        "usage_by_role": {
+          "curator": {
+            "calls": 140,
+            "prompt_tokens": 309232,
+            "completion_tokens": 35853
+          },
+          "executor": {
+            "calls": 1579,
+            "prompt_tokens": 1282787,
+            "completion_tokens": 110502
+          },
+          "judge": {
+            "calls": 140,
+            "prompt_tokens": 145975,
+            "completion_tokens": 9536
+          }
+        },
+        "native_vs_judge": {
+          "labeled_episodes": 140,
+          "true_positive": 112,
+          "false_positive": 0,
+          "false_negative": 14,
+          "true_negative": 14,
+          "parse_errors": 0,
+          "generation_errors": 0
+        },
+        "storage": {
+          "stored_entries": 140,
+          "final_bank_size": 140,
+          "native_failed_stored_entries": 14,
+          "judge_failed_stored_entries": 28,
+          "native_failed_stored_fraction": 0.1,
+          "judge_failed_stored_fraction": 0.2,
+          "retrieval": {
+            "references": 390,
+            "native_failed_references": 50,
+            "judge_failed_references": 84,
+            "episodes_with_retrieval": 130,
+            "episodes_with_native_failed_retrieval": 46,
+            "episodes_with_judge_failed_retrieval": 60,
+            "native_failed_fraction": 0.1282051282051282,
+            "judge_failed_fraction": 0.2153846153846154
+          }
+        },
+        "generation_failures": {
+          "calls": 0,
+          "episodes": 0,
+          "by_role": {},
+          "by_finish_reason": {}
+        }
+      },
+      "paired_counts": {
+        "both_success": 117,
+        "filtered_only": 3,
+        "full_only": 9,
+        "both_failure": 11
+      },
+      "by_task_type": {
+        "look_at_obj_in_light": {
+          "tasks": 13,
+          "filtered_sr": 0.7692307692307693,
+          "full_sr": 0.8461538461538461,
+          "delta_pp": -7.692307692307687
+        },
+        "pick_and_place_simple": {
+          "tasks": 35,
+          "filtered_sr": 0.8857142857142857,
+          "full_sr": 0.9142857142857143,
+          "delta_pp": -2.857142857142858
+        },
+        "pick_clean_then_place_in_recep": {
+          "tasks": 27,
+          "filtered_sr": 0.9259259259259259,
+          "full_sr": 0.9259259259259259,
+          "delta_pp": 0.0
+        },
+        "pick_cool_then_place_in_recep": {
+          "tasks": 25,
+          "filtered_sr": 0.88,
+          "full_sr": 0.92,
+          "delta_pp": -4.0000000000000036
+        },
+        "pick_heat_then_place_in_recep": {
+          "tasks": 16,
+          "filtered_sr": 0.9375,
+          "full_sr": 1,
+          "delta_pp": -6.25
+        },
+        "pick_two_obj_and_place": {
+          "tasks": 24,
+          "filtered_sr": 0.7083333333333334,
+          "full_sr": 0.7916666666666666,
+          "delta_pp": -8.333333333333325
+        }
+      }
+    },
+    {
+      "seed": 1,
+      "tasks": 140,
+      "delta_pp": 2.1428571428571463,
+      "mean_decision_delta": -0.3785714285714281,
+      "mean_environment_step_delta": -0.3785714285714281,
+      "filtered": {
+        "tasks": 140,
+        "successes": 125,
+        "success_rate": 0.8928571428571429,
+        "mean_decisions": 10.6,
+        "mean_environment_steps": 10.6,
+        "invalid_actions": 2,
+        "truncated_episodes": 15,
+        "stored_episodes": 116,
+        "native_failed_stored_episodes": 2,
+        "empty_bank_episodes": 10,
+        "prompt_tokens": 1598816,
+        "completion_tokens": 148156,
+        "paper_efficiency": {
+          "mean_executor_input_tokens_k": 8.639414285714285,
+          "mean_executor_output_tokens_k": 0.7478285714285714,
+          "mean_executor_interaction_turns": 10.6
+        },
+        "usage_by_role": {
+          "curator": {
+            "calls": 140,
+            "prompt_tokens": 246243,
+            "completion_tokens": 33889
+          },
+          "executor": {
+            "calls": 1484,
+            "prompt_tokens": 1209518,
+            "completion_tokens": 104696
+          },
+          "judge": {
+            "calls": 140,
+            "prompt_tokens": 143055,
+            "completion_tokens": 9571
+          }
+        },
+        "native_vs_judge": {
+          "labeled_episodes": 140,
+          "true_positive": 114,
+          "false_positive": 2,
+          "false_negative": 11,
+          "true_negative": 13,
+          "parse_errors": 0,
+          "generation_errors": 0
+        },
+        "storage": {
+          "stored_entries": 116,
+          "final_bank_size": 116,
+          "native_failed_stored_entries": 2,
+          "judge_failed_stored_entries": 0,
+          "native_failed_stored_fraction": 0.017241379310344827,
+          "judge_failed_stored_fraction": 0.0,
+          "retrieval": {
+            "references": 390,
+            "native_failed_references": 13,
+            "judge_failed_references": 0,
+            "episodes_with_retrieval": 130,
+            "episodes_with_native_failed_retrieval": 13,
+            "episodes_with_judge_failed_retrieval": 0,
+            "native_failed_fraction": 0.03333333333333333,
+            "judge_failed_fraction": 0.0
+          }
+        },
+        "generation_failures": {
+          "calls": 0,
+          "episodes": 0,
+          "by_role": {},
+          "by_finish_reason": {}
+        }
+      },
+      "full": {
+        "tasks": 140,
+        "successes": 122,
+        "success_rate": 0.8714285714285714,
+        "mean_decisions": 10.978571428571428,
+        "mean_environment_steps": 10.978571428571428,
+        "invalid_actions": 3,
+        "truncated_episodes": 18,
+        "stored_episodes": 140,
+        "native_failed_stored_episodes": 18,
+        "empty_bank_episodes": 10,
+        "prompt_tokens": 1688268,
+        "completion_tokens": 153679,
+        "paper_efficiency": {
+          "mean_executor_input_tokens_k": 8.905707142857143,
+          "mean_executor_output_tokens_k": 0.7789857142857143,
+          "mean_executor_interaction_turns": 10.978571428571428
+        },
+        "usage_by_role": {
+          "curator": {
+            "calls": 140,
+            "prompt_tokens": 297707,
+            "completion_tokens": 35165
+          },
+          "executor": {
+            "calls": 1537,
+            "prompt_tokens": 1246799,
+            "completion_tokens": 109058
+          },
+          "judge": {
+            "calls": 140,
+            "prompt_tokens": 143762,
+            "completion_tokens": 9456
+          }
+        },
+        "native_vs_judge": {
+          "labeled_episodes": 140,
+          "true_positive": 109,
+          "false_positive": 1,
+          "false_negative": 13,
+          "true_negative": 17,
+          "parse_errors": 0,
+          "generation_errors": 0
+        },
+        "storage": {
+          "stored_entries": 140,
+          "final_bank_size": 140,
+          "native_failed_stored_entries": 18,
+          "judge_failed_stored_entries": 30,
+          "native_failed_stored_fraction": 0.12857142857142856,
+          "judge_failed_stored_fraction": 0.21428571428571427,
+          "retrieval": {
+            "references": 390,
+            "native_failed_references": 72,
+            "judge_failed_references": 93,
+            "episodes_with_retrieval": 130,
+            "episodes_with_native_failed_retrieval": 56,
+            "episodes_with_judge_failed_retrieval": 61,
+            "native_failed_fraction": 0.18461538461538463,
+            "judge_failed_fraction": 0.23846153846153847
+          }
+        },
+        "generation_failures": {
+          "calls": 0,
+          "episodes": 0,
+          "by_role": {},
+          "by_finish_reason": {}
+        }
+      },
+      "paired_counts": {
+        "both_success": 119,
+        "filtered_only": 6,
+        "full_only": 3,
+        "both_failure": 12
+      },
+      "by_task_type": {
+        "look_at_obj_in_light": {
+          "tasks": 13,
+          "filtered_sr": 0.9230769230769231,
+          "full_sr": 0.9230769230769231,
+          "delta_pp": 0.0
+        },
+        "pick_and_place_simple": {
+          "tasks": 35,
+          "filtered_sr": 0.9714285714285714,
+          "full_sr": 0.9428571428571428,
+          "delta_pp": 2.857142857142858
+        },
+        "pick_clean_then_place_in_recep": {
+          "tasks": 27,
+          "filtered_sr": 0.9259259259259259,
+          "full_sr": 0.9259259259259259,
+          "delta_pp": 0.0
+        },
+        "pick_cool_then_place_in_recep": {
+          "tasks": 25,
+          "filtered_sr": 0.84,
+          "full_sr": 0.88,
+          "delta_pp": -4.0000000000000036
+        },
+        "pick_heat_then_place_in_recep": {
+          "tasks": 16,
+          "filtered_sr": 0.875,
+          "full_sr": 0.875,
+          "delta_pp": 0.0
+        },
+        "pick_two_obj_and_place": {
+          "tasks": 24,
+          "filtered_sr": 0.7916666666666666,
+          "full_sr": 0.6666666666666666,
+          "delta_pp": 12.5
+        }
+      }
+    },
+    {
+      "seed": 2,
+      "tasks": 140,
+      "delta_pp": 2.857142857142858,
+      "mean_decision_delta": -0.27857142857142847,
+      "mean_environment_step_delta": -0.27857142857142847,
+      "filtered": {
+        "tasks": 140,
+        "successes": 127,
+        "success_rate": 0.9071428571428571,
+        "mean_decisions": 10.392857142857142,
+        "mean_environment_steps": 10.392857142857142,
+        "invalid_actions": 1,
+        "truncated_episodes": 13,
+        "stored_episodes": 116,
+        "native_failed_stored_episodes": 2,
+        "empty_bank_episodes": 10,
+        "prompt_tokens": 1577760,
+        "completion_tokens": 146943,
+        "paper_efficiency": {
+          "mean_executor_input_tokens_k": 8.53572142857143,
+          "mean_executor_output_tokens_k": 0.7360071428571429,
+          "mean_executor_interaction_turns": 10.392857142857142
+        },
+        "usage_by_role": {
+          "curator": {
+            "calls": 140,
+            "prompt_tokens": 241393,
+            "completion_tokens": 34449
+          },
+          "executor": {
+            "calls": 1455,
+            "prompt_tokens": 1195001,
+            "completion_tokens": 103041
+          },
+          "judge": {
+            "calls": 140,
+            "prompt_tokens": 141366,
+            "completion_tokens": 9453
+          }
+        },
+        "native_vs_judge": {
+          "labeled_episodes": 140,
+          "true_positive": 114,
+          "false_positive": 2,
+          "false_negative": 13,
+          "true_negative": 11,
+          "parse_errors": 0,
+          "generation_errors": 0
+        },
+        "storage": {
+          "stored_entries": 116,
+          "final_bank_size": 116,
+          "native_failed_stored_entries": 2,
+          "judge_failed_stored_entries": 0,
+          "native_failed_stored_fraction": 0.017241379310344827,
+          "judge_failed_stored_fraction": 0.0,
+          "retrieval": {
+            "references": 390,
+            "native_failed_references": 1,
+            "judge_failed_references": 0,
+            "episodes_with_retrieval": 130,
+            "episodes_with_native_failed_retrieval": 1,
+            "episodes_with_judge_failed_retrieval": 0,
+            "native_failed_fraction": 0.002564102564102564,
+            "judge_failed_fraction": 0.0
+          }
+        },
+        "generation_failures": {
+          "calls": 0,
+          "episodes": 0,
+          "by_role": {},
+          "by_finish_reason": {}
+        }
+      },
+      "full": {
+        "tasks": 140,
+        "successes": 123,
+        "success_rate": 0.8785714285714286,
+        "mean_decisions": 10.67142857142857,
+        "mean_environment_steps": 10.67142857142857,
+        "invalid_actions": 2,
+        "truncated_episodes": 17,
+        "stored_episodes": 140,
+        "native_failed_stored_episodes": 17,
+        "empty_bank_episodes": 10,
+        "prompt_tokens": 1642827,
+        "completion_tokens": 152636,
+        "paper_efficiency": {
+          "mean_executor_input_tokens_k": 8.7175,
+          "mean_executor_output_tokens_k": 0.7747928571428571,
+          "mean_executor_interaction_turns": 10.67142857142857
+        },
+        "usage_by_role": {
+          "curator": {
+            "calls": 140,
+            "prompt_tokens": 280462,
+            "completion_tokens": 34687
+          },
+          "executor": {
+            "calls": 1494,
+            "prompt_tokens": 1220450,
+            "completion_tokens": 108471
+          },
+          "judge": {
+            "calls": 140,
+            "prompt_tokens": 141915,
+            "completion_tokens": 9478
+          }
+        },
+        "native_vs_judge": {
+          "labeled_episodes": 140,
+          "true_positive": 113,
+          "false_positive": 0,
+          "false_negative": 10,
+          "true_negative": 17,
+          "parse_errors": 0,
+          "generation_errors": 0
+        },
+        "storage": {
+          "stored_entries": 140,
+          "final_bank_size": 140,
+          "native_failed_stored_entries": 17,
+          "judge_failed_stored_entries": 27,
+          "native_failed_stored_fraction": 0.12142857142857143,
+          "judge_failed_stored_fraction": 0.19285714285714287,
+          "retrieval": {
+            "references": 390,
+            "native_failed_references": 46,
+            "judge_failed_references": 70,
+            "episodes_with_retrieval": 130,
+            "episodes_with_native_failed_retrieval": 43,
+            "episodes_with_judge_failed_retrieval": 55,
+            "native_failed_fraction": 0.11794871794871795,
+            "judge_failed_fraction": 0.1794871794871795
+          }
+        },
+        "generation_failures": {
+          "calls": 0,
+          "episodes": 0,
+          "by_role": {},
+          "by_finish_reason": {}
+        }
+      },
+      "paired_counts": {
+        "both_success": 118,
+        "filtered_only": 9,
+        "full_only": 5,
+        "both_failure": 8
+      },
+      "by_task_type": {
+        "look_at_obj_in_light": {
+          "tasks": 13,
+          "filtered_sr": 0.9230769230769231,
+          "full_sr": 0.6923076923076923,
+          "delta_pp": 23.076923076923084
+        },
+        "pick_and_place_simple": {
+          "tasks": 35,
+          "filtered_sr": 0.9714285714285714,
+          "full_sr": 0.9428571428571428,
+          "delta_pp": 2.857142857142858
+        },
+        "pick_clean_then_place_in_recep": {
+          "tasks": 27,
+          "filtered_sr": 0.9629629629629629,
+          "full_sr": 0.9259259259259259,
+          "delta_pp": 3.703703703703698
+        },
+        "pick_cool_then_place_in_recep": {
+          "tasks": 25,
+          "filtered_sr": 0.88,
+          "full_sr": 0.92,
+          "delta_pp": -4.0000000000000036
+        },
+        "pick_heat_then_place_in_recep": {
+          "tasks": 16,
+          "filtered_sr": 0.875,
+          "full_sr": 0.9375,
+          "delta_pp": -6.25
+        },
+        "pick_two_obj_and_place": {
+          "tasks": 24,
+          "filtered_sr": 0.7916666666666666,
+          "full_sr": 0.75,
+          "delta_pp": 4.1666666666666625
+        }
+      }
+    }
+  ],
+  "statistical_scope": {
+    "std_definition": "sample standard deviation across three order seeds, ddof=1",
+    "unique_task_count": 140,
+    "repeated_episode_pairs": 420,
+    "pooled_significance_test": null,
+    "note": "Repeated tasks and memory-coupled streams are not independent observations; results are descriptive."
+  },
+  "dataset_integrity": {
+    "file_count": 18416,
+    "after_sha256": "ea156e972ba076f73968c690ae732c5dc7a3978f3c6a39270cc5aa1abadad278",
+    "unchanged": true,
+    "fingerprint_definition": "relative paths, sizes, mtimes and complete content hashes"
+  },
+  "audit": {
+    "passed": true,
+    "errors": [],
+    "complete_840_episode_audit": true,
+    "comparison_validated": true,
+    "model_api_calls": 0,
+    "native_replayed_episodes": 40,
+    "counts": {
+      "episodes": 840,
+      "seeds": 3,
+      "seed_runs": 6,
+      "batches": 84,
+      "source_files": 12,
+      "games": 140,
+      "dataset_files": 18416,
+      "logged_model_calls": 10867,
+      "new_model_api_calls": 0
+    },
+    "analysis_sha256": "5d74ac285956255fcddb85ce2622035412a00faf9b67d9d8a0bad9893a3779dd",
+    "preflight_sha256": "af178d8d1bd96f29f2d223f5b709a8449a7c388037e004de27a9453ff1d38c62"
+  },
+  "reproduction_limits": [
+    "Judge PDF whitespace, complete trajectory serialization and full-storage label syntax are not author runtime bytes.",
+    "Exact task IDs/order seeds, environment/data versions, BM25 details and some inference settings are undisclosed by the paper.",
+    "Inherited GiGPO action/history settings do not establish the author's actual runtime fork.",
+    "This experiment does not establish that model choice is the only remaining implementation difference."
+  ],
+  "execution_usage_scope": "Committed episode API usage only; missing usage remains null, and transport retry or interrupted-request billing is not inferred.",
+  "execution": {
+    "ledger_sha256": "bd7b04b4901855b1d10be0f6de6b5cebfa1879f25603330bf7034a93f9bfcb3c",
+    "events": [
+      {
+        "kind": "paired_http_429_interruption",
+        "http_status": 429,
+        "committed_tasks_at_interruption": {
+          "filtered_seed_0": 90,
+          "full_seed_0": 110
+        },
+        "config_source_assets_unchanged": true,
+        "committed_records_reexecuted": false,
+        "resume_mode": "sequential_arms",
+        "workers_per_arm": 10,
+        "batch_size": 10,
+        "uncommitted_request_billing": "unknown"
+      }
+    ],
+    "committed_records_preservation": {
+      "passed": true,
+      "seed": 0,
+      "preserved_episodes": 200,
+      "by_arm": {
+        "filtered": 90,
+        "full": 110
+      },
+      "episode_content_size_mtime_unchanged": true,
+      "snapshot_sha256": "751aee76e4faf18e5d8e2836ed57ee79bf847518197206cc47967023df2e248f",
+      "execution_events_sha256": "bd7b04b4901855b1d10be0f6de6b5cebfa1879f25603330bf7034a93f9bfcb3c"
+    }
+  }
+}

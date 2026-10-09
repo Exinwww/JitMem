@@ -123,4 +123,21 @@ JITMEM 三轮最终 bank 各 118 条，judge/native 的重复 episode 计数为 
 
 真实ALFWorld脚本检查执行3次命令，包括一个非admissible命令和一个缺action标签但可解析为look的返回；均实际交给环境。决策与原生交互均为3，没有人工Invalid decision反馈，模型动作列表排除help。`outputs/paper_native_protocol_check.json`标为 `is_model_benchmark=false`、`scripted_commands=true`、`model_api_calls=0`，不是模型能力分数，也没有使用expert/walkthrough。
 
-新成对模型评测使用 `outputs/storage_filtered_paper_v1/` 与 `outputs/storage_all_paper_v1/`，只有完整三轮分析和最终审计通过后才报告成功率。
+新成对模型评测已在 `outputs/storage_filtered_paper_v1/` 与 `outputs/storage_all_paper_v1/` 完成，共140任务×3轮×2组、840条真实episode、84批、10,867次已记录模型调用。两组冻结相同的12个核心源码文件、5份模板、runtime、140个游戏和配对task order；每轮空库，没有warm start。curator/executor配置模型名均为`gpt-5.5`，judge复用executor。
+
+| Seed | 过滤成功 / 140 | 全量成功 / 140 | 过滤减全量（百分点） |
+| --- | ---: | ---: | ---: |
+| 0 | 120 | 126 | −4.29 |
+| 1 | 125 | 122 | +2.14 |
+| 2 | 127 | 123 | +2.86 |
+| Mean ± sample std | 88.57 ± 2.58% | 88.33 ± 1.49% | +0.24 ± 3.93 |
+
+三轮合计372与371次成功，差异方向随seed翻转，不能支持稳定的过滤优势。主指标为native SR；效率仅计executor，每任务input K为8.84±0.43与8.93±0.22、output K为0.77±0.05与0.78±0.01、交互次数为10.90±0.70与10.98±0.30，全部任务参与分母；全角色成本单列诊断，不混入Table4口径。
+
+运行中两组遇到一次HTTP429中断，已提交记录分别为90与110条。确认没有残留评测进程后，保持各组workers10、同一配置和源码，先后执行`--resume`完成全部三轮。独立核对中断前200条记录的内容SHA256、大小和纳秒修改时间，均未改变；已提交任务没有重跑或重写。用量只覆盖已提交记录，未提交请求与重试可能额外计费，不能由报告倒推完整账单。
+
+最终独立审计 `outputs/paper_storage_ablation_final_audit.json` 为`passed=true`、`errors=[]`、`complete_840_episode_audit=true`、`comparison_validated=true`。重新构建全部840条episode的原文messages、动作解析、描述BM25排序、judge gate、完整raw轨迹、批内快照与bank/checkpoint，独立重算主指标和分角色用量；核对源包与模板溯源、12个源码指纹和中断记录保全。审计不调用模型API，也不修改原始实验。
+
+原生环境重放范围是两组seed0前20任务，共40条。初始与每步observation、admissible actions、实际提交命令以及最终native reward/won/done均一致；证据文件绑定本次新记录的hash。该检查不调用模型，不代表全部840条均经过环境重放。
+
+最终审计再次只读核对外部全部18,416个文件的内容、大小和修改时间，fingerprint仍为`ea156e972ba076f73968c690ae732c5dc7a3978f3c6a39270cc5aa1abadad278`。没有读取expert/walkthrough来指导模型，也没有用native标签纠正judge。完整原始证据保留在本机被忽略的`outputs/`；公开[结果报告](results/alfworld_storage_ablation_paper_v1_2026-10-09.md)和[结构化汇总](results/alfworld_storage_ablation_paper_v1_2026-10-09.json)只包含白名单字段。

@@ -45,3 +45,11 @@ Gitleaks CI模板位于`configs/secret-scan.workflow.example.yml`，配置push/p
 Gitleaks扫描公开文档无命中；另检查两组新原始记录共约126.75 MB。每组只命中一处manifest中的新 `api.py` 源码SHA256，均已与当前公开源文件完整内容独立核对，是指纹误报。未为此增加白名单，也未扩大任何目录/文件例外；公开汇总将源码指纹写为独立的 `file` / `sha256` 字段。
 
 再次核对GitHub：仓库为public，原生secret scanning与push protection均enabled，开放密钥告警数量为0。公开汇总的独立复核、暂存区和完整历史扫描均通过；检查结论限于本次内容及上述范围。本地脱敏证据位于 `outputs/security_audit/storage_ablation_*`。
+
+## 原文协议重评测发布检查（2026-10-09，paper-v1）
+
+新paper-v1报告单独发布，保留旧报告，不公开完整prompt资产、原始请求、endpoint、凭证及其变量名或个人绝对路径。导出前要求完整840条评测和最终独立审计通过，核对冻结实现、原文资产、分析文件、40条新协议原生重放和200条中断前记录保全证据；公开JSON采用逐字段白名单，指标经独立复核与本地分析一致。
+
+本轮发布前的逐字凭证检查在内存中读取2个不同凭证，覆盖2,862个项目/运行记录文件、95个Git blob（包括不可达对象）、Git配置和HEAD日志；literal UTF-8、URL编码、JSON转义和base64均无匹配。该范围包括新完整评测记录和新公开报告；依赖、下载的Python、扫描器二进制和缓存仍排除。检查不显示或保存凭证，不调用模型API，脱敏记录为本机 `outputs/security_audit/paper_v1_exact_credentials.json`。
+
+Gitleaks对当前全部公开文档约230 KB的扫描通过，既有源码指纹的唯一固定例外未扩大。发布继续经过暂存区和完整历史扫描，推送后再次核对仓库public、GitHub原生secret scanning与push protection启用、开放密钥告警为0，并对包含新提交的Git对象再次做上述凭证比对。检查结论对应本次实际扫描范围，不将扫描通过解释为对未知凭证或未来提交的保证。

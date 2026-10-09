@@ -12,7 +12,9 @@
 
 这是 JITMEM-base 的已报告消融。当前项目按用户要求使用模型 API、不训练 curator；本机使用环境变量配置的模型，不能将本次数字当作原论文模型或 RL-trained JITMEM 的等价复跑。
 
-旧legacy-paraphrase协议已完成140任务×3轮×2组：过滤组 **85.71 ± 2.14%**，全量组 **88.57 ± 1.24%**，过滤减全量 **−2.86 ± 2.47 个百分点**，见[历史报告](results/alfworld_storage_ablation_2026-10-09.md)和[结构化结果](results/alfworld_storage_ablation_2026-10-09.json)。当前正式配置已切换到paper-v1原文模板与对齐的继承runtime，须重新评测；不能用上述数字代表新协议。
+当前paper-v1原文模板与对齐的继承runtime已重新完成140任务×3轮×2组：过滤组 **88.57 ± 2.58%**，全量组 **88.33 ± 1.49%**，过滤减全量 **+0.24 ± 3.93 个百分点**。合计成功372与371次，差异方向随seed翻转，不能支持稳定的过滤优势；见[原文协议报告](results/alfworld_storage_ablation_paper_v1_2026-10-09.md)和[结构化结果](results/alfworld_storage_ablation_paper_v1_2026-10-09.json)。全部840条记录通过独立审计，另有40条原生环境重放。
+
+旧legacy-paraphrase协议结果为过滤组 **85.71 ± 2.14%**、全量组 **88.57 ± 1.24%**，差值 **−2.86 ± 2.47 个百分点**，见[历史报告](results/alfworld_storage_ablation_2026-10-09.md)和[结构化结果](results/alfworld_storage_ablation_2026-10-09.json)。旧协议和checkpoint保持独立；前后还改变了交互与输出处理，不能把结果变化单独归因于prompt。
 
 ## 配对协议
 
@@ -53,7 +55,7 @@
 
 分析器要求完整配对的140任务×3轮，验证配置仅有上述差异、source/runtime/game/order一致、每批快照和有序写入、judge gate、全量组标签与实际存储轨迹相符。还核对逐任务记录、checkpoint、最终bank和模型请求，不接受未完成/故障run。
 
-除主指标外，报告各 seed/任务类SR、配对成功/失败转移、平均决策与环境步数、分角色tokens、judge/native混淆矩阵、bank增长、存储和检索中的失败比例。judge判失败和原生失败分别统计，避免把模型误判当作环境事实。API不提供usage时保留 `null`，不能宣称零成本。
+主SR按Table9，效率按Table4报告每任务executor-only input/output K与交互次数，均按三轮计算mean/sample std。另报告各seed/任务类SR、配对成功/失败转移、分角色tokens、judge/native混淆矩阵、bank增长、存储和检索中的失败比例作为诊断。judge判失败和原生失败分别统计，避免把模型误判当作环境事实。API不提供usage时保留 `null`，不能宣称零成本。
 
 ## 解释边界
 
