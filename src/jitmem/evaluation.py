@@ -139,7 +139,7 @@ def _run_episode_worker(config, task, bank_entries: list[dict]) -> tuple[dict, d
     from .pipeline import MockChatClient, Pipeline
 
     if config.environment.backend == "mock":
-        executor = curator = MockChatClient()
+        executor = curator = judge = MockChatClient()
         environment = FakeHouseholdEnvironment(max_steps=config.experiment.max_steps)
     elif config.environment.backend == "alfworld":
         executor = ChatClient(config.executor)
@@ -148,11 +148,16 @@ def _run_episode_worker(config, task, bank_entries: list[dict]) -> tuple[dict, d
             if config.experiment.method in {"jitmem", "write-summary"}
             else executor
         )
+        judge = (
+            ChatClient(config.judge)
+            if config.judge is not None and config.experiment.method != "no-memory"
+            else executor
+        )
         environment = ALFWorldEnvironment(max_steps=config.experiment.max_steps)
     else:
         raise ValueError("Parallel evaluation supports only standard mock and alfworld backends.")
     bank = MemoryBank([Trajectory.from_dict(entry) for entry in bank_entries])
-    pipeline = Pipeline(config, executor, curator)
+    pipeline = Pipeline(config, executor, curator, judge)
     try:
         result, stored = pipeline.run_episode(task, environment, bank)
         result["worker_pid"] = os.getpid()
@@ -209,7 +214,7 @@ def evaluate(config, tasks, pipeline, environment_factory, *, resume: bool = Fal
             raise ValueError(
                 "Parallel evaluation supports only standard mock and alfworld backends."
             )
-    configuration = asdict(config)
+    configuration = config.to_dict()
     task_manifest = []
     for task in tasks:
         item = asdict(task)

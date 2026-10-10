@@ -123,7 +123,10 @@ def main() -> None:
             )
             return
         if args.command == "api-check":
-            for role, model in [("executor", config.executor), ("curator", config.curator)]:
+            roles = [("executor", config.executor), ("curator", config.curator)]
+            if config.judge is not None:
+                roles.append(("judge", config.judge))
+            for role, model in roles:
                 result = ChatClient(model).complete(
                     [{"role": "user", "content": "Reply with API ready."}]
                 )
@@ -171,7 +174,7 @@ def main() -> None:
                 environment.close()
             return
         if config.environment.backend == "mock":
-            executor = curator = MockChatClient()
+            executor = curator = judge = MockChatClient()
         else:
             executor = ChatClient(config.executor)
             curator = (
@@ -179,7 +182,12 @@ def main() -> None:
                 if config.experiment.method in {"jitmem", "write-summary"}
                 else executor
             )
-        pipeline = Pipeline(config, executor, curator)
+            judge = (
+                ChatClient(config.judge)
+                if config.judge is not None and config.experiment.method != "no-memory"
+                else executor
+            )
+        pipeline = Pipeline(config, executor, curator, judge)
         summary = evaluate(
             config,
             tasks,

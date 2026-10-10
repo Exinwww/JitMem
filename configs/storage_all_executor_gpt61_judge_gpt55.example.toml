@@ -1,0 +1,52 @@
+# Full-storage executor comparison against storage_all_curator_gpt61.
+# Curator stays gpt-6.1-sol; executor switches to gpt-6.1-sol; judge stays gpt-5.5.
+# Copy to storage_all_executor_gpt61_judge_gpt55.local.toml and set data_root.
+# Endpoints and credentials come from environment variables.
+# Pin JITMEM_CURATOR_MODEL=gpt-6.1-sol, JITMEM_EXECUTOR_MODEL=gpt-6.1-sol,
+# and JITMEM_JUDGE_MODEL=gpt-5.5. Role variables override common OPENAI_* variables.
+[environment]
+backend = "alfworld"
+data_root = "/path/to/alfworld"
+split = "valid_seen"
+task_types = [1, 2, 3, 4, 5, 6]
+
+[experiment]
+method = "jitmem"
+prompt_profile = "paper-v1"
+prompt_assets = "outputs/paper_prompts/v1"
+seeds = [0, 1, 2]
+batch_size = 10
+workers = 10
+max_steps = 30
+history_window = 3
+retrieval_k = 3
+store_policy = "all"
+task_adaptive = true
+output_dir = "outputs/storage_all_executor_gpt61_judge_gpt55_paper_v1"
+
+[executor]
+model = "gpt-6.1-sol"
+temperature = 1.0
+omit_temperature = false
+max_tokens = 4096
+timeout_seconds = 90.0
+retries = 3
+token_limit_parameter = "max_tokens"
+
+[curator]
+model = "gpt-6.1-sol"
+temperature = 1.0
+omit_temperature = false
+max_tokens = 8192
+timeout_seconds = 90.0
+retries = 3
+token_limit_parameter = "max_tokens"
+
+[judge]
+model = "gpt-5.5"
+temperature = 1.0
+omit_temperature = false
+max_tokens = 4096
+timeout_seconds = 90.0
+retries = 3
+token_limit_parameter = "max_tokens"

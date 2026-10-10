@@ -33,6 +33,15 @@ ALFWorld 文本交互环境已在项目 `.venv` 中安装并验证。数据直�
 
 过滤减全量为 **+0.48 ± 2.30 个百分点**，净多2次成功；各seed差值为+1.43、−2.14、+2.14个百分点，不能支持稳定的过滤优势。见[新存储对照结果](docs/results/alfworld_storage_ablation_curator_gpt61_paper_v1_2026-10-09.md)与[结构化汇总](docs/results/alfworld_storage_ablation_curator_gpt61_paper_v1_2026-10-09.json)。
 
+2026-10-10 在该全量组基础上，仅将executor切换为`gpt-6.1-sol`；curator保持`gpt-6.1-sol`，judge独立固定为`gpt-5.5`。新运行420条episode，与历史全量组420条配对，原文模板及其他有效配置一致。新增独立judge路由的四个源码模块差异通过启动前离线兼容重放核对，详情见[固定协议](docs/executor_model_comparison.md)。
+
+| Executor | Native SR mean ± sample std | 成功 / 420 | Executor交互 / task |
+| --- | ---: | ---: | ---: |
+| gpt-5.5 | 89.52 ± 1.65% | 376 / 420 | 10.56 ± 0.30 |
+| gpt-6.1-sol | 94.29 ± 1.24% | 396 / 420 | 9.23 ± 0.19 |
+
+新executor减基线为 **+4.76 ± 2.89 个百分点**，净多20次成功，各seed分别多9、2、9次。该结果说明本次固定curator/judge的完整流程对executor替换有收益，不能单独证明与原论文的差距来自模型智力；原文curator及judge角色设置不同，服务端权重也未独立验证。见[executor对照结果](docs/results/alfworld_executor_gpt61_judge_gpt55_paper_v1_2026-10-10.md)与[结构化汇总](docs/results/alfworld_executor_gpt61_judge_gpt55_paper_v1_2026-10-10.json)。
+
 以下两项为历史legacy-paraphrase结果，不代表当前paper-v1协议，也不用于估计原文提示词的独立因果影响。
 
 2026-10-08 已完成用户 API 的 no-memory / prompted JITMEM 成对评测：`valid_seen` 全部 140 个任务，seeds 0、1、2，每组 420 次、共 840 次真实交互。curator/executor 配置模型名均为 `gpt-5.5`；无 warm start，batch10、workers10、history3、最多30次决策。成功率由原生环境判定，均值与样本标准差按三轮计算。
@@ -88,8 +97,8 @@ flowchart LR
     C --> E[API executor]
     E <--> A[真实 ALFWorld 文本环境]
     E --> T[完整交互轨迹]
-    T --> J[同一 executor API 自评]
-    J --> B[通过 gate 的轨迹在批次结束后写入]
+    T --> J[judge API，默认复用 executor]
+    J --> B[按存储策略在批次结束后写入]
     B --> M
     A --> V[原生 verifier 计算评测结果]
 ```
@@ -143,7 +152,7 @@ bash scripts/setup_alfworld.sh
 
 本项目uv虚拟环境没有pip时，先使用 `uv pip install --python .venv/bin/python -e '.[paper]'`。模板全文保存在被忽略的 `outputs/paper_prompts/v1/`；每次运行核对源与模板哈希，缺失或篡改会提前失败，不回退改写prompt。TOML默认使用paper-v1，`legacy-paraphrase`仅供旧协议诊断和离线兼容。
 
-当前 API adapter 支持 OpenAI-compatible `POST /chat/completions`。原生 Gemini / Anthropic 等其他格式需要兼容 gateway 或新增 adapter。curator 和 executor 可以指定不同模型、endpoint 和密钥环境变量；judge 固定复用 executor client。endpoint 可以是 base URL 或完整的 `/chat/completions` URL。
+当前 API adapter 支持 OpenAI-compatible `POST /chat/completions`。原生 Gemini / Anthropic 等其他格式需要兼容 gateway 或新增 adapter。curator 和 executor 可以指定不同模型、endpoint 和密钥环境变量；judge 默认复用 executor client，也可为模型消融独立配置。endpoint 可以是 base URL 或完整的 `/chat/completions` URL。
 
 base URL、模型名和 key 通过环境变量指定；无需编辑配置文件中的模型值：
 
@@ -154,7 +163,7 @@ export OPENAI_API_KEY="your-api-key"
 export OPENAI_BASE_URL="https://api.openai.com/v1"
 ```
 
-默认 curator、executor 和 judge 使用相同的模型 API。需要不同 curator 时可单独设置 `JITMEM_CURATOR_MODEL`、`JITMEM_CURATOR_BASE_URL`、`JITMEM_CURATOR_API_KEY`；executor 对应 `JITMEM_EXECUTOR_MODEL`、`JITMEM_EXECUTOR_BASE_URL`、`JITMEM_EXECUTOR_API_KEY`。role 环境变量优先于共同 `OPENAI_*` 变量，环境变量优先于可选的 TOML 配置。密钥值不进入 TOML、manifest 或日志。judge 始终复用 executor。
+默认 curator、executor 和 judge 使用相同的模型 API。需要不同 curator 时可单独设置 `JITMEM_CURATOR_MODEL`、`JITMEM_CURATOR_BASE_URL`、`JITMEM_CURATOR_API_KEY`；executor 对应 `JITMEM_EXECUTOR_MODEL`、`JITMEM_EXECUTOR_BASE_URL`、`JITMEM_EXECUTOR_API_KEY`。role 环境变量优先于共同 `OPENAI_*` 变量，环境变量优先于可选的 TOML 配置。密钥值不进入 TOML、manifest 或日志。显式 `[judge]` 或非空 `JITMEM_JUDGE_MODEL`、`JITMEM_JUDGE_BASE_URL`、`JITMEM_JUDGE_API_KEY` 可启用独立 judge；普通 `OPENAI_*` 变量本身不会启用独立 judge。独立 judge 的未指定参数继承 executor，再按相同环境变量优先级解析。
 
 也可以复制 `.env.example` 为 `.env`，填入参数后执行 `source .env`；程序不自动读取 `.env`。该文件不会提交到 Git。
 
@@ -200,6 +209,8 @@ pilot 的 batch size 2 用于在 5 个任务内检查记忆增长，与正式 ba
 ```
 
 使用自定义 TOML 时给上述命令追加 `--config configs/alfworld.local.toml`，确保配置没有启用 `limit`，正式 batch size 为 10。三轮评测每个方法共 420 个 episode；模型生成仍有随机性，order seeds 只控制任务顺序，不能保证 API token sampling 可复现。最多 30 次 executor 调用 / episode，JITMEM 另有 curator 和 judge 调用，详细用量分角色记录。
+
+固定全量存储和 `gpt-6.1-sol` curator、仅切换 executor 并保持 `gpt-5.5` judge 的配置见 [独立 judge 模板](configs/storage_all_executor_gpt61_judge_gpt55.example.toml)，运行、兼容验证与解释范围见 [executor 模型对照](docs/executor_model_comparison.md)。
 
 其他对照：`--method raw-memory` 直接注入检索轨迹；`--method write-summary` 在 write time 生成固定摘要，read time 再 curate，是简化的信息损失消融。它们不是完整 ReasoningBank、MemP 或 SkillOS 复现。配置 `[experiment] task_adaptive=false` 隐藏 curator 当前任务，`store_policy="all"` 保存所有带 judge label 的轨迹，`retrieval_k=0` 检查无检索的 curator。`--split valid_unseen` 可跑 134 个泛化任务，输出到单独目录。
 

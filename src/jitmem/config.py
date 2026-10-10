@@ -2,8 +2,8 @@
 
 Model names may be omitted while inspecting a dataset or running a mock smoke
 test. The API client validates that a model and any required API key are present
-when it is constructed. Judging uses the executor configuration; there is no
-separate judge model setting.
+when it is constructed. Judging defaults to the executor configuration, as in
+the paper. An explicit independent judge configuration supports model ablations.
 """
 
 from __future__ import annotations
@@ -259,6 +259,7 @@ class RunConfig:
     experiment: ExperimentConfig = field(default_factory=ExperimentConfig)
     executor: ModelConfig = field(default_factory=ModelConfig)
     curator: ModelConfig = field(default_factory=lambda: ModelConfig(max_tokens=8192))
+    judge: ModelConfig | None = None
 
     def __post_init__(self) -> None:
         for name, expected in (
@@ -269,10 +270,15 @@ class RunConfig:
         ):
             if not isinstance(getattr(self, name), expected):
                 raise ConfigError(f"{name} must be a {expected.__name__}")
+        if self.judge is not None and not isinstance(self.judge, ModelConfig):
+            raise ConfigError("judge must be a ModelConfig or None")
 
     def to_dict(self) -> dict[str, Any]:
-        """Return JSON-compatible settings; only API key variable names are stored."""
-        return asdict(self)
+        """Serialize credential names and preserve historical default-judge shape."""
+        value = asdict(self)
+        if self.judge is None:
+            value.pop("judge")
+        return value
 
 
 def _section(
@@ -325,8 +331,14 @@ def load_config(path: str | Path) -> RunConfig:
     budget, including the resolved executor credential variable name when no
     curator/common key is provided. Only the API key's variable name enters
     the configuration.
-    A dedicated ``judge`` section is rejected because the paper's judge must
-    use the executor model. Paths are interpreted by the caller relative to its
+    Judging reuses the executor unless a ``judge`` TOML section or a nonempty
+    JITMEM_JUDGE_BASE_URL/MODEL/API_KEY variable activates the independent role.
+    Common OPENAI_* variables alone do not activate it. When activated, judge
+    defaults inherit the resolved executor, then follow the same precedence as
+    other roles: dedicated judge variables, common variables, TOML, inheritance.
+    In particular, common OPENAI_MODEL overrides an explicit judge TOML model;
+    use JITMEM_JUDGE_MODEL to fix a different judge model during an ablation.
+    Paths are interpreted by the caller relative to its
     working directory, so ``outputs/alfworld`` retains its ordinary CLI meaning.
     """
     config_path = Path(path).expanduser()
@@ -335,16 +347,23 @@ def load_config(path: str | Path) -> RunConfig:
             raw = tomllib.load(source)
     except tomllib.TOMLDecodeError as exc:
         raise ConfigError(f"Invalid TOML in {config_path}") from exc
-    unknown = set(raw) - {"environment", "experiment", "executor", "curator"}
+    unknown = set(raw) - {"environment", "experiment", "executor", "curator", "judge"}
     if unknown:
-        if "judge" in unknown:
-            raise ConfigError("A judge section is unsupported: judging must use the executor model")
         raise ConfigError(f"Unknown configuration sections: {', '.join(sorted(unknown))}")
     executor = _section(
         raw, "executor", ModelConfig, overrides=_environment_model_overrides("executor")
     )
     curator_defaults = asdict(executor)
     curator_defaults["max_tokens"] = 8192
+    independent_judge = "judge" in raw or any(
+        os.environ.get(f"JITMEM_JUDGE_{suffix}", "").strip()
+        for suffix in ("BASE_URL", "MODEL", "API_KEY")
+    )
+    judge = (
+        _section(raw, "judge", ModelConfig, asdict(executor), _environment_model_overrides("judge"))
+        if independent_judge
+        else None
+    )
     return RunConfig(
         environment=_section(raw, "environment", EnvironmentConfig),
         experiment=_section(
@@ -354,4 +373,5 @@ def load_config(path: str | Path) -> RunConfig:
         curator=_section(
             raw, "curator", ModelConfig, curator_defaults, _environment_model_overrides("curator")
         ),
+        judge=judge,
     )

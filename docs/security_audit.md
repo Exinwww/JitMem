@@ -71,3 +71,13 @@ Gitleaks对新增后的公开文档扫描通过。另扫描新组全部原始评
 首次发布前的内存凭证比对读取2个不同凭证，覆盖3,802个项目/运行记录文件、116个Git blob（包括不可达对象）、Git配置及HEAD日志。literal UTF-8、URL编码、JSON转义和base64均无匹配；不显示或保存凭证，不调用模型API。范围包括新完整420条全量记录和公开报告，依赖、下载的Python、扫描器二进制和缓存仍排除。前置脱敏证据单独保留为本机 `outputs/security_audit/storage_gpt61_exact_credentials_prepublication.json`，发布后再次比对新增Git对象。
 
 Gitleaks对新增后的公开文档扫描通过；另扫描新全量原始记录约71.78 MB，唯一命中为manifest中的`api.py`源码SHA256，已逐行与当前源码完整内容hash核对为指纹误报。没有扩大固定白名单、文件或目录例外。提交和推送仍经过暂存区与全部历史扫描，GitHub仓库保持public，原生secret scanning与push protection均enabled，开放密钥告警为0。检查结论限于本次已扫描内容及当前凭证，不将模式扫描解释为未知凭证的完全保证。
+
+## 固定 judge 的 executor 模型对照（2026-10-10，paper-v1）
+
+独立 judge 复用既有 `ModelConfig` 与 `ChatClient` 的凭证验证：密钥值只在运行时读取，不写入模型请求记录、manifest 或公开报告。本机endpoint可记录在被忽略的配置和manifest中，公开报告不包含连接信息。URL认证信息、嵌套凭证字段、非法header字符和HTTP重定向的既有拒绝规则继续生效。新增配置示例只包含通用环境变量名和占位数据路径，软件路由测试只使用明确的本机假凭证。
+
+启动前的严格内存逐字检查读取2个不同凭证，覆盖3,848个项目/运行记录文件、124个Git blob（包含不可达对象）、Git配置及HEAD日志。literal UTF-8、URL编码、JSON转义和base64均无匹配，GitHub凭证由本机keychain读取，不显示或持久化凭证值，0模型API。该前置范围不冒充尚未完成的新420条与最终报告检查；后续发布检查单独记录。
+
+完整新420条与配对840条的严格审计通过后，单独导出新公开报告。独立复核报告全部白名单字段、MD渲染以及148项原始数值核算，均与冻结证据一致。最终发布前的严格凭证比对覆盖4,608个本地文件、146个Git blob（包括不可达对象）、Git配置及HEAD日志；2个实际凭证的上述四种编码均为0匹配，新完整420条和公开报告均包含在范围内。依赖、下载的Python、扫描器二进制和缓存仍排除，0模型API；脱敏证据为本机 `outputs/security_audit/executor_gpt61_exact_credentials_final.json`。
+
+Gitleaks检查新原始评测记录62,058,149 bytes，仅命中manifest中的固定`api.py`源码SHA256；已逐行与当前源码内容独立核对为指纹误报。全部公开文档扫描无命中，没有增加白名单或任何目录/文件例外。发布前核对仓库public、GitHub原生secret scanning和push protection均enabled，开放密钥告警为0；提交与推送继续执行既有hook，发布后再检查新增Git对象。检查结论限于实际扫描范围与当前凭证。

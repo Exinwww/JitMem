@@ -96,10 +96,13 @@ def goal_from_observation(observation: str, fallback: str) -> str:
 
 
 class Pipeline:
-    def __init__(self, config, executor, curator):
+    def __init__(self, config, executor, curator, judge=None):
+        if config.judge is not None and judge is None and config.experiment.method != "no-memory":
+            raise ValueError("An explicit judge configuration requires a judge client.")
         self.config = config
         self.executor = executor
         self.curator = curator
+        self.judge = executor if judge is None else judge
         self.assets = (
             load_assets(config.experiment.prompt_assets)
             if config.experiment.prompt_profile == "paper-v1"
@@ -221,7 +224,7 @@ class Pipeline:
         if exp.method != "no-memory":
             verdict = complete(
                 "judge",
-                self.executor,
+                self.judge,
                 judge_messages(trajectory, profile=exp.prompt_profile, assets=self.assets),
             )
             judgment = (

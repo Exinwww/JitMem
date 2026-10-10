@@ -8,7 +8,7 @@
 
 按用户要求，连接参数通过环境变量指定：通用 `OPENAI_BASE_URL`、`OPENAI_MODEL`、`OPENAI_API_KEY`，默认 OpenAI-compatible `https://api.openai.com/v1/chat/completions`。可用 `JITMEM_EXECUTOR_*`、`JITMEM_CURATOR_*` 覆盖角色；环境变量优先于可选 TOML 值，未单独配置的 curator 继承 executor。运行 metadata 保存解析后的 URL/model 和密钥变量名称，不保存密钥值。
 
-当前实现训练自由的 read-time memory pipeline。curator 与 executor 可以分别配置用户提供的模型 API；judge 固定复用 executor 的同一个 client、模型与生成配置，不支持独立 `judge` 配置。这对应论文的 JITMEM-base 或强模型 prompted-curator 变体；如果 API 提供的是普通 pretrained 模型，不能称为论文 RL-trained JITMEM，也不能承诺复现其 77.4% 等训练后结果。
+当前实现训练自由的 read-time memory pipeline。curator 与 executor 可以分别配置用户提供的模型 API；judge 默认复用 executor 的同一个 client、模型与生成配置。为独立角色模型消融，支持显式 `[judge]` 或专用 `JITMEM_JUDGE_*` 环境变量，详见 [executor 模型对照](executor_model_comparison.md)。这对应论文的 JITMEM-base 或强模型 prompted-curator 变体；如果 API 提供的是普通 pretrained 模型，不能称为论文 RL-trained JITMEM，也不能承诺复现其 77.4% 等训练后结果。
 
 没有找到可验证的官方 JITMEM 代码或 trained-curator checkpoint 链接。检查了论文全文、arXiv abstract 页面、[由作者提交的 Hugging Face paper 页面](https://huggingface.co/papers/2609.27334)及针对 Salesforce/GitHub/Hugging Face 的搜索；作者 paper 页面当前显示没有关联模型。检索未发现不等于不存在，后续可接入作者发布的 curator API。
 

@@ -1,0 +1,1266 @@
+{
+  "schema_version": 1,
+  "kind": "public_paper_v1_alfworld_executor_model_comparison_fixed_judge_summary",
+  "evaluation_date": "2026-10-10",
+  "timezone": "Asia/Shanghai",
+  "benchmark": true,
+  "prompt_profile": "paper-v1",
+  "split": "valid_seen",
+  "unique_tasks": 140,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "total_comparison_episodes": 840,
+  "historical_baseline_episodes": 420,
+  "new_candidate_evaluated_episodes": 420,
+  "difference_definition": "candidate minus baseline",
+  "executor_models": {
+    "baseline": "gpt-5.5",
+    "candidate": "gpt-6.1-sol"
+  },
+  "curator_model": "gpt-6.1-sol",
+  "judge_model": "gpt-5.5",
+  "model_identity_source": "Configured request IDs; provider weights not independently verified",
+  "model_identity_evidence": {
+    "requested_model": "gpt-6.1-sol",
+    "metadata_valid": true,
+    "requested_id_advertised": true,
+    "server_weights_verified": false,
+    "historical_evidence_reused": true,
+    "evidence_sha256": "03472b2352d744ca70a219ee4e373e4afabce6d970c164c475c6b21875a2dcbf",
+    "historical_external_read_requests": 1,
+    "new_external_read_requests": 0,
+    "new_model_api_calls": 0,
+    "benchmark": false,
+    "included_in_benchmark_metrics": false,
+    "included_in_token_usage": false
+  },
+  "variant": "API prompted/untrained full-storage executor comparison under fixed independent judge; no local training",
+  "protocol": {
+    "matched_effective_config_except": [
+      "executor.model",
+      "experiment.output_dir"
+    ],
+    "store_policy": "all",
+    "labels_visible": true,
+    "cold_start": true,
+    "task_adaptive": true,
+    "warm_start": null,
+    "method": "jitmem",
+    "workers": 10,
+    "batch_size": 10,
+    "history_window": 3,
+    "max_steps": 30,
+    "retrieval_k": 3,
+    "process_start_method": "spawn",
+    "memory_commit_order": "scheduled task order after complete batch",
+    "success_metric": "native verifier binary success; all evaluated tasks retained",
+    "primary_efficiency_scope": "executor-only input/output tokens K=1000 and interaction turns per task",
+    "judge_routing": {
+      "baseline": "implicit executor client",
+      "candidate": "explicit independent judge client"
+    },
+    "configuration_representation_difference": "baseline implicit judge resolves to its executor; candidate explicitly configures identical effective judge parameters"
+  },
+  "sampling": {
+    "baseline": {
+      "curator": {
+        "temperature": 1.0,
+        "max_tokens": 8192,
+        "omit_temperature": false
+      },
+      "executor": {
+        "temperature": 1.0,
+        "max_tokens": 4096,
+        "omit_temperature": false
+      },
+      "judge": {
+        "temperature": 1.0,
+        "max_tokens": 4096,
+        "omit_temperature": false
+      }
+    },
+    "candidate": {
+      "curator": {
+        "temperature": 1.0,
+        "max_tokens": 8192,
+        "omit_temperature": false
+      },
+      "executor": {
+        "temperature": 1.0,
+        "max_tokens": 4096,
+        "omit_temperature": false
+      },
+      "judge": {
+        "temperature": 1.0,
+        "max_tokens": 4096,
+        "omit_temperature": false
+      }
+    }
+  },
+  "runtime": {
+    "python_version": [
+      3,
+      11,
+      16
+    ],
+    "packages": {
+      "alfworld": "0.4.2",
+      "textworld": "1.6.2",
+      "fast-downward-textworld": "20.6.4",
+      "jitmem-reproduction": "0.1.0"
+    }
+  },
+  "baseline_implementation_commit": "cc289e285da3753ec679c9cfe3219892330f3c6f",
+  "candidate_implementation_identity": "Preflight frozen source bytes; no candidate commit identifier claimed",
+  "same_core_sources": false,
+  "source_difference_paths": [
+    "cli.py",
+    "config.py",
+    "evaluation.py",
+    "pipeline.py"
+  ],
+  "source_fingerprints": {
+    "baseline": [
+      {
+        "file": "src/jitmem/__init__.py",
+        "sha256": "fe687808ac0902256465e9acc98f8e4b2f7419c34d135e914656f711d1b57c6e"
+      },
+      {
+        "file": "src/jitmem/__main__.py",
+        "sha256": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279"
+      },
+      {
+        "file": "src/jitmem/api.py",
+        "sha256": "89e5b9b98513dafd3cfe95384bacaff334156146b50b2775ca3d0879b4bbc2c6"
+      },
+      {
+        "file": "src/jitmem/cli.py",
+        "sha256": "e20fb7ddebabc1e34db91cd43bf51665fd61661c01178ed95137cfdbba53b355"
+      },
+      {
+        "file": "src/jitmem/config.py",
+        "sha256": "26c042ba631feefea79574df214903ae0fd25b85ab3db5bf7564eb9c894cd0ba"
+      },
+      {
+        "file": "src/jitmem/environments.py",
+        "sha256": "0a6c3dcde99b7a7550dbddbc4b0368b7754b1c2a3e906a2223dfb433829c8e5d"
+      },
+      {
+        "file": "src/jitmem/evaluation.py",
+        "sha256": "ac601ceeac1b7a361dec495e9b4ab8b44a73c4a802eb34af02f2e3f347df8755"
+      },
+      {
+        "file": "src/jitmem/memory.py",
+        "sha256": "e7c1b534ed8e7752d969cc3b8e9a21bfcd9e022d93bfda5d212a9e910182c317"
+      },
+      {
+        "file": "src/jitmem/paper_assets.py",
+        "sha256": "acb96fd79683e2fd6328e6e6afb11911f4fa37256d2b65891a1bb554ad2181e7"
+      },
+      {
+        "file": "src/jitmem/pipeline.py",
+        "sha256": "6fff0c8447193638006aebd2563005901a1d3c558be7415457e761820b2841f6"
+      },
+      {
+        "file": "src/jitmem/prompts.py",
+        "sha256": "ac2ec556645d4a1a2312c4c818d22b1b1374a40dc03146d53df549cba1339e7d"
+      },
+      {
+        "file": "src/jitmem/usage.py",
+        "sha256": "f601f2e3c24ab3dea3134f7d05b48377a27b4b6bd86b1d458b626a074b0203b6"
+      }
+    ],
+    "candidate": [
+      {
+        "file": "src/jitmem/__init__.py",
+        "sha256": "fe687808ac0902256465e9acc98f8e4b2f7419c34d135e914656f711d1b57c6e"
+      },
+      {
+        "file": "src/jitmem/__main__.py",
+        "sha256": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279"
+      },
+      {
+        "file": "src/jitmem/api.py",
+        "sha256": "89e5b9b98513dafd3cfe95384bacaff334156146b50b2775ca3d0879b4bbc2c6"
+      },
+      {
+        "file": "src/jitmem/cli.py",
+        "sha256": "e552923a0e0eee2124354138e0ff7cb6d053dacd060fb7c2cdd3ce948d9dd353"
+      },
+      {
+        "file": "src/jitmem/config.py",
+        "sha256": "237bbb4046401aa5297b8e866ba95ee1eeab91f170a1192012032070771f7704"
+      },
+      {
+        "file": "src/jitmem/environments.py",
+        "sha256": "0a6c3dcde99b7a7550dbddbc4b0368b7754b1c2a3e906a2223dfb433829c8e5d"
+      },
+      {
+        "file": "src/jitmem/evaluation.py",
+        "sha256": "ff6de6a425b27f8b5cb1d2e9053826b6092552f3ecd8dd8274fde2ffb9019d11"
+      },
+      {
+        "file": "src/jitmem/memory.py",
+        "sha256": "e7c1b534ed8e7752d969cc3b8e9a21bfcd9e022d93bfda5d212a9e910182c317"
+      },
+      {
+        "file": "src/jitmem/paper_assets.py",
+        "sha256": "acb96fd79683e2fd6328e6e6afb11911f4fa37256d2b65891a1bb554ad2181e7"
+      },
+      {
+        "file": "src/jitmem/pipeline.py",
+        "sha256": "3d8c0fdbc8762869b1c15010d29b48cfdf3a89522a270c685c83096bed3117d1"
+      },
+      {
+        "file": "src/jitmem/prompts.py",
+        "sha256": "ac2ec556645d4a1a2312c4c818d22b1b1374a40dc03146d53df549cba1339e7d"
+      },
+      {
+        "file": "src/jitmem/usage.py",
+        "sha256": "f601f2e3c24ab3dea3134f7d05b48377a27b4b6bd86b1d458b626a074b0203b6"
+      }
+    ]
+  },
+  "paper_assets": {
+    "profile": "paper-v1",
+    "sources": {
+      "jitmem": {
+        "version": "2609.27334v1",
+        "url": "https://arxiv.org/src/2609.27334v1",
+        "member": "sections/appendix_prompt.tex",
+        "archive_sha256": "7fbe36724756652232976b1b3de5e93710b0a8c36392cda5329135bb5b4ed667",
+        "member_sha256": "f0822e51102dfb5fbc4c30f6bb61d11585963d0f2295f167189a53c2badc9a8b"
+      },
+      "skillos": {
+        "version": "2605.06614v1",
+        "url": "https://arxiv.org/src/2605.06614v1",
+        "member": "figures/alfworld_judge.pdf",
+        "archive_sha256": "3a3f45d849aefdf58905ecb2ee836ea0035e827ae4af740e0960ac458c80c076",
+        "member_sha256": "12109bc451eee6e163944e1ca4f6510381a38ea9b38809ab42c96a362ae370e1"
+      }
+    },
+    "templates": [
+      {
+        "file": "curator.txt",
+        "sha256": "5194cf0991f6e6a9faf80c85b9ebe8d30f7727844432776936d63f84d2b17c04"
+      },
+      {
+        "file": "distillation.txt",
+        "sha256": "778916de8c3e8244632d4ebf1cc2d0b4817f3010b01a0f4e317a392444e970b0"
+      },
+      {
+        "file": "executor.txt",
+        "sha256": "1eccc28bab43f335fdfcad9a322fc687f519fb750131ed95cddcf8d5b2642b61"
+      },
+      {
+        "file": "judge_system.txt",
+        "sha256": "02fbbbb8a63a1caf090b7e9dfa5c0994862c07851096892ae56fde3ea3388db6"
+      },
+      {
+        "file": "judge_user.txt",
+        "sha256": "fda96911b4daf6f1cc0f331043f9b68557e197fb1081161224b03ff6ca0b8ba5"
+      }
+    ],
+    "judge_extraction": "SkillOS Figure 13 PDF text; title/bullet whitespace normalized using pypdf 6.10.0. Published words are retained; original runtime whitespace is unavailable."
+  },
+  "manifest_fingerprints": {
+    "baseline": "5ebcf9614c0fb26bd2040aa962fffd847d489c1f22f0dddb5e6b1ac5a3723e1b",
+    "candidate": "8be80b6efaa1b4280d33f0664fd5b96007dd996de6c75292c51454be5ca1c21e"
+  },
+  "per_seed": [
+    {
+      "seed": 0,
+      "tasks": 140,
+      "delta_pp": 6.428571428571428,
+      "mean_decision_delta": -1.3428571428571416,
+      "mean_environment_step_delta": -1.3428571428571416,
+      "baseline": {
+        "tasks": 140,
+        "successes": 124,
+        "success_rate": 0.8857142857142857,
+        "mean_decisions": 10.364285714285714,
+        "mean_environment_steps": 10.364285714285714,
+        "invalid_actions": 2,
+        "truncated_episodes": 16,
+        "stored_episodes": 140,
+        "native_failed_stored_episodes": 16,
+        "empty_bank_episodes": 10,
+        "prompt_tokens": 1539019,
+        "completion_tokens": 142459,
+        "paper_efficiency": {
+          "mean_executor_input_tokens_k": 7.926578571428571,
+          "mean_executor_output_tokens_k": 0.7519285714285714,
+          "mean_executor_interaction_turns": 10.364285714285714
+        },
+        "usage_by_role": {
+          "curator": {
+            "calls": 140,
+            "prompt_tokens": 287681,
+            "completion_tokens": 27790
+          },
+          "executor": {
+            "calls": 1451,
+            "prompt_tokens": 1109721,
+            "completion_tokens": 105270
+          },
+          "judge": {
+            "calls": 140,
+            "prompt_tokens": 141617,
+            "completion_tokens": 9399
+          }
+        },
+        "native_vs_judge": {
+          "labeled_episodes": 140,
+          "true_positive": 111,
+          "false_positive": 0,
+          "false_negative": 13,
+          "true_negative": 16,
+          "parse_errors": 0,
+          "generation_errors": 0
+        },
+        "storage": {
+          "stored_entries": 140,
+          "final_bank_size": 140,
+          "native_failed_stored_entries": 16,
+          "judge_failed_stored_entries": 29,
+          "native_failed_stored_fraction": 0.11428571428571428,
+          "judge_failed_stored_fraction": 0.20714285714285716,
+          "retrieval": {
+            "references": 390,
+            "native_failed_references": 43,
+            "judge_failed_references": 84,
+            "episodes_with_retrieval": 130,
+            "episodes_with_native_failed_retrieval": 42,
+            "episodes_with_judge_failed_retrieval": 65,
+            "native_failed_fraction": 0.11025641025641025,
+            "judge_failed_fraction": 0.2153846153846154
+          }
+        },
+        "generation_failures": {
+          "calls": 0,
+          "episodes": 0,
+          "by_role": {},
+          "by_finish_reason": {}
+        }
+      },
+      "candidate": {
+        "tasks": 140,
+        "successes": 133,
+        "success_rate": 0.95,
+        "mean_decisions": 9.021428571428572,
+        "mean_environment_steps": 9.021428571428572,
+        "invalid_actions": 0,
+        "truncated_episodes": 7,
+        "stored_episodes": 140,
+        "native_failed_stored_episodes": 7,
+        "empty_bank_episodes": 10,
+        "prompt_tokens": 1393035,
+        "completion_tokens": 123022,
+        "paper_efficiency": {
+          "mean_executor_input_tokens_k": 7.057457142857142,
+          "mean_executor_output_tokens_k": 0.6007357142857143,
+          "mean_executor_interaction_turns": 9.021428571428572
+        },
+        "usage_by_role": {
+          "curator": {
+            "calls": 140,
+            "prompt_tokens": 270645,
+            "completion_tokens": 27973
+          },
+          "executor": {
+            "calls": 1263,
+            "prompt_tokens": 988044,
+            "completion_tokens": 84103
+          },
+          "judge": {
+            "calls": 140,
+            "prompt_tokens": 134346,
+            "completion_tokens": 10946
+          }
+        },
+        "native_vs_judge": {
+          "labeled_episodes": 140,
+          "true_positive": 123,
+          "false_positive": 0,
+          "false_negative": 10,
+          "true_negative": 7,
+          "parse_errors": 0,
+          "generation_errors": 0
+        },
+        "storage": {
+          "stored_entries": 140,
+          "final_bank_size": 140,
+          "native_failed_stored_entries": 7,
+          "judge_failed_stored_entries": 17,
+          "native_failed_stored_fraction": 0.05,
+          "judge_failed_stored_fraction": 0.12142857142857143,
+          "retrieval": {
+            "references": 390,
+            "native_failed_references": 28,
+            "judge_failed_references": 59,
+            "episodes_with_retrieval": 130,
+            "episodes_with_native_failed_retrieval": 28,
+            "episodes_with_judge_failed_retrieval": 46,
+            "native_failed_fraction": 0.07179487179487179,
+            "judge_failed_fraction": 0.15128205128205127
+          }
+        },
+        "generation_failures": {
+          "calls": 0,
+          "episodes": 0,
+          "by_role": {},
+          "by_finish_reason": {}
+        }
+      },
+      "paired_counts": {
+        "both_success": 123,
+        "baseline_only": 1,
+        "candidate_only": 10,
+        "both_failure": 6
+      },
+      "by_task_type": {
+        "look_at_obj_in_light": {
+          "tasks": 13,
+          "baseline_sr": 1,
+          "candidate_sr": 0.9230769230769231,
+          "delta_pp": -7.692307692307687
+        },
+        "pick_and_place_simple": {
+          "tasks": 35,
+          "baseline_sr": 0.9428571428571428,
+          "candidate_sr": 1,
+          "delta_pp": 5.714285714285716
+        },
+        "pick_clean_then_place_in_recep": {
+          "tasks": 27,
+          "baseline_sr": 0.9629629629629629,
+          "candidate_sr": 1,
+          "delta_pp": 3.703703703703709
+        },
+        "pick_cool_then_place_in_recep": {
+          "tasks": 25,
+          "baseline_sr": 0.84,
+          "candidate_sr": 0.88,
+          "delta_pp": 4.0000000000000036
+        },
+        "pick_heat_then_place_in_recep": {
+          "tasks": 16,
+          "baseline_sr": 1,
+          "candidate_sr": 1,
+          "delta_pp": 0
+        },
+        "pick_two_obj_and_place": {
+          "tasks": 24,
+          "baseline_sr": 0.625,
+          "candidate_sr": 0.875,
+          "delta_pp": 25.0
+        }
+      }
+    },
+    {
+      "seed": 1,
+      "tasks": 140,
+      "delta_pp": 1.4285714285714346,
+      "mean_decision_delta": -1.0857142857142854,
+      "mean_environment_step_delta": -1.0857142857142854,
+      "baseline": {
+        "tasks": 140,
+        "successes": 128,
+        "success_rate": 0.9142857142857143,
+        "mean_decisions": 10.4,
+        "mean_environment_steps": 10.4,
+        "invalid_actions": 2,
+        "truncated_episodes": 12,
+        "stored_episodes": 140,
+        "native_failed_stored_episodes": 12,
+        "empty_bank_episodes": 10,
+        "prompt_tokens": 1547733,
+        "completion_tokens": 143569,
+        "paper_efficiency": {
+          "mean_executor_input_tokens_k": 7.99675,
+          "mean_executor_output_tokens_k": 0.7536571428571428,
+          "mean_executor_interaction_turns": 10.4
+        },
+        "usage_by_role": {
+          "curator": {
+            "calls": 140,
+            "prompt_tokens": 287859,
+            "completion_tokens": 28546
+          },
+          "executor": {
+            "calls": 1456,
+            "prompt_tokens": 1119545,
+            "completion_tokens": 105512
+          },
+          "judge": {
+            "calls": 140,
+            "prompt_tokens": 140329,
+            "completion_tokens": 9511
+          }
+        },
+        "native_vs_judge": {
+          "labeled_episodes": 140,
+          "true_positive": 116,
+          "false_positive": 1,
+          "false_negative": 12,
+          "true_negative": 11,
+          "parse_errors": 0,
+          "generation_errors": 0
+        },
+        "storage": {
+          "stored_entries": 140,
+          "final_bank_size": 140,
+          "native_failed_stored_entries": 12,
+          "judge_failed_stored_entries": 23,
+          "native_failed_stored_fraction": 0.08571428571428572,
+          "judge_failed_stored_fraction": 0.16428571428571428,
+          "retrieval": {
+            "references": 390,
+            "native_failed_references": 61,
+            "judge_failed_references": 75,
+            "episodes_with_retrieval": 130,
+            "episodes_with_native_failed_retrieval": 53,
+            "episodes_with_judge_failed_retrieval": 54,
+            "native_failed_fraction": 0.1564102564102564,
+            "judge_failed_fraction": 0.19230769230769232
+          }
+        },
+        "generation_failures": {
+          "calls": 0,
+          "episodes": 0,
+          "by_role": {},
+          "by_finish_reason": {}
+        }
+      },
+      "candidate": {
+        "tasks": 140,
+        "successes": 130,
+        "success_rate": 0.9285714285714286,
+        "mean_decisions": 9.314285714285715,
+        "mean_environment_steps": 9.314285714285715,
+        "invalid_actions": 0,
+        "truncated_episodes": 10,
+        "stored_episodes": 140,
+        "native_failed_stored_episodes": 10,
+        "empty_bank_episodes": 10,
+        "prompt_tokens": 1421473,
+        "completion_tokens": 124981,
+        "paper_efficiency": {
+          "mean_executor_input_tokens_k": 7.260385714285714,
+          "mean_executor_output_tokens_k": 0.6168428571428571,
+          "mean_executor_interaction_turns": 9.314285714285715
+        },
+        "usage_by_role": {
+          "curator": {
+            "calls": 140,
+            "prompt_tokens": 269878,
+            "completion_tokens": 27951
+          },
+          "executor": {
+            "calls": 1304,
+            "prompt_tokens": 1016454,
+            "completion_tokens": 86358
+          },
+          "judge": {
+            "calls": 140,
+            "prompt_tokens": 135141,
+            "completion_tokens": 10672
+          }
+        },
+        "native_vs_judge": {
+          "labeled_episodes": 140,
+          "true_positive": 119,
+          "false_positive": 0,
+          "false_negative": 11,
+          "true_negative": 10,
+          "parse_errors": 0,
+          "generation_errors": 0
+        },
+        "storage": {
+          "stored_entries": 140,
+          "final_bank_size": 140,
+          "native_failed_stored_entries": 10,
+          "judge_failed_stored_entries": 21,
+          "native_failed_stored_fraction": 0.07142857142857142,
+          "judge_failed_stored_fraction": 0.15,
+          "retrieval": {
+            "references": 390,
+            "native_failed_references": 40,
+            "judge_failed_references": 71,
+            "episodes_with_retrieval": 130,
+            "episodes_with_native_failed_retrieval": 33,
+            "episodes_with_judge_failed_retrieval": 47,
+            "native_failed_fraction": 0.10256410256410256,
+            "judge_failed_fraction": 0.18205128205128204
+          }
+        },
+        "generation_failures": {
+          "calls": 0,
+          "episodes": 0,
+          "by_role": {},
+          "by_finish_reason": {}
+        }
+      },
+      "paired_counts": {
+        "both_success": 126,
+        "baseline_only": 2,
+        "candidate_only": 4,
+        "both_failure": 8
+      },
+      "by_task_type": {
+        "look_at_obj_in_light": {
+          "tasks": 13,
+          "baseline_sr": 1,
+          "candidate_sr": 1,
+          "delta_pp": 0
+        },
+        "pick_and_place_simple": {
+          "tasks": 35,
+          "baseline_sr": 0.9714285714285714,
+          "candidate_sr": 1,
+          "delta_pp": 2.857142857142858
+        },
+        "pick_clean_then_place_in_recep": {
+          "tasks": 27,
+          "baseline_sr": 0.9629629629629629,
+          "candidate_sr": 0.9629629629629629,
+          "delta_pp": 0.0
+        },
+        "pick_cool_then_place_in_recep": {
+          "tasks": 25,
+          "baseline_sr": 0.92,
+          "candidate_sr": 0.88,
+          "delta_pp": -4.0000000000000036
+        },
+        "pick_heat_then_place_in_recep": {
+          "tasks": 16,
+          "baseline_sr": 0.8125,
+          "candidate_sr": 1,
+          "delta_pp": 18.75
+        },
+        "pick_two_obj_and_place": {
+          "tasks": 24,
+          "baseline_sr": 0.7916666666666666,
+          "candidate_sr": 0.75,
+          "delta_pp": -4.1666666666666625
+        }
+      }
+    },
+    {
+      "seed": 2,
+      "tasks": 140,
+      "delta_pp": 6.428571428571428,
+      "mean_decision_delta": -1.5428571428571427,
+      "mean_environment_step_delta": -1.5428571428571427,
+      "baseline": {
+        "tasks": 140,
+        "successes": 124,
+        "success_rate": 0.8857142857142857,
+        "mean_decisions": 10.907142857142857,
+        "mean_environment_steps": 10.907142857142857,
+        "invalid_actions": 4,
+        "truncated_episodes": 16,
+        "stored_episodes": 140,
+        "native_failed_stored_episodes": 16,
+        "empty_bank_episodes": 10,
+        "prompt_tokens": 1589660,
+        "completion_tokens": 150650,
+        "paper_efficiency": {
+          "mean_executor_input_tokens_k": 8.280578571428572,
+          "mean_executor_output_tokens_k": 0.8095214285714286,
+          "mean_executor_interaction_turns": 10.907142857142857
+        },
+        "usage_by_role": {
+          "curator": {
+            "calls": 140,
+            "prompt_tokens": 286711,
+            "completion_tokens": 27953
+          },
+          "executor": {
+            "calls": 1527,
+            "prompt_tokens": 1159281,
+            "completion_tokens": 113333
+          },
+          "judge": {
+            "calls": 140,
+            "prompt_tokens": 143668,
+            "completion_tokens": 9364
+          }
+        },
+        "native_vs_judge": {
+          "labeled_episodes": 140,
+          "true_positive": 112,
+          "false_positive": 1,
+          "false_negative": 12,
+          "true_negative": 15,
+          "parse_errors": 0,
+          "generation_errors": 0
+        },
+        "storage": {
+          "stored_entries": 140,
+          "final_bank_size": 140,
+          "native_failed_stored_entries": 16,
+          "judge_failed_stored_entries": 27,
+          "native_failed_stored_fraction": 0.11428571428571428,
+          "judge_failed_stored_fraction": 0.19285714285714287,
+          "retrieval": {
+            "references": 390,
+            "native_failed_references": 37,
+            "judge_failed_references": 57,
+            "episodes_with_retrieval": 130,
+            "episodes_with_native_failed_retrieval": 36,
+            "episodes_with_judge_failed_retrieval": 49,
+            "native_failed_fraction": 0.09487179487179487,
+            "judge_failed_fraction": 0.14615384615384616
+          }
+        },
+        "generation_failures": {
+          "calls": 0,
+          "episodes": 0,
+          "by_role": {},
+          "by_finish_reason": {}
+        }
+      },
+      "candidate": {
+        "tasks": 140,
+        "successes": 133,
+        "success_rate": 0.95,
+        "mean_decisions": 9.364285714285714,
+        "mean_environment_steps": 9.364285714285714,
+        "invalid_actions": 0,
+        "truncated_episodes": 7,
+        "stored_episodes": 140,
+        "native_failed_stored_episodes": 7,
+        "empty_bank_episodes": 10,
+        "prompt_tokens": 1417980,
+        "completion_tokens": 125439,
+        "paper_efficiency": {
+          "mean_executor_input_tokens_k": 7.238535714285715,
+          "mean_executor_output_tokens_k": 0.6146428571428572,
+          "mean_executor_interaction_turns": 9.364285714285714
+        },
+        "usage_by_role": {
+          "curator": {
+            "calls": 140,
+            "prompt_tokens": 268946,
+            "completion_tokens": 27442
+          },
+          "executor": {
+            "calls": 1311,
+            "prompt_tokens": 1013395,
+            "completion_tokens": 86050
+          },
+          "judge": {
+            "calls": 140,
+            "prompt_tokens": 135639,
+            "completion_tokens": 11947
+          }
+        },
+        "native_vs_judge": {
+          "labeled_episodes": 140,
+          "true_positive": 128,
+          "false_positive": 0,
+          "false_negative": 5,
+          "true_negative": 7,
+          "parse_errors": 0,
+          "generation_errors": 0
+        },
+        "storage": {
+          "stored_entries": 140,
+          "final_bank_size": 140,
+          "native_failed_stored_entries": 7,
+          "judge_failed_stored_entries": 12,
+          "native_failed_stored_fraction": 0.05,
+          "judge_failed_stored_fraction": 0.08571428571428572,
+          "retrieval": {
+            "references": 390,
+            "native_failed_references": 24,
+            "judge_failed_references": 27,
+            "episodes_with_retrieval": 130,
+            "episodes_with_native_failed_retrieval": 24,
+            "episodes_with_judge_failed_retrieval": 27,
+            "native_failed_fraction": 0.06153846153846154,
+            "judge_failed_fraction": 0.06923076923076923
+          }
+        },
+        "generation_failures": {
+          "calls": 0,
+          "episodes": 0,
+          "by_role": {},
+          "by_finish_reason": {}
+        }
+      },
+      "paired_counts": {
+        "both_success": 124,
+        "baseline_only": 0,
+        "candidate_only": 9,
+        "both_failure": 7
+      },
+      "by_task_type": {
+        "look_at_obj_in_light": {
+          "tasks": 13,
+          "baseline_sr": 0.8461538461538461,
+          "candidate_sr": 1,
+          "delta_pp": 15.384615384615385
+        },
+        "pick_and_place_simple": {
+          "tasks": 35,
+          "baseline_sr": 0.9142857142857143,
+          "candidate_sr": 0.9714285714285714,
+          "delta_pp": 5.714285714285716
+        },
+        "pick_clean_then_place_in_recep": {
+          "tasks": 27,
+          "baseline_sr": 0.9629629629629629,
+          "candidate_sr": 1,
+          "delta_pp": 3.703703703703709
+        },
+        "pick_cool_then_place_in_recep": {
+          "tasks": 25,
+          "baseline_sr": 0.88,
+          "candidate_sr": 0.88,
+          "delta_pp": 0.0
+        },
+        "pick_heat_then_place_in_recep": {
+          "tasks": 16,
+          "baseline_sr": 0.9375,
+          "candidate_sr": 1,
+          "delta_pp": 6.25
+        },
+        "pick_two_obj_and_place": {
+          "tasks": 24,
+          "baseline_sr": 0.75,
+          "candidate_sr": 0.875,
+          "delta_pp": 12.5
+        }
+      }
+    }
+  ],
+  "overall": {
+    "baseline": {
+      "episodes": 420,
+      "calls": 5274,
+      "all_role_prompt_tokens": 4676412,
+      "all_role_completion_tokens": 436678,
+      "all_role_input_output_tokens": 5113090,
+      "usage_by_role": {
+        "curator": {
+          "calls": 420,
+          "prompt_tokens": 862251,
+          "completion_tokens": 84289
+        },
+        "executor": {
+          "calls": 4434,
+          "prompt_tokens": 3388547,
+          "completion_tokens": 324115
+        },
+        "judge": {
+          "calls": 420,
+          "prompt_tokens": 425614,
+          "completion_tokens": 28274
+        }
+      },
+      "paper_efficiency": {
+        "mean_executor_input_tokens_k": 8.067969047619048,
+        "mean_executor_output_tokens_k": 0.771702380952381,
+        "mean_executor_interaction_turns": 10.557142857142857
+      }
+    },
+    "candidate": {
+      "episodes": 420,
+      "calls": 4718,
+      "all_role_prompt_tokens": 4232488,
+      "all_role_completion_tokens": 373442,
+      "all_role_input_output_tokens": 4605930,
+      "usage_by_role": {
+        "curator": {
+          "calls": 420,
+          "prompt_tokens": 809469,
+          "completion_tokens": 83366
+        },
+        "executor": {
+          "calls": 3878,
+          "prompt_tokens": 3017893,
+          "completion_tokens": 256511
+        },
+        "judge": {
+          "calls": 420,
+          "prompt_tokens": 405126,
+          "completion_tokens": 33565
+        }
+      },
+      "paper_efficiency": {
+        "mean_executor_input_tokens_k": 7.185459523809524,
+        "mean_executor_output_tokens_k": 0.6107404761904762,
+        "mean_executor_interaction_turns": 9.233333333333333
+      }
+    }
+  },
+  "across_seed": {
+    "baseline_sr_percent": {
+      "mean": 89.52380952380952,
+      "std": 1.6495721976846474
+    },
+    "candidate_sr_percent": {
+      "mean": 94.28571428571429,
+      "std": 1.2371791482634815
+    },
+    "delta_pp": {
+      "mean": 4.761904761904764,
+      "std": 2.886751345948125
+    },
+    "baseline_mean_decisions": {
+      "mean": 10.557142857142857,
+      "std": 0.3036344472404609
+    },
+    "candidate_mean_decisions": {
+      "mean": 9.233333333333334,
+      "std": 0.1852099378770891
+    },
+    "baseline_mean_environment_steps": {
+      "mean": 10.557142857142857,
+      "std": 0.3036344472404609
+    },
+    "candidate_mean_environment_steps": {
+      "mean": 9.233333333333334,
+      "std": 0.1852099378770891
+    },
+    "mean_decision_delta": {
+      "mean": -1.3238095238095233,
+      "std": 0.22916589362887554
+    },
+    "mean_environment_step_delta": {
+      "mean": -1.3238095238095233,
+      "std": 0.22916589362887554
+    },
+    "baseline_mean_executor_input_tokens_k": {
+      "mean": 8.067969047619048,
+      "std": 0.18743829533428688
+    },
+    "baseline_mean_executor_output_tokens_k": {
+      "mean": 0.771702380952381,
+      "std": 0.03276365763929243
+    },
+    "baseline_mean_executor_interaction_turns": {
+      "mean": 10.557142857142857,
+      "std": 0.3036344472404609
+    },
+    "candidate_mean_executor_input_tokens_k": {
+      "mean": 7.185459523809524,
+      "std": 0.11139036211499151
+    },
+    "candidate_mean_executor_output_tokens_k": {
+      "mean": 0.6107404761904762,
+      "std": 0.008733924981257371
+    },
+    "candidate_mean_executor_interaction_turns": {
+      "mean": 9.233333333333334,
+      "std": 0.1852099378770891
+    },
+    "by_task_type": {
+      "look_at_obj_in_light": {
+        "tasks_per_seed": 13,
+        "baseline_sr_percent": {
+          "mean": 94.87179487179488,
+          "std": 8.882311833686552
+        },
+        "candidate_sr_percent": {
+          "mean": 97.43589743589743,
+          "std": 4.441155916843276
+        },
+        "delta_pp": {
+          "mean": 2.564102564102566,
+          "std": 11.750194089630357
+        }
+      },
+      "pick_and_place_simple": {
+        "tasks_per_seed": 35,
+        "baseline_sr_percent": {
+          "mean": 94.28571428571428,
+          "std": 2.857142857142854
+        },
+        "candidate_sr_percent": {
+          "mean": 99.04761904761905,
+          "std": 1.6495721976846474
+        },
+        "delta_pp": {
+          "mean": 4.761904761904764,
+          "std": 1.6495721976846456
+        }
+      },
+      "pick_clean_then_place_in_recep": {
+        "tasks_per_seed": 27,
+        "baseline_sr_percent": {
+          "mean": 96.29629629629629,
+          "std": 0.0
+        },
+        "candidate_sr_percent": {
+          "mean": 98.76543209876543,
+          "std": 2.1383343303319506
+        },
+        "delta_pp": {
+          "mean": 2.469135802469139,
+          "std": 2.13833433033195
+        }
+      },
+      "pick_cool_then_place_in_recep": {
+        "tasks_per_seed": 25,
+        "baseline_sr_percent": {
+          "mean": 88.0,
+          "std": 4.0
+        },
+        "candidate_sr_percent": {
+          "mean": 88.0,
+          "std": 0.0
+        },
+        "delta_pp": {
+          "mean": 0.0,
+          "std": 4.0000000000000036
+        }
+      },
+      "pick_heat_then_place_in_recep": {
+        "tasks_per_seed": 16,
+        "baseline_sr_percent": {
+          "mean": 91.66666666666667,
+          "std": 9.547032697824667
+        },
+        "candidate_sr_percent": {
+          "mean": 100,
+          "std": 0.0
+        },
+        "delta_pp": {
+          "mean": 8.333333333333334,
+          "std": 9.547032697824667
+        }
+      },
+      "pick_two_obj_and_place": {
+        "tasks_per_seed": 24,
+        "baseline_sr_percent": {
+          "mean": 72.22222222222221,
+          "std": 8.673608331108882
+        },
+        "candidate_sr_percent": {
+          "mean": 83.33333333333333,
+          "std": 7.216878364870322
+        },
+        "delta_pp": {
+          "mean": 11.111111111111112,
+          "std": 14.632852434517691
+        }
+      }
+    }
+  },
+  "statistical_scope": {
+    "std_definition": "sample standard deviation across three order seeds, ddof=1",
+    "unique_task_count": 140,
+    "repeated_episode_pairs": 420,
+    "pooled_significance_test": null,
+    "note": "Repeated tasks and memory-coupled streams are not independent observations; descriptive results only"
+  },
+  "source_behavior_bridge": {
+    "passed": true,
+    "sha256": "fdd50a58979646991b1b093ab9447f1e8634282d2d95d036e862068954431b02",
+    "benchmark": false,
+    "replay_kind": "recorded_api_and_environment_fixture",
+    "complete_420_baseline_episode_replay": true,
+    "baseline_episodes_checked": 420,
+    "recorded_calls_checked": 5274,
+    "variants_checked": [
+      "legacy_default",
+      "compatible_default",
+      "compatible_explicit_same_judge"
+    ],
+    "source_difference_paths": [
+      "cli.py",
+      "config.py",
+      "evaluation.py",
+      "pipeline.py"
+    ],
+    "variants": {
+      "legacy_default": {
+        "episodes_checked": 420,
+        "calls_checked": 5274,
+        "calls_by_role": {
+          "curator": 420,
+          "executor": 4434,
+          "judge": 420
+        },
+        "batches_checked": 42,
+        "effective_model_by_role": {
+          "curator": "gpt-6.1-sol",
+          "executor": "gpt-5.5",
+          "judge": "gpt-5.5"
+        },
+        "effective_judge_model": "gpt-5.5",
+        "all_messages_actions_storage_usage_batches_match": true
+      },
+      "compatible_default": {
+        "episodes_checked": 420,
+        "calls_checked": 5274,
+        "calls_by_role": {
+          "curator": 420,
+          "executor": 4434,
+          "judge": 420
+        },
+        "batches_checked": 42,
+        "effective_model_by_role": {
+          "curator": "gpt-6.1-sol",
+          "executor": "gpt-5.5",
+          "judge": "gpt-5.5"
+        },
+        "effective_judge_model": "gpt-5.5",
+        "all_messages_actions_storage_usage_batches_match": true
+      },
+      "compatible_explicit_same_judge": {
+        "episodes_checked": 420,
+        "calls_checked": 5274,
+        "calls_by_role": {
+          "curator": 420,
+          "executor": 4434,
+          "judge": 420
+        },
+        "batches_checked": 42,
+        "effective_model_by_role": {
+          "curator": "gpt-6.1-sol",
+          "executor": "gpt-5.5",
+          "judge": "gpt-5.5"
+        },
+        "effective_judge_model": "gpt-5.5",
+        "all_messages_actions_storage_usage_batches_match": true
+      }
+    },
+    "model_api_calls": 0,
+    "external_api_calls": 0,
+    "native_environment_steps": 0,
+    "scope_limit": "Recorded response/state fixtures establish compatibility on these420 trajectories; no new model sampling/native replay or universal equivalence proof"
+  },
+  "baseline_evidence": {
+    "prior_audit": {
+      "passed": true,
+      "sha256": "8a3fdcb5796ee3fc4f282d885b9131ec025586181ef39d56dcb226d7cf7a4b3f",
+      "original_analysis_sha256": "92235958015d77cef1e3f9b96454e53ef85262ac71c5fe8b18790faca85eec1c",
+      "original_audited_comparison_episodes": 840,
+      "bound_baseline_episodes": 420,
+      "historical_arm_in_original_comparison": "full"
+    },
+    "preservation": {
+      "passed": true,
+      "files": 437,
+      "episodes": 420,
+      "content_size_mtime_unchanged": true,
+      "snapshot_evidence_sha256": "3cc2a6d98876f4e53636c181c3ad659e73a75f9916494eed3db0fe4fa9a0c133",
+      "before_snapshot_sha256": "7eb4dd41f69e5d7417e384fdede70110295aa25353a6bdec31ed8ad7b3193c85",
+      "after_snapshot_sha256": "7eb4dd41f69e5d7417e384fdede70110295aa25353a6bdec31ed8ad7b3193c85",
+      "postflight_sha256": "b65198ff75d5b585171363060267cb4657495f5091b15ba77d8f505497c79c11"
+    }
+  },
+  "dataset_integrity": {
+    "passed": true,
+    "unchanged": true,
+    "file_count": 18416,
+    "before_sha256": "ea156e972ba076f73968c690ae732c5dc7a3978f3c6a39270cc5aa1abadad278",
+    "after_sha256": "ea156e972ba076f73968c690ae732c5dc7a3978f3c6a39270cc5aa1abadad278",
+    "preflight_sha256": "d0250802748fdee2ef56f1f649bb7bd0f07812ffcc20a324e0557a67af65cbb6",
+    "postflight_sha256": "312c3e363c702ffbb056d73a02a7a76e24b970bca34713c99b4869aebbb4fd0b",
+    "independently_scanned_at_final": true,
+    "fingerprint_definition": "relative paths, byte sizes, nanosecond mtimes and complete content hashes"
+  },
+  "new_native_replay_evidence": {
+    "available": true,
+    "passed": true,
+    "sha256": "8cd0ff0f2014282b1d749515cd746e2bf9d474a1145f3dfef420b2359a100f62",
+    "seed": 0,
+    "candidate_episodes": 20,
+    "native_replayed_episodes": 20,
+    "model_api_calls": 0,
+    "remaining_new_candidate_episodes_not_fully_replayed": 400
+  },
+  "execution": {
+    "ledger_sha256": "2470171f72cee439cfba0c6ccb311c9ea28df0dde3161c223c263527f0187d4b",
+    "interrupted": true,
+    "events_verified": 1,
+    "events": [
+      {
+        "kind": "transport_interruption",
+        "seed": 1,
+        "preserved_episodes": 230,
+        "preserved_total_episodes": 230,
+        "interrupted_seed_committed_episodes": 90,
+        "preserved_counts_by_seed": {
+          "0": 140,
+          "1": 90,
+          "2": 0
+        },
+        "batch_offset": 90,
+        "batch_size": 10,
+        "workers": 10,
+        "attempts_before_exit": 4,
+        "error_type": "URLError",
+        "content_size_mtime_unchanged": true,
+        "snapshot_sha256": "75d902b99efab2e07cb5df9a2d9e7790f2b71db4a844d0379962ddf2dc5b4315",
+        "original_error_sha256": "acdeb56776b197cec816ec31c93ee1f41d3cc8c8094b44905ce2b7c3c82e1136",
+        "sanitized_message_validated": true,
+        "checkpoint_archives": [
+          {
+            "seed": 0,
+            "sha256": "56f4f65b77be1434eec94cb5c3b2e5d026a0702bbd7e06fcca58468a2161c9a9",
+            "committed_episodes": 140,
+            "bank_entries": 140
+          },
+          {
+            "seed": 1,
+            "sha256": "aefa8e0d02e2d2c675b1d1b96007ef6ab40daa5dd59d5f62cc12e8497186833e",
+            "committed_episodes": 90,
+            "bank_entries": 90
+          }
+        ],
+        "checkpoint_and_bank_prefix_unchanged": true,
+        "process_exit_proof_sha256": "db30b4d60780f4c918ee9c12f834c98767284e8033e308d64092fcfbabc9a688",
+        "process_exit_verified": true,
+        "residual_eval_processes": 0,
+        "resume_performed": true,
+        "resume_command_validated": true,
+        "resume_preflight_sha256": "99fd600876243cbe09d13fad00e6a5dc440afbf7e6d9b3d237b3bdc24af44b13"
+      }
+    ],
+    "new_non_benchmark_model_probes": 0,
+    "new_model_metadata_read_requests": 0,
+    "usage_scope": "Committed response usage only; retry/uncommitted billing not inferred"
+  },
+  "audit": {
+    "passed": true,
+    "errors": [],
+    "complete_420_candidate_episode_audit": true,
+    "complete_840_comparison_episode_audit": true,
+    "comparison_validated": true,
+    "model_api_calls": 0,
+    "analysis_sha256": "fddcdfa23549d8edd2d7b87d713c55d225ff417ff314294fb37bb04139e22dc7",
+    "final_audit_sha256": "8cb3ea41b096b23e7ea92683f3afc0a3640f7c37bb527c1c5e175b17d4e0faa7",
+    "preflight_sha256": "99fd600876243cbe09d13fad00e6a5dc440afbf7e6d9b3d237b3bdc24af44b13",
+    "counts": {
+      "episodes": 840,
+      "new_candidate_episodes": 420,
+      "historical_baseline_episodes": 420,
+      "unique_tasks": 140,
+      "seeds": 3,
+      "seed_runs": 6,
+      "new_candidate_batches": 42,
+      "source_files": 12,
+      "games": 140,
+      "logged_model_calls": 9992,
+      "new_audit_model_api_calls": 0
+    }
+  },
+  "execution_usage_scope": "Committed response usage only; baseline is historical, candidate is new. Historical probes/catalog evidence and retry/uncommitted billing are excluded and not inferred",
+  "reproduction_limits": [
+    "Independent fixed judge differs from the original paper's executor-shared judge; this controls the current executor-model ablation.",
+    "Old/new source bytes differ in four routing/configuration modules; the420 recorded-behavior bridge is not a universal equivalence proof or a native/model benchmark.",
+    "Executor changes can propagate through trajectories, judge labels and future retrieval under the fixed curator/judge.",
+    "Published template words are aligned; author runtime whitespace/serialization, environment/BM25/task-order and inference details remain partly undisclosed.",
+    "Relative to the original paper, this cannot establish model choice as the only remaining difference; API IDs do not verify server weights.",
+    "Historical baseline was reused; seeds control task order, not provider sampling; three repeated streams are descriptive and support no pooled significance claim."
+  ]
+}

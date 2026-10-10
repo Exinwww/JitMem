@@ -1,5 +1,6 @@
 """Configuration validation has no dependency on API credentials or ALFWorld."""
 
+import hashlib
 import json
 import os
 import tempfile
@@ -44,7 +45,206 @@ class ConfigTests(unittest.TestCase):
         self.assertFalse(config.executor.omit_temperature)
         self.assertEqual(config.executor.max_tokens, 4096)
         self.assertEqual(config.curator.max_tokens, 8192)
+        self.assertIsNone(config.judge)
         json.dumps(config.to_dict())
+
+    def test_default_judge_serialization_preserves_exact_historical_shape(self) -> None:
+        config = RunConfig(
+            environment=EnvironmentConfig(data_root="/dataset"),
+            experiment=ExperimentConfig(output_dir="/output", prompt_assets="/prompts"),
+            executor=ModelConfig(model="executor-model"),
+            curator=ModelConfig(model="curator-model", max_tokens=8192),
+        )
+        # Captured before the optional judge field was introduced. Preserving
+        # this shape preserves the configuration portion of historical fingerprints;
+        # changes to source hashes still correctly prevent a cross-version resume.
+        serialized = config.to_dict()
+        self.assertEqual(set(serialized), {"environment", "experiment", "executor", "curator"})
+        self.assertEqual(
+            hashlib.sha256(json.dumps(serialized, sort_keys=True).encode()).hexdigest(),
+            "358c0ed05003991a79b32cc8dd2cd42cbc78000fcc3f2eaa701e1ea68b9f8498",
+        )
+
+    def test_common_variables_do_not_activate_independent_judge(self) -> None:
+        with patch.dict(
+            os.environ,
+            {
+                "OPENAI_MODEL": "common-model",
+                "OPENAI_BASE_URL": "https://common.example.test/v1",
+                "OPENAI_API_KEY": "common-secret",
+                "JITMEM_EXECUTOR_MODEL": "executor-only-model",
+                "JITMEM_EXECUTOR_API_KEY": "executor-only-secret",
+            },
+        ):
+            config = self.load("")
+        self.assertIsNone(config.judge)
+        self.assertNotIn("judge", config.to_dict())
+        self.assertEqual(config.executor.model, "executor-only-model")
+        self.assertEqual(config.executor.api_key_env, "JITMEM_EXECUTOR_API_KEY")
+
+    def test_blank_dedicated_variables_do_not_activate_independent_judge(self) -> None:
+        with patch.dict(
+            os.environ,
+            {
+                "OPENAI_MODEL": "common-model",
+                "JITMEM_JUDGE_MODEL": " ",
+                "JITMEM_JUDGE_BASE_URL": "",
+                "JITMEM_JUDGE_API_KEY": "  ",
+            },
+        ):
+            config = self.load("")
+        self.assertIsNone(config.judge)
+        self.assertNotIn("judge", config.to_dict())
+
+    def test_explicit_independent_judge_inherits_resolved_executor_parameters(self) -> None:
+        with patch.dict(os.environ, {"JITMEM_EXECUTOR_API_KEY": "executor-only-secret"}):
+            config = self.load("""
+[executor]
+base_url = "https://executor.example.test/v1"
+model = "gpt-6.1-sol"
+max_tokens = 1234
+temperature = 0.25
+timeout_seconds = 12
+retries = 1
+token_limit_parameter = "max_completion_tokens"
+[executor.extra_body]
+top_p = 0.95
+[judge]
+model = "gpt-5.5"
+""")
+        self.assertEqual(config.executor.model, "gpt-6.1-sol")
+        self.assertEqual(config.judge.model, "gpt-5.5")
+        self.assertEqual(config.judge.base_url, config.executor.base_url)
+        self.assertEqual(config.judge.api_key_env, "JITMEM_EXECUTOR_API_KEY")
+        for field in (
+            "max_tokens",
+            "temperature",
+            "timeout_seconds",
+            "retries",
+            "token_limit_parameter",
+        ):
+            self.assertEqual(getattr(config.judge, field), getattr(config.executor, field))
+        self.assertEqual(config.judge.extra_body, {"top_p": 0.95})
+        config.judge.extra_body["top_p"] = 0.5
+        self.assertEqual(config.executor.extra_body["top_p"], 0.95)
+        self.assertEqual(config.curator.extra_body["top_p"], 0.95)
+        self.assertEqual(config.to_dict()["judge"]["model"], "gpt-5.5")
+        self.assertNotIn("executor-only-secret", json.dumps(config.to_dict()))
+
+    def test_explicit_empty_judge_section_activates_matching_independent_config(self) -> None:
+        config = self.load('[executor]\nmodel="executor-model"\n[judge]\n')
+        self.assertEqual(config.judge, config.executor)
+        self.assertIsNot(config.judge, config.executor)
+        self.assertIn("judge", config.to_dict())
+
+    def test_explicit_judge_common_environment_precedence_matches_other_roles(self) -> None:
+        with patch.dict(
+            os.environ,
+            {
+                "OPENAI_MODEL": "common-model",
+                "OPENAI_BASE_URL": "https://common.example.test/v1",
+                "OPENAI_API_KEY": "common-secret",
+                "JITMEM_EXECUTOR_MODEL": "executor-only-model",
+            },
+        ):
+            config = self.load("""
+[judge]
+model = "toml-judge"
+base_url = "https://toml-judge.example.test/v1"
+api_key_env = "TOML_JUDGE_KEY"
+""")
+        self.assertEqual(config.executor.model, "executor-only-model")
+        self.assertEqual(config.judge.model, "common-model")
+        self.assertEqual(config.judge.base_url, "https://common.example.test/v1")
+        self.assertEqual(config.judge.api_key_env, "OPENAI_API_KEY")
+
+    def test_judge_environment_overrides_common_and_toml_without_persisting_keys(self) -> None:
+        with patch.dict(
+            os.environ,
+            {
+                "OPENAI_MODEL": "common-model",
+                "OPENAI_BASE_URL": "https://common.example.test/v1",
+                "OPENAI_API_KEY": "common-secret",
+                "JITMEM_JUDGE_MODEL": " judge-env-model ",
+                "JITMEM_JUDGE_BASE_URL": " https://judge.example.test/v1 ",
+                "JITMEM_JUDGE_API_KEY": "judge-only-secret",
+            },
+        ):
+            config = self.load('[judge]\nmodel="toml-judge"\napi_key_env="TOML_JUDGE_KEY"')
+        self.assertEqual(config.judge.model, "judge-env-model")
+        self.assertEqual(config.judge.base_url, "https://judge.example.test/v1")
+        self.assertEqual(config.judge.api_key_env, "JITMEM_JUDGE_API_KEY")
+        self.assertEqual(config.executor.model, "common-model")
+        self.assertEqual(config.curator.model, "common-model")
+        for value in ("common-secret", "judge-only-secret"):
+            self.assertNotIn(value, json.dumps(config.to_dict()))
+            self.assertNotIn(value, repr(config))
+
+    def test_each_dedicated_judge_variable_can_activate_the_role_without_toml(self) -> None:
+        cases = (
+            ("JITMEM_JUDGE_MODEL", "judge-model", "model", "judge-model"),
+            (
+                "JITMEM_JUDGE_BASE_URL",
+                "https://judge.example.test/v1",
+                "base_url",
+                "https://judge.example.test/v1",
+            ),
+            ("JITMEM_JUDGE_API_KEY", "judge-only-secret", "api_key_env", "JITMEM_JUDGE_API_KEY"),
+        )
+        for variable, value, field, expected in cases:
+            with self.subTest(variable=variable):
+                with patch.dict(
+                    os.environ, {variable: value, "JITMEM_EXECUTOR_API_KEY": "executor-only-secret"}
+                ):
+                    config = self.load('[executor]\nmodel="executor-model"\nmax_tokens=321')
+                self.assertIsInstance(config.judge, ModelConfig)
+                self.assertEqual(getattr(config.judge, field), expected)
+                self.assertEqual(config.judge.max_tokens, 321)
+                if field != "model":
+                    self.assertEqual(config.judge.model, "executor-model")
+                if field != "api_key_env":
+                    self.assertEqual(config.judge.api_key_env, "JITMEM_EXECUTOR_API_KEY")
+                self.assertNotIn("judge-only-secret", json.dumps(config.to_dict()))
+
+    def test_explicit_judge_credential_name_can_override_executor_inheritance(self) -> None:
+        with patch.dict(os.environ, {"JITMEM_EXECUTOR_API_KEY": "executor-only-secret"}):
+            config = self.load('[judge]\nmodel="judge-model"\napi_key_env="CUSTOM_JUDGE_KEY"')
+        self.assertEqual(config.judge.api_key_env, "CUSTOM_JUDGE_KEY")
+        self.assertEqual(config.executor.api_key_env, "JITMEM_EXECUTOR_API_KEY")
+
+    def test_judge_environment_connection_is_validated(self) -> None:
+        for endpoint in (
+            "not-http",
+            "https://user:private-fixture@example.test/v1",
+            "https://judge.example.test/v1?api_key=private-fixture",
+        ):
+            with self.subTest(endpoint=endpoint):
+                with patch.dict(os.environ, {"JITMEM_JUDGE_BASE_URL": endpoint}):
+                    with self.assertRaises(ConfigError) as caught:
+                        self.load("")
+                self.assertNotIn("private-fixture", str(caught.exception))
+
+    def test_run_config_judge_type_validation(self) -> None:
+        self.assertIsNone(RunConfig(judge=None).judge)
+        self.assertEqual(
+            RunConfig(judge=ModelConfig(model="judge-model")).judge.model, "judge-model"
+        )
+        for value in ({}, "judge-model", False, 1, EnvironmentConfig()):
+            with self.subTest(value_type=type(value).__name__):
+                with self.assertRaisesRegex(ConfigError, "judge must be a ModelConfig or None"):
+                    RunConfig(judge=value)
+
+    def test_judge_cannot_embed_nested_credentials(self) -> None:
+        cases = (
+            '[judge.extra_body]\napi_key="private-fixture"',
+            '[judge.extra_body.headers]\nAUTHORIZATION="private-fixture"',
+            '[judge.extra_body]\nprovider=[{access_token="private-fixture"}]',
+        )
+        for text in cases:
+            with self.subTest(text=text):
+                with self.assertRaisesRegex(ConfigError, "judge: Credentials cannot") as caught:
+                    self.load(text)
+                self.assertNotIn("private-fixture", str(caught.exception))
 
     def test_explicit_values_and_curator_inheritance(self) -> None:
         config = self.load("""
@@ -218,7 +418,10 @@ api_key_env = "TOML_CURATOR_KEY"
 
     def test_unknown_and_malformed_settings_are_rejected(self) -> None:
         cases = [
-            "[judge]\nmodel = 'different-model'",
+            "judge = 'not-table'",
+            "[judge]\nunsupported = 1",
+            "[judge]\nmax_tokens = false",
+            "[judge]\napi_key_env = 'literal api key'",
             "[unknown]\nvalue = 1",
             "[environment]\nlimt = 5",
             "environment = 'not-table'",

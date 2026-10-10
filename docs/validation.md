@@ -178,3 +178,25 @@ JITMEM 三轮最终 bank 各 118 条，judge/native 的重复 episode 计数为 
 本轮运行完整退出，无基础设施中断/续跑，未新增连接探针或模型目录GET；历史目录声明只作请求模型ID的证据，不验证服务端权重。用量来自已提交记录，不倒推内部重试或完整账单。数据前后完整扫描再次确认18,416文件指纹仍为`ea156e972ba076f73968c690ae732c5dc7a3978f3c6a39270cc5aa1abadad278`，过滤baseline全部437文件的SHA256、大小和纳秒mtime与新前置快照完全一致。
 
 新审计工具的11项负向守卫检查、新公开导出工具的38项局部自检及Ruff/编译检查通过；这些是本地工具验证，0模型API。此前pipeline测试记录仍见前节，本轮未改核心代码。公开[结果报告](results/alfworld_storage_ablation_curator_gpt61_paper_v1_2026-10-09.md)与[结构化汇总](results/alfworld_storage_ablation_curator_gpt61_paper_v1_2026-10-09.json)只含白名单字段，完整请求和证据继续留在被忽略的`outputs/`。
+
+## 独立 judge 与 executor 模型对照验证（2026-10-10，paper-v1）
+
+本轮在全量存储下固定 curator=`gpt-6.1-sol`、judge=`gpt-5.5`，只将 executor 从 `gpt-5.5` 切换为 `gpt-6.1-sol`。独立 judge 是控制本次消融变量的扩展；原文默认 executor 兼任 judge。未配置独立角色时仍复用同一个 executor client。启用独立角色后，其未指定参数继承解析后的 executor 配置；本次明确固定 judge 模型和全部生成参数。完整协议见[executor 模型对照](executor_model_comparison.md)。
+
+独立角色支持改变 `config.py`、`pipeline.py`、`cli.py`、`evaluation.py` 四个模块，其余八个核心模块及五份原文资产与历史基线相同。启动前冻结全部新旧源码指纹、配置、runtime、任务和基线快照；将历史隐式 judge 展开后，两组有效参数只允许 executor 模型与输出目录不同。没有声称两组源码完全相同。
+
+启动前用历史全部420条记录、5,274次已记录响应，对旧默认实现、新默认实现、新显式同模型 judge 实现分别离线重放。三种实现的全部 messages、动作、标签、存储、批次顺序、checkpoint、usage 与汇总一致。响应和环境状态来自记录，模型 API 调用及 native 环境步数均为0；该兼容 fixture 不属于新模型 benchmark，也不替代新组原生环境重放。
+
+完整软件测试为 **299 passed, 125 subtests passed**。包含独立 judge 配置、实际本机 HTTP 请求路由、真实 spawn 子进程路由、默认 client 身份复用、缺失独立 client 拒绝、judge 配置变化拒绝续跑，以及新分析器33项测试。全部测试0外部模型 API；Ruff、34个Python文件格式检查及 `git diff --check` 通过，测试前后12个核心源码指纹仍与启动前冻结一致。
+
+新组完整140任务×seeds0/1/2，共420条模型episode，正常退出；历史全量组420条直接配对，未重跑。旧executor逐seed成功124/128/124，新executor为133/130/133，native SR **89.52±1.65% → 94.29±1.24%**；新减旧为 **+4.76±2.89个百分点**，净多20次成功。三轮方向均为正，仍按三个任务排列报告描述性统计，不宣称显著性或把420条当作独立随机任务。
+
+`outputs/executor_gpt61_final_audit.json`为`passed=true`、`errors=[]`、`comparison_validated=true`，`complete_420_candidate_episode_audit`及`complete_840_comparison_episode_audit`均为true。独立核对6个run、84批次、全部原文messages、动作解析、描述BM25排序、judge标签、gate、raw bank、checkpoint与usage，绑定当前分析SHA256。审计覆盖9,992次已记录模型调用，历史组5,274次、新组4,718次；新组executor原生交互3,878次，curator/judge各420次。所有seed最终全量bank均140条。分析与审计0模型API。
+
+Table4的executor-only input K/task为8.068±0.187 → 7.185±0.111，output K/task为0.772±0.033 → 0.611±0.009，原生交互/task为10.56±0.30 → 9.23±0.19。全角色input+output为5,113,090 → 4,605,930，仅单列诊断，不作为executor-only效率或完整账单。
+
+仅新组seed0前20条在原生环境完整重放，初始/每步observation、admissible actions、实际命令和最终native won/reward/done均一致，证据绑定本轮新记录hash。其余400条新记录未完整环境重放；完整840条属于产物审计，启动前420×3兼容重放属于离线fixture，覆盖范围分别记录。
+
+新组在seed1提交90条、累计230条后遇到一次transport URLError，4次尝试后退出。实际确认原进程退出且没有残留评测进程，保持同一配置、源码、workers10续跑完成。全部230条已提交记录的SHA256、大小及纳秒mtime不变，两份checkpoint与bank/results前缀完整；未重跑已提交任务。新连接探针及模型目录GET均为0；用量只覆盖已提交响应，未提交请求和重试计费未知。历史模型目录声明不能独立验证服务端权重。
+
+后置扫描确认全部18,416个外部数据文件的内容、大小及纳秒mtime指纹仍为`ea156e972ba076f73968c690ae732c5dc7a3978f3c6a39270cc5aa1abadad278`；历史全量组437文件、420条记录与启动前快照完全一致。公开[结果报告](results/alfworld_executor_gpt61_judge_gpt55_paper_v1_2026-10-10.md)与[结构化汇总](results/alfworld_executor_gpt61_judge_gpt55_paper_v1_2026-10-10.json)采用字段白名单，完整证据保存在被忽略的`outputs/`。
